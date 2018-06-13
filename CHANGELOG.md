@@ -4,9 +4,13 @@ The epl-syntax-highligher extention is currently WIP. It has basic highlighting 
 
 If you are new to EPL there are good instructions here that will help you start. The language is centered around events and event processing.
 
+## [v0.5]
+
+- Snippets support and further syntax highlighting added
+
 ## [v0.4]
 
-- Cleanup of code and rewrite of the tmLanguage file 
+- Cleanup of code and rewrite of the tmLanguage file
 
 ## [v0.2]
 

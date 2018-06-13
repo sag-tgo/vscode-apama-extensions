@@ -2,7 +2,7 @@
   "name": "epl-syntax-highlighting",
   "displayName": "epl-syntax-highlighting",
   "description": "EPL language support for Apama",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "publisher": "CaribouJohn",
   "repository": {
     "url": "https://github.com/CaribouJohn/epl-syntax-highlighting"
