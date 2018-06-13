@@ -1,32 +1,142 @@
 {
-	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-	"name": "epl",
-	"patterns": [
-		{
-			"include": "#keywords"
-		},
-		{
-			"include": "#strings"
-		}
-	],
-	"repository": {
-		"keywords": {
-			"patterns": [{
-				"name": "keyword.control.epl",
-				"match": "\\b(if|while|for|return)\\b"
-			}]
-		},
-		"strings": {
-			"name": "string.quoted.double.epl",
-			"begin": "\"",
-			"end": "\"",
-			"patterns": [
-				{
-					"name": "constant.character.escape.epl",
-					"match": "\\\\."
-				}
-			]
-		}
-	},
-	"scopeName": "source.epl"
+  "$schema":
+    "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "epl",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#collections"
+    },
+    {
+      "include": "#definitions"
+    },
+    {
+      "include": "#types"
+    },
+    {
+      "include": "#controlkw"
+    },
+    {
+      "include": "#logging"
+    },
+    {
+      "include": "#constants"
+    }
+  ],
+  "repository": {
+    "controlkw": {
+      "patterns": [
+        {
+          "comment": "Control keywords",
+          "match":
+            "(\\b(die|as|spawn|return|for|new|at|if|else|then|not|log|self|and|or|on|all|in|route|emit|enqueue|send)\\b)",
+          "name": "keyword.control.epl"
+        }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        {
+          "comment": "Constants in EPL",
+          "match": "\\b(true|false|constant)\\b",
+          "name": "constant.language.epl"
+        }
+      ]
+    },
+    "logging": {
+      "patterns": [
+        {
+          "comment": "Logging and numeric constants",
+          "match": "\\b(\\d+|DEBUG|WARN|INFO|ERROR|CRIT)\\b",
+          "name": "constant.language.epl"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "match":
+            "\\b(string|integer|float|boolean)\\b\\s*([_A-Za-z][_A-Za-z0-9]*\\b)?+",
+          "captures": {
+            "1": {
+              "name": "storage.type.epl"
+            },
+            "2": {
+              "name": "token.variable.language.epl"
+            }
+          }
+        }
+      ]
+    },
+    "collections": {
+      "patterns": [
+        {
+          "match":
+            "\\b(sequence|dictionary)\\b\\s*\\<([_A-Za-z][_A-Za-z0-9]*)\\b\\>\\s*([_A-Za-z][_A-Za-z0-9]*\\b)?+",
+          "captures": {
+            "1": {
+              "name": "entity.name.type.epl"
+            },
+            "2": {
+              "name": "storage.type.epl"
+            },
+            "3": {
+              "name": "token.variable.language.epl"
+            }
+          }
+        }
+      ]
+    },
+    "definitions": {
+      "patterns": [
+        {
+          "name": "keyword.other.epl",
+          "match": "\\b(returns|using)\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.epl",
+          "match": "\\b(if|while|for|return)\\b"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.epl",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.epl",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        {
+          "comment": "Block Comments",
+          "begin": "/\\*",
+          "end": "\\*/",
+          "name": "comment.block.epl"
+        },
+        {
+          "comment": "Comment lines",
+          "match": "(//.+)",
+          "name": "comment.line.epl"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.epl"
 }
