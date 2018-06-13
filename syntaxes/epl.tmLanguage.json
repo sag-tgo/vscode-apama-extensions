@@ -7,6 +7,15 @@
       "include": "#comments"
     },
     {
+      "include": "#event"
+    },
+    {
+      "include": "#action"
+    },
+    {
+      "include": "#monitor"
+    },
+    {
       "include": "#keywords"
     },
     {
@@ -32,6 +41,82 @@
     }
   ],
   "repository": {
+    "event": {
+      "patterns": [
+        {
+          "match":
+            "\\b(event)\\b\\s*([_A-Za-z][_A-Za-z0-9]*\\b)?+\\s*\\{",
+          "captures": {
+            "1": {
+              "name": "entity.name.type.epl"
+            },
+            "2": {
+              "name": "token.variable.language.epl"
+            }
+          }
+        }
+      ]
+    },
+    "action": {
+      "patterns": [
+				{
+					"comment": "action => method like thing",
+					"begin": "\\b(action)\\b\\s*([_A-Za-z][_A-Za-z0-9]*\\b)?+",
+					"beginCaptures": {
+						"0": {
+							"name": "keyword.other.epl"
+						},
+						"1": {
+							"name": "entity.name.type.epl"
+						}
+					},
+					"end": "(?<=\\})|(?=(;|\\(|\\)|>|\\[|\\]|=))",
+					"name": "meta.class-struct-block.epl",
+					"patterns": [
+						{
+							"begin": "\\{",
+							"beginCaptures": {
+								"0": {
+									"name": "punctuation.section.block.begin.bracket.curly.epl"
+								}
+							},
+							"end": "(\\})(\\s*\\n)?",
+							"endCaptures": {
+								"1": {
+									"name": "punctuation.section.block.end.bracket.curly.epl"
+								},
+								"2": {
+									"name": "invalid.illegal.you-forgot-semicolon.epl"
+								}
+							},
+							"patterns": [
+								{
+									"include": "$base"
+								}
+							]
+						},
+						{
+							"include": "$base"
+						}
+					]
+				}
+			]    },
+    "monitor": {
+      "patterns": [
+        {
+          "match":
+            "\\b(monitor)\\b\\s*([_A-Za-z][_A-Za-z0-9]*\\b)?+\\s*\\{",
+          "captures": {
+            "1": {
+              "name": "entity.name.type.epl"
+            },
+            "2": {
+              "name": "token.variable.language.epl"
+            }
+          }
+        }
+      ]
+    },
     "controlkw": {
       "patterns": [
         {
