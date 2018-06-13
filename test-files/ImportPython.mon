@@ -1,0 +1,20 @@
+
+package apama.test;
+
+event myevent {} 
+
+monitor ImportPython {
+
+	import "myPlugin" as pyplugin;
+
+	integer a := 20;
+	integer ret;
+
+	action onload() {
+		ret := pyplugin.echo(a);
+		log ret.toString();
+
+		//keep the monitor alive so it can be deleted.
+		on all myevent() {}
+	}
+}
