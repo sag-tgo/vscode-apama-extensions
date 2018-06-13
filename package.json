@@ -1,0 +1,26 @@
+{
+    "name": "epl-syntax-highlighting",
+    "displayName": "epl-syntax-highlighting",
+    "description": "EPL language support for Apama",
+    "version": "0.0.1",
+    "publisher": "CaribouJohn",
+    "engines": {
+        "vscode": "^1.24.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "epl",
+            "aliases": ["epl", "epl"],
+            "extensions": [".mon",".evt"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "epl",
+            "scopeName": "source.epl",
+            "path": "./syntaxes/epl.tmLanguage.json"
+        }]
+    }
+}
