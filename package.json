@@ -99,6 +99,7 @@
     "vscode": "^1.1.6"
   },
   "activationEvents": [
-    "onDebug"
+    "onDebug",
+    "onLanguage:epl"
   ]
 }
