@@ -8,16 +8,7 @@ import { CorrelatorDebugSession } from './correlatorDebugSession';
 import { platform } from 'os';
 import { execFileSync } from 'child_process';
 import {EPLCompletionItemProvider} from './eplCompletionProvider';
-
-//keywords and static information (doesn't change)
-var lang_default = require('../syntaxes/epl.default.json');
-
-//Built cache of information : dictionary of events/fields , monitors/actions/parameters
-//the idea is to add to structure incrementally using filesystem watcher/change callbacks
-//https://code.visualstudio.com/docs/extensionAPI/vscode-api#_workspace 
-//(watches for config, document and workspace changes which will promp rescanning potentially)
-//ws.createFileSystemWatcher(globPattern: GlobPattern, ignoreCreateEvents?: boolean, ignoreChangeEvents?: boolean, ignoreDeleteEvents?: boolean): FileSystemWatcher
-let workspace_language_data = {};
+import * as Lang from './languageItem';
 
 const EPL_MODE: vscode.DocumentFilter = { language: 'epl', scheme: 'file' };
 
@@ -32,8 +23,8 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(EPL_MODE, completionProvider , '.'));
     //context.subscriptions.push(vscode.languages.registerRenameProvider(EPL_MODE, renameProvider);
     console.log("**********************"  );
-    console.log( lang_default );
-    console.log( workspace_language_data );
+    console.log( Lang.staticLanguageItems );
+    console.log( Lang.workspaceLanguageDataMap );
     console.log("**********************" );
     
 
