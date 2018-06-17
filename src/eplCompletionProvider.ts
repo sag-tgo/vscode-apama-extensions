@@ -23,7 +23,7 @@ function extractItems(document: vscode.TextDocument , regex: RegExp , symbolKind
             
             rVal.push(
                 {
-                    label: type + ' ' + symbol,
+                    label: symbol + ":" + type,
                     kind: symbolKind,
                     documentation: type + ' ' + symbol,
                     insertText: symbol
