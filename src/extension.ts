@@ -9,6 +9,8 @@ import { platform } from 'os';
 import { execFileSync } from 'child_process';
 import {EPLCompletionItemProvider} from './eplCompletionProvider';
 
+var lang_default = require('../syntaxes/epl.default.json');
+
 const EPL_MODE: vscode.DocumentFilter = { language: 'epl', scheme: 'file' };
 
 // this method is called when your extension is activated
@@ -21,6 +23,10 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(provider);
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(EPL_MODE, completionProvider , '.', '\"'));
     //context.subscriptions.push(vscode.languages.registerRenameProvider(EPL_MODE, renameProvider);
+    console.log("**********************"  );
+    console.log( lang_default );
+    console.log("**********************" );
+    
 
 }
 
