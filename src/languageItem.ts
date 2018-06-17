@@ -27,7 +27,9 @@ export const staticLanguageItems = require('../syntaxes/epl.default.json');
 //ws.createFileSystemWatcher(globPattern: GlobPattern, ignoreCreateEvents?: boolean, ignoreChangeEvents?: boolean, ignoreDeleteEvents?: boolean): FileSystemWatcher
 export let workspaceLanguageDataMap: { [index: string]: CompletionLanguageItem; } = {};
 
-//basic class for dictionary
+//basic class for items. I think we might be able to reuse if we 
+//use interfaces possibly or inherit from a base class and provide 
+//ways to extract the Items required. WIP
 export class CompletionLanguageItem 
 {
     symbol: string;
