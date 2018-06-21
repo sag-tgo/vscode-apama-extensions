@@ -40,7 +40,6 @@ monitor Weather {
 		deleteAll.dvName := "Weather";
 		route deleteAll;
 		
-
 		// Add the set of initial locations
 		string s;
 		for s in locations {

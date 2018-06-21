@@ -25,7 +25,7 @@ export const staticLanguageItems = require('../syntaxes/epl.default.json');
 //https://code.visualstudio.com/docs/extensionAPI/vscode-api#_workspace 
 //(watches for config, document and workspace changes which will promp rescanning potentially)
 //ws.createFileSystemWatcher(globPattern: GlobPattern, ignoreCreateEvents?: boolean, ignoreChangeEvents?: boolean, ignoreDeleteEvents?: boolean): FileSystemWatcher
-export let workspaceLanguageDataMap: { [index: string]: CompletionLanguageItem; } = {};
+export let workspaceLanguageDataMap = new Map<string , CompletionLanguageItem> ();
 
 //basic class for items. I think we might be able to reuse if we 
 //use interfaces possibly or inherit from a base class and provide 
@@ -43,8 +43,8 @@ export class CompletionLanguageItem
         this.symbolType = symtype;
         this.filename = fileName;
         this.type = t;
-        if(!( this.symbol in workspaceLanguageDataMap)){
-            workspaceLanguageDataMap[this.symbol] = this;
+        if(!(workspaceLanguageDataMap.has(this.symbol))){
+            workspaceLanguageDataMap.set(this.symbol,this);
         }
     }
 

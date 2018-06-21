@@ -8,7 +8,9 @@ For mor information on EPL and Apama please visit the [Apama Community Edition w
 
 ## Features
 
-supporting EPL language from Apama 10.3 +
+* Supporting EPL language from Apama 10.3 +
+* Snippet support
+* Basic Autocomplete support
 
 ## Requirements
 
@@ -16,7 +18,7 @@ There are no requirements for use of this extention currently.
 
 ## Extension Settings
 
-No settings currently.
+* **apama.apamaHome** defines the Apama install directory that will be used by the Debug support.
 
 ## Known Issues
 
