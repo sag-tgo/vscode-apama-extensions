@@ -19,7 +19,7 @@ export function activate(context: vscode.ExtensionContext) {
     //const renameProvider = new EPLRenameProvider();
 	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('apama', provider));
     context.subscriptions.push(provider);
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(EPL_MODE, completionProvider , '.', '\"'));
+    //context.subscriptions.push(vscode.languages.registerCompletionItemProvider(EPL_MODE, completionProvider , '.', '\"'));
     //context.subscriptions.push(vscode.languages.registerRenameProvider(EPL_MODE, renameProvider);
 
 }
