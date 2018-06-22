@@ -7,21 +7,13 @@ import * as Net from 'net';
 import { CorrelatorDebugSession, normalizeCorrelatorFilePath } from './correlatorDebugSession';
 import { platform } from 'os';
 import { execFileSync } from 'child_process';
-import {EPLCompletionItemProvider} from './eplCompletionProvider';
-
-const EPL_MODE: vscode.DocumentFilter = { language: 'epl', scheme: 'file' };
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
     const provider = new ApamaConfigurationProvider();
-    const completionProvider = new EPLCompletionItemProvider();
-    //const renameProvider = new EPLRenameProvider();
-	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('apama', provider));
+    context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('apama', provider));
     context.subscriptions.push(provider);
-    //context.subscriptions.push(vscode.languages.registerCompletionItemProvider(EPL_MODE, completionProvider , '.', '\"'));
-    //context.subscriptions.push(vscode.languages.registerRenameProvider(EPL_MODE, renameProvider);
-
 }
 
 // this method is called when your extension is deactivated
