@@ -45,13 +45,14 @@
       "patterns": [
         {
           "match":
-            "\\b(event)\\b\\s*([_A-Za-z][_A-Za-z0-9]*\\b)?+\\s*\\{",
+            "\\b(event)\\s+([_A-Za-z][_A-Za-z0-9]*\\b)+\\s*{",
           "captures": {
             "1": {
               "name": "entity.name.type.epl"
             },
             "2": {
-              "name": "token.variable.language.epl"
+              "oldname": "token.variable.language.epl",
+              "name": "comment.line.epl"
             }
           }
         }
@@ -217,7 +218,7 @@
         },
         {
           "comment": "Comment lines",
-          "match": "(//.+)",
+          "match": "(//.*)",
           "name": "comment.line.epl"
         }
       ]
