@@ -16,5 +16,15 @@ monitor ImportPython {
 
 		//keep the monitor alive so it can be deleted.
 		on all myevent() {}
+		
+	}
+
+	/**
+	 * Description of actionName
+	 * @param paramName Description of this param
+	 * @returns Description of the return value
+	 */
+	action actionName(string param) returns string {
+		throw com.apama.exceptions.Exception("Not yet implemented", "NotImplemented");
 	}
 }

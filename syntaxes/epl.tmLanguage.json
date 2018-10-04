@@ -61,7 +61,7 @@
 			"name": "variable.language.epl"
 		},
 		{
-			"begin": "(?=(\\basync\\b\\s*)?\\baction\\b(?!\\s*:))",
+			"begin": "(?=\\baction\\b(?!\\s*))",
 			"end": "(?<=})",
 			"patterns": [
 				{
@@ -83,7 +83,7 @@
 			]
 		},
 		{
-			"begin": "(?=(\\.)?[a-zA-Z_$][\\w$]*\\s*=\\s*(\\basync\\b\\s*)?\\baction\\b)",
+			"begin": "(?=(\\.)?[a-zA-Z_$][\\w$]*\\s*:=\\s*\\baction\\b)",
 			"end": "(?<=})",
 			"patterns": [
 				{
@@ -98,7 +98,7 @@
 					"name": "meta.function.epl",
 					"patterns": [
 						{
-							"match": "(\\.)?([a-zA-Z_$][\\w$]*)\\s*(=)\\s*",
+							"match": "(\\.)?([a-zA-Z_$][\\w$]*)\\s*(:=)\\s*",
 							"captures": {
 								"1": {
 									"name": "meta.delimiter.method.period.epl"
@@ -119,7 +119,7 @@
 			]
 		},
 		{
-			"begin": "(?=\\b[a-zA-Z_$][\\w$]*\\s*:\\s*(\\basync\\b\\s*)?\\baction\\b)",
+			"begin": "(?=\\b[a-zA-Z_$][\\w$]*\\s*:=\\s*\\baction\\b)",
 			"end": "(?<=})",
 			"patterns": [
 				{
@@ -134,7 +134,7 @@
 					"name": "meta.function.eplon.epl",
 					"patterns": [
 						{
-							"match": "\\b([a-zA-Z_$][\\w$]*)\\s*(:)\\s*",
+							"match": "\\b([a-zA-Z_$][\\w$]*)\\s*(:=)\\s*",
 							"captures": {
 								"1": {
 									"name": "entity.name.function.epl"
@@ -152,7 +152,7 @@
 			]
 		},
 		{
-			"begin": "(?=(('[^']*?')|(\"[^\"]*?\"))\\s*:\\s*(\\basync\\b\\s*)?\\baction\\b)",
+			"begin": "(?=(('[^']*?')|(\"[^\"]*?\"))\\s*:=\\s*\\baction\\b)",
 			"end": "(?<=})",
 			"patterns": [
 				{
@@ -167,7 +167,7 @@
 					"name": "meta.function.eplon.epl",
 					"patterns": [
 						{
-							"match": "(?:((')([^']*?)('))|((\")([^\"]*?)(\")))\\s*(:)",
+							"match": "(?:((')([^']*?)('))|((\")([^\"]*?)(\")))\\s*(:=)",
 							"captures": {
 								"1": {
 									"name": "string.quoted.single.epl"
@@ -197,32 +197,6 @@
 									"name": "keyword.operator.assignment.epl"
 								}
 							}
-						},
-						{
-							"include": "#function_innards"
-						}
-					]
-				}
-			]
-		},
-		{
-			"begin": "(?=\\bconstructor\\b\\s*)",
-			"end": "(?<=})",
-			"patterns": [
-				{
-					"include": "#comments"
-				},
-				{
-					"include": "#function_body"
-				},
-				{
-					"begin": "\\G",
-					"end": "(?<=\\))",
-					"name": "meta.function.epl",
-					"patterns": [
-						{
-							"match": "\\b(constructor)\\s*",
-							"name": "entity.name.function.constructor.epl"
 						},
 						{
 							"include": "#function_innards"
@@ -268,10 +242,6 @@
 								}
 							},
 							"name": "meta.computed-key.epl"
-						},
-						{
-							"match": "\\b(get|set)(?=\\s*\\[.+\\]\\s*\\(|\\s+[^\\s\\[(]+\\s*\\()",
-							"name": "keyword.operator.$1ter.epl"
 						},
 						{
 							"match": "\\b([a-zA-Z_$][\\w$]*)",
@@ -441,7 +411,7 @@
 			}
 		},
 		{
-			"match": "(?x)\n\\b(action|monitor|event|class)\n(?:\n  (?:\\s+(extends)\\s+([a-zA-Z_$][\\w$]*))\n  |\n  (?:\n    (?:\\s+([a-zA-Z_$][\\w$]*))\n    (?:\\s+(extends)\\s+([a-zA-Z_$][\\w$]*))?\n  )\n)",
+			"match": "(?x)\n\\b(action|monitor|event)\n(?:\n  (?:\\s+(extends)\\s+([a-zA-Z_$][\\w$]*))\n  |\n  (?:\n    (?:\\s+([a-zA-Z_$][\\w$]*))\n    (?:\\s+(extends)\\s+([a-zA-Z_$][\\w$]*))?\n  )\n)",
 			"captures": {
 				"1": {
 					"name": "storage.type.class.epl"
@@ -483,81 +453,6 @@
 			}
 		},
 		{
-			"begin": "(?<![\\w$])console(?![\\w$]|\\s*:)",
-			"beginCaptures": {
-				"0": {
-					"name": "entity.name.type.object.console.epl"
-				}
-			},
-			"end": "(?x)\n(?<=\\)) | (?=\n  (?! (\\s*//)|(\\s*/\\*)|(\\s*(\\.)\\s*\n    (assert|clear|debug|error|info|log|profile|profileEnd|time|timeEnd|warn)\n    \\s*\\(\n  )) \\s*\\S\n)",
-			"patterns": [
-				{
-					"include": "#comments"
-				},
-				{
-					"begin": "\\s*(\\.)\\s*(\\w+)\\s*(?=\\()",
-					"beginCaptures": {
-						"1": {
-							"name": "meta.delimiter.method.period.epl"
-						},
-						"2": {
-							"name": "support.function.console.epl"
-						}
-					},
-					"end": "(?<=\\))",
-					"name": "meta.method-call.epl",
-					"patterns": [
-						{
-							"include": "#arguments"
-						}
-					]
-				}
-			]
-		},
-		{
-			"begin": "(?<![\\w$])Math(?![\\w$]|\\s*:)",
-			"beginCaptures": {
-				"0": {
-					"name": "support.class.math.epl"
-				}
-			},
-			"end": "(?x)\n(?<=E|LN10|LN2|LOG10E|LOG2E|PI|SQRT1_2|SQRT2|\\)\n) | (?=\n  (?! (\\s*//)|(\\s*/\\*)|(\\s*\\.\\s* (\n    ((abs|acos|acosh|asin|asinh|atan|atan2|atanh|cbrt|ceil|clz32|cos|cosh|exp|\n    expm1|floor|fround|hypot|imul|log|log10|log1p|log2|max|min|pow|random|\n    round|sign|sin|sinh|sqrt|tan|tanh|trunc)\\s*\\(\n    ) | (E|LN10|LN2|LOG10E|LOG2E|PI|SQRT1_2|SQRT2)(?!\\s*[\\w$(]))\n  )) \\s*\\S\n)",
-			"patterns": [
-				{
-					"include": "#comments"
-				},
-				{
-					"begin": "\\s*(\\.)\\s*(\\w+)\\s*(?=\\()",
-					"beginCaptures": {
-						"1": {
-							"name": "meta.delimiter.method.period.epl"
-						},
-						"2": {
-							"name": "support.function.math.epl"
-						}
-					},
-					"end": "(?<=\\))",
-					"name": "meta.method-call.epl",
-					"patterns": [
-						{
-							"include": "#arguments"
-						}
-					]
-				},
-				{
-					"match": "\\s*(\\.)\\s*(\\w+)\\b",
-					"captures": {
-						"1": {
-							"name": "meta.delimiter.property.period.epl"
-						},
-						"2": {
-							"name": "support.constant.property.math.epl"
-						}
-					}
-				}
-			]
-		},
-		{
 			"include": "#strings"
 		},
 		{
@@ -576,12 +471,8 @@
 			"name": "comment.block.html.epl"
 		},
 		{
-			"match": "(?<!\\.)\\b(action|monitor|event|class|enum|function|interface)(?!\\s*:)\\b",
+			"match": "(?<!\\.)\\b(action|monitor|event)(?!\\s*:)\\b",
 			"name": "storage.type.epl"
-		},
-		{
-			"match": "(?<!\\.)\\b(async|export|extends|implements|private|protected|public|static)(?!\\s*:)\\b",
-			"name": "storage.modifier.epl"
 		},
 		{
 			"match": "(?<!\\.)\\b(any|sequence|dictionary|integer|float|string|boolean)(?!\\s*:)\\b",
@@ -652,18 +543,6 @@
 			]
 		},
 		{
-			"match": "(?<!\\.)\\b(yield)(?!\\s*:)\\b(?:\\s*(\\*))?",
-			"captures": {
-				"1": {
-					"name": "keyword.control.epl"
-				},
-				"2": {
-					"name": "storage.modifier.epl"
-				}
-			},
-			"name": "meta.control.yield.epl"
-		},
-		{
 			"match": "(?<!\\.)\\b(await|break|catch|continue|do|else|finally|spawn|for|at|on|all|as|route|log|if|import|package|return|throw|try|while|with)(?!\\s*:)\\b",
 			"name": "keyword.control.epl"
 		},
@@ -675,71 +554,8 @@
 			"name": "keyword.operator.$1.epl"
 		},
 		{
-			"match": "\\.\\.\\.",
-			"name": "keyword.operator.spread.epl"
-		},
-		{
 			"match": "(?<!\\.)\\b(true|false)(?!\\s*:)\\b",
 			"name": "constant.language.boolean.$1.epl"
-		},
-		{
-			"match": "(?<!\\.)\\b(null)(?!\\s*:)\\b",
-			"name": "constant.language.null.epl"
-		},
-		{
-			"match": "(?<!\\.)\\b(debugger)(?!\\s*:)\\b",
-			"name": "keyword.other.debugger.epl"
-		},
-		{
-			"match": "(?x) (?<!\\$) \\b\n(Array|ArrayBuffer|Atomics|Boolean|DataView|Date|Error|EvalError|Float32Array|Float64Array|Function|Generator\n|GeneratorFunction|Int16Array|Int32Array|Int8Array|InternalError|Intl|JSON|Map|Number|Object|Promise|Proxy\n|RangeError|ReferenceError|Reflect|RegExp|Set|SharedArrayBuffer|SIMD|String|Symbol|SyntaxError|TypeError\n|Uint16Array|Uint32Array|Uint8Array|Uint8ClampedArray|URIError|WeakMap|WeakSet)\n\\b",
-			"name": "support.class.epl"
-		},
-		{
-			"match": "(?x) (\\.) \\s* (?:\n  (constructor|length|prototype) |\n  (EPSILON|MAX_SAFE_INTEGER|MAX_VALUE|MIN_SAFE_INTEGER|MIN_VALUE|NEGATIVE_INFINITY|POSITIVE_INFINITY)\n)\\b",
-			"captures": {
-				"1": {
-					"name": "meta.delimiter.property.period.epl"
-				},
-				"2": {
-					"name": "support.variable.property.epl"
-				},
-				"3": {
-					"name": "support.constant.epl"
-				}
-			}
-		},
-		{
-			"match": "(?x) (?<!\\$) \\b (?:\n  (document|event|navigator|performance|screen|window)\n  |\n  (AnalyserNode|ArrayBufferView|Attr|AudioBuffer|AudioBufferSourceNode|AudioContext|AudioDestinationNode|AudioListener\n  |AudioNode|AudioParam|BatteryManager|BeforeUnloadEvent|BiquadFilterNode|Blob|BufferSource|ByteString|CSS|CSSConditionRule\n  |CSSCounterStyleRule|CSSGroupingRule|CSSMatrix|CSSMediaRule|CSSPageRule|CSSPrimitiveValue|CSSRule|CSSRuleList|CSSStyleDeclaration\n  |CSSStyleRule|CSSStyleSheet|CSSSupportsRule|CSSValue|CSSValueList|CanvasGradient|CanvasImageSource|CanvasPattern\n  |CanvasRenderingContext2D|ChannelMergerNode|ChannelSplitterNode|CharacterData|ChromeWorker|CloseEvent|Comment|CompositionEvent\n  |Console|ConvolverNode|Coordinates|Credential|CredentialsContainer|Crypto|CryptoKey|CustomEvent|DOMError|DOMException\n  |DOMHighResTimeStamp|DOMImplementation|DOMString|DOMStringList|DOMStringMap|DOMTimeStamp|DOMTokenList|DataTransfer\n  |DataTransferItem|DataTransferItemList|DedicatedWorkerGlobalScope|DelayNode|DeviceProximityEvent|DirectoryEntry\n  |DirectoryEntrySync|DirectoryReader|DirectoryReaderSync|Document|DocumentFragment|DocumentTouch|DocumentType|DragEvent\n  |DynamicsCompressorNode|Element|Entry|EntrySync|ErrorEvent|Event|EventListener|EventSource|EventTarget|FederatedCredential\n  |FetchEvent|File|FileEntry|FileEntrySync|FileException|FileList|FileReader|FileReaderSync|FileSystem|FileSystemSync\n  |FontFace|FormData|GainNode|Gamepad|GamepadButton|GamepadEvent|Geolocation|GlobalEventHandlers|HTMLAnchorElement\n  |HTMLAreaElement|HTMLAudioElement|HTMLBRElement|HTMLBaseElement|HTMLBodyElement|HTMLButtonElement|HTMLCanvasElement\n  |HTMLCollection|HTMLContentElement|HTMLDListElement|HTMLDataElement|HTMLDataListElement|HTMLDialogElement|HTMLDivElement\n  |HTMLDocument|HTMLElement|HTMLEmbedElement|HTMLFieldSetElement|HTMLFontElement|HTMLFormControlsCollection|HTMLFormElement\n  |HTMLHRElement|HTMLHeadElement|HTMLHeadingElement|HTMLHtmlElement|HTMLIFrameElement|HTMLImageElement|HTMLInputElement\n  |HTMLKeygenElement|HTMLLIElement|HTMLLabelElement|HTMLLegendElement|HTMLLinkElement|HTMLMapElement|HTMLMediaElement\n  |HTMLMetaElement|HTMLMeterElement|HTMLModElement|HTMLOListElement|HTMLObjectElement|HTMLOptGroupElement|HTMLOptionElement\n  |HTMLOptionsCollection|HTMLOutputElement|HTMLParagraphElement|HTMLParamElement|HTMLPreElement|HTMLProgressElement\n  |HTMLQuoteElement|HTMLScriptElement|HTMLSelectElement|HTMLShadowElement|HTMLSourceElement|HTMLSpanElement|HTMLStyleElement\n  |HTMLTableCaptionElement|HTMLTableCellElement|HTMLTableColElement|HTMLTableDataCellElement|HTMLTableElement|HTMLTableHeaderCellElement\n  |HTMLTableRowElement|HTMLTableSectionElement|HTMLTextAreaElement|HTMLTimeElement|HTMLTitleElement|HTMLTrackElement\n  |HTMLUListElement|HTMLUnknownElement|HTMLVideoElement|HashChangeEvent|History|IDBCursor|IDBCursorWithValue|IDBDatabase\n  |IDBEnvironment|IDBFactory|IDBIndex|IDBKeyRange|IDBMutableFile|IDBObjectStore|IDBOpenDBRequest|IDBRequest|IDBTransaction\n  |IDBVersionChangeEvent|IIRFilterNode|IdentityManager|ImageBitmap|ImageBitmapFactories|ImageData|Index|InputDeviceCapabilities\n  |InputEvent|InstallEvent|InstallTrigger|KeyboardEvent|LinkStyle|LocalFileSystem|LocalFileSystemSync|Location|MIDIAccess\n  |MIDIConnectionEvent|MIDIInput|MIDIInputMap|MIDIOutputMap|MediaElementAudioSourceNode|MediaError|MediaKeyMessageEvent\n  |MediaKeySession|MediaKeyStatusMap|MediaKeySystemAccess|MediaKeySystemConfiguration|MediaKeys|MediaRecorder|MediaStream\n  |MediaStreamAudioDestinationNode|MediaStreamAudioSourceNode|MessageChannel|MessageEvent|MessagePort|MouseEvent\n  |MutationObserver|MutationRecord|NamedNodeMap|Navigator|NavigatorConcurrentHardware|NavigatorGeolocation|NavigatorID\n  |NavigatorLanguage|NavigatorOnLine|Node|NodeFilter|NodeIterator|NodeList|NonDocumentTypeChildNode|Notification\n  |OfflineAudioCompletionEvent|OfflineAudioContext|OscillatorNode|PageTransitionEvent|PannerNode|ParentNode|PasswordCredential\n  |Path2D|PaymentAddress|PaymentRequest|PaymentResponse|Performance|PerformanceEntry|PerformanceFrameTiming|PerformanceMark\n  |PerformanceMeasure|PerformanceNavigation|PerformanceNavigationTiming|PerformanceObserver|PerformanceObserverEntryList\n  |PerformanceResourceTiming|PerformanceTiming|PeriodicSyncEvent|PeriodicWave|Plugin|Point|PointerEvent|PopStateEvent\n  |PortCollection|Position|PositionError|PositionOptions|PresentationConnectionClosedEvent|PresentationConnectionList\n  |PresentationReceiver|ProcessingInstruction|ProgressEvent|PromiseRejectionEvent|PushEvent|PushRegistrationManager\n  |RTCCertificate|RTCConfiguration|RTCPeerConnection|RTCSessionDescriptionCallback|RTCStatsReport|RadioNodeList|RandomSource\n  |Range|ReadableByteStream|RenderingContext|SVGAElement|SVGAngle|SVGAnimateColorElement|SVGAnimateElement|SVGAnimateMotionElement\n  |SVGAnimateTransformElement|SVGAnimatedAngle|SVGAnimatedBoolean|SVGAnimatedEnumeration|SVGAnimatedInteger|SVGAnimatedLength\n  |SVGAnimatedLengthList|SVGAnimatedNumber|SVGAnimatedNumberList|SVGAnimatedPoints|SVGAnimatedPreserveAspectRatio\n  |SVGAnimatedRect|SVGAnimatedString|SVGAnimatedTransformList|SVGAnimationElement|SVGCircleElement|SVGClipPathElement\n  |SVGCursorElement|SVGDefsElement|SVGDescElement|SVGElement|SVGEllipseElement|SVGEvent|SVGFilterElement|SVGFontElement\n  |SVGFontFaceElement|SVGFontFaceFormatElement|SVGFontFaceNameElement|SVGFontFaceSrcElement|SVGFontFaceUriElement\n  |SVGForeignObjectElement|SVGGElement|SVGGlyphElement|SVGGradientElement|SVGHKernElement|SVGImageElement|SVGLength\n  |SVGLengthList|SVGLineElement|SVGLinearGradientElement|SVGMPathElement|SVGMaskElement|SVGMatrix|SVGMissingGlyphElement\n  |SVGNumber|SVGNumberList|SVGPathElement|SVGPatternElement|SVGPoint|SVGPolygonElement|SVGPolylineElement|SVGPreserveAspectRatio\n  |SVGRadialGradientElement|SVGRect|SVGRectElement|SVGSVGElement|SVGScriptElement|SVGSetElement|SVGStopElement|SVGStringList\n  |SVGStylable|SVGStyleElement|SVGSwitchElement|SVGSymbolElement|SVGTRefElement|SVGTSpanElement|SVGTests|SVGTextElement\n  |SVGTextPositioningElement|SVGTitleElement|SVGTransform|SVGTransformList|SVGTransformable|SVGUseElement|SVGVKernElement\n  |SVGViewElement|ServiceWorker|ServiceWorkerContainer|ServiceWorkerGlobalScope|ServiceWorkerRegistration|ServiceWorkerState\n  |ShadowRoot|SharedWorker|SharedWorkerGlobalScope|SourceBufferList|StereoPannerNode|Storage|StorageEvent|StyleSheet\n  |StyleSheetList|SubtleCrypto|SyncEvent|Text|TextMetrics|TimeEvent|TimeRanges|Touch|TouchEvent|TouchList|Transferable\n  |TreeWalker|UIEvent|USVString|VRDisplayCapabilities|ValidityState|WaveShaperNode|WebGL|WebGLActiveInfo|WebGLBuffer\n  |WebGLContextEvent|WebGLFramebuffer|WebGLProgram|WebGLRenderbuffer|WebGLRenderingContext|WebGLShader|WebGLShaderPrecisionFormat\n  |WebGLTexture|WebGLTimerQueryEXT|WebGLTransformFeedback|WebGLUniformLocation|WebGLVertexArrayObject|WebGLVertexArrayObjectOES\n  |WebSocket|WebSockets|WebVTT|WheelEvent|Window|WindowBase64|WindowEventHandlers|WindowTimers|Worker|WorkerGlobalScope\n  |WorkerLocation|WorkerNavigator|XMLHttpRequest|XMLHttpRequestEventTarget|XMLSerializer|XPathExpression|XPathResult\n  |XSLTProcessor)\n)\\b",
-			"captures": {
-				"1": {
-					"name": "support.variable.dom.epl"
-				},
-				"2": {
-					"name": "support.class.dom.epl"
-				}
-			}
-		},
-		{
-			"match": "(?x) (\\.) \\s*\n(?:\n  (ATTRIBUTE_NODE|CDATA_SECTION_NODE|COMMENT_NODE|DOCUMENT_FRAGMENT_NODE|DOCUMENT_NODE|DOCUMENT_TYPE_NODE\n  |DOMSTRING_SIZE_ERR|ELEMENT_NODE|ENTITY_NODE|ENTITY_REFERENCE_NODE|HIERARCHY_REQUEST_ERR|INDEX_SIZE_ERR\n  |INUSE_ATTRIBUTE_ERR|INVALID_CHARACTER_ERR|NO_DATA_ALLOWED_ERR|NO_MODIFICATION_ALLOWED_ERR|NOT_FOUND_ERR\n  |NOT_SUPPORTED_ERR|NOTATION_NODE|PROCESSING_INSTRUCTION_NODE|TEXT_NODE|WRONG_DOCUMENT_ERR)\n  |\n  (_content|[xyz]|abbr|above|accept|acceptCharset|accessKey|action|align|[av]Link(?:color)?|all|alt|anchors|appCodeName\n  |appCore|applets|appMinorVersion|appName|appVersion|archive|areas|arguments|attributes|availHeight|availLeft|availTop\n  |availWidth|axis|background|backgroundColor|backgroundImage|below|bgColor|body|border|borderBottomWidth|borderColor\n  |borderLeftWidth|borderRightWidth|borderStyle|borderTopWidth|borderWidth|bottom|bufferDepth|callee|caller|caption\n  |cellPadding|cells|cellSpacing|ch|characterSet|charset|checked|childNodes|chOff|cite|classes|className|clear\n  |clientInformation|clip|clipBoardData|closed|code|codeBase|codeType|color|colorDepth|cols|colSpan|compact|complete\n  |components|content|controllers|cookie|cookieEnabled|cords|cpuClass|crypto|current|data|dateTime|declare|defaultCharset\n  |defaultChecked|defaultSelected|defaultStatus|defaultValue|defaultView|defer|description|dialogArguments|dialogHeight\n  |dialogLeft|dialogTop|dialogWidth|dir|directories|disabled|display|docmain|doctype|documentElement|elements|embeds\n  |enabledPlugin|encoding|enctype|entities|event|expando|external|face|fgColor|filename|firstChild|fontFamily|fontSize\n  |fontWeight|form|formName|forms|frame|frameBorder|frameElement|frames|hasFocus|hash|headers|height|history|host\n  |hostname|href|hreflang|hspace|htmlFor|httpEquiv|id|ids|ignoreCase|images|implementation|index|innerHeight|innerWidth\n  |input|isMap|label|lang|language|lastChild|lastIndex|lastMatch|lastModified|lastParen|layer[sXY]|left|leftContext\n  |lineHeight|link|linkColor|links|listStyleType|localName|location|locationbar|longDesc|lowsrc|lowSrc|marginBottom\n  |marginHeight|marginLeft|marginRight|marginTop|marginWidth|maxLength|media|menubar|method|mimeTypes|multiline|multiple\n  |name|nameProp|namespaces|namespaceURI|next|nextSibling|nodeName|nodeType|nodeValue|noHref|noResize|noShade|notationName\n  |notations|noWrap|object|offscreenBuffering|onLine|onreadystatechange|opener|opsProfile|options|oscpu|outerHeight\n  |outerWidth|ownerDocument|paddingBottom|paddingLeft|paddingRight|paddingTop|page[XY]|page[XY]Offset|parent|parentLayer\n  |parentNode|parentWindow|pathname|personalbar|pixelDepth|pkcs11|platform|plugins|port|prefix|previous|previousDibling\n  |product|productSub|profile|profileend|prompt|prompter|protocol|publicId|readOnly|readyState|referrer|rel|responseText\n  |responseXML|rev|right|rightContext|rowIndex|rows|rowSpan|rules|scheme|scope|screen[XY]|screenLeft|screenTop|scripts\n  |scrollbars|scrolling|sectionRowIndex|security|securityPolicy|selected|selectedIndex|selection|self|shape|siblingAbove\n  |siblingBelow|size|source|specified|standby|start|status|statusbar|statusText|style|styleSheets|suffixes|summary\n  |systemId|systemLanguage|tagName|tags|target|tBodies|text|textAlign|textDecoration|textIndent|textTransform|tFoot|tHead\n  |title|toolbar|top|type|undefined|uniqueID|updateInterval|URL|URLUnencoded|useMap|userAgent|userLanguage|userProfile\n  |vAlign|value|valueType|vendor|vendorSub|version|visibility|vspace|whiteSpace|width|X[MS]LDocument|zIndex)\n)\n\\b",
-			"captures": {
-				"1": {
-					"name": "meta.delimiter.property.period.epl"
-				},
-				"2": {
-					"name": "support.constant.dom.epl"
-				},
-				"3": {
-					"name": "support.variable.property.dom.epl"
-				}
-			}
-		},
-		{
-			"match": "(?<!\\.)\\b(module|exports|__filename|__dirname|global|process)(?!\\s*:)\\b",
-			"name": "support.variable.epl"
-		},
-		{
-			"match": "\\b(Infinity|NaN|undefined)\\b",
-			"name": "constant.language.epl"
 		},
 		{
 			"begin": "(?<=[\\[=(?:+,!]|^|return|=>|&&|\\|\\|)\\s*(/)(?![/*+?])(?=.*/)",
