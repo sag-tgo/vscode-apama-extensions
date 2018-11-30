@@ -455,11 +455,11 @@
 			"name": "storage.type.epl"
 		},
 		{
-			"match": "(?<!\\.)\\b(any|sequence|dictionary|integer|float|string|boolean)(?!\\s*:)\\b",
+			"match": "(?<!\\.)\\b(stream|decimal|any|sequence|dictionary|integer|float|string|boolean)(?!\\s*:)\\b",
 			"name": "storage.type.var.epl"
 		},
 		{
-			"match": "(?<!\\.)\\b(await|break|catch|continue|do|else|finally|spawn|for|at|on|all|as|route|log|if|import|package|return|throw|try|while|with)(?!\\s*:)\\b",
+			"match": "(?<!\\.)\\b(send|to|where|partition by|group by|having|rstream|select|retain|in|constant|from|await|break|catch|continue|do|else|finally|spawn|for|at|on|all|as|route|log|if|import|package|return|throw|try|while|with)(?!\\s*:)\\b",
 			"name": "keyword.control.epl"
 		},
 		{
