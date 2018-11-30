@@ -459,7 +459,7 @@
 			"name": "storage.type.var.epl"
 		},
 		{
-			"match": "(?<!\\.)\\b(send|to|where|partition by|group by|having|rstream|select|retain|in|constant|from|await|break|catch|continue|do|else|finally|spawn|for|at|on|all|as|route|log|if|import|package|return|throw|try|while|with)(?!\\s*:)\\b",
+			"match": "(?<!\\.)\\b(within|send|to|where|partition by|group by|having|rstream|select|retain|in|constant|from|await|break|catch|continue|do|else|finally|spawn|for|at|on|all|as|route|log|if|import|package|return|throw|try|while|with)(?!\\s*:)\\b",
 			"name": "keyword.control.epl"
 		},
 		{
@@ -476,26 +476,6 @@
 		{
 			"match": "\\b(INFO|CRIT|DEBUG|TRACE)\\b",
 			"name": "constant.language.epl"
-		},
-		{
-			"begin": "(?<=[\\[=(?:+,!]|^|return|=>|&&|\\|\\|)\\s*(/)(?![/*+?])(?=.*/)",
-			"beginCaptures": {
-				"1": {
-					"name": "punctuation.definition.string.begin.epl"
-				}
-			},
-			"end": "(/)[gimuy]*",
-			"endCaptures": {
-				"1": {
-					"name": "punctuation.definition.string.end.epl"
-				}
-			},
-			"name": "string.regexp.epl",
-			"patterns": [
-				{
-					"include": "source.epl.regexp"
-				}
-			]
 		},
 		{
 			"include": "#operators"
@@ -554,6 +534,44 @@
 				}
 			},
 			"end": "}",
+			"endCaptures": {
+				"0": {
+					"name": "meta.brace.curly.epl"
+				}
+			},
+			"patterns": [
+				{
+					"include": "$self"
+				}
+			]
+		},
+		{
+			"begin": "<",
+			"beginCaptures": {
+				"0": {
+					"name": "meta.brace.curly.epl"
+				}
+			},
+			"end": ">",
+			"endCaptures": {
+				"0": {
+					"name": "meta.brace.curly.epl"
+				}
+			},
+			"patterns": [
+				{
+					"include": "$self"
+				}
+			]
+		},
+		{
+			"begin": "\\[",
+			"beginCaptures": {
+				"0": {
+					"name": "meta.brace.curly.epl"
+				}
+			},
+			"end": "\\]",
 			"endCaptures": {
 				"0": {
 					"name": "meta.brace.curly.epl"
@@ -963,10 +981,6 @@
 						"1": {
 							"patterns": [
 								{
-									"match": "(?x)\n\\b(isNaN|isFinite|eval|uneval|parseInt|parseFloat|decodeURI|\ndecodeURIComponent|encodeURI|encodeURIComponent|escape|unescape|\nrequire|set(Interval|Timeout)|clear(Interval|Timeout))\\b",
-									"name": "support.function.epl"
-								},
-								{
 									"match": "[a-zA-Z_$][\\w$]*",
 									"name": "entity.name.function.epl"
 								},
@@ -1055,44 +1069,6 @@
 							"name": "invalid.illegal.identifier.epl"
 						}
 					}
-				}
-			]
-		},
-		"interpolated_js": {
-			"patterns": [
-				{
-					"begin": "\\${",
-					"captures": {
-						"0": {
-							"name": "punctuation.section.embedded.epl"
-						}
-					},
-					"end": "}",
-					"name": "source.epl.embedded.source",
-					"patterns": [
-						{
-							"begin": "{",
-							"beginCaptures": {
-								"0": {
-									"name": "meta.brace.curly.epl"
-								}
-							},
-							"end": "}",
-							"endCaptures": {
-								"0": {
-									"name": "meta.brace.curly.epl"
-								}
-							},
-							"patterns": [
-								{
-									"include": "$self"
-								}
-							]
-						},
-						{
-							"include": "$self"
-						}
-					]
 				}
 			]
 		},
