@@ -2,7 +2,7 @@
   "name": "apama-extensions",
   "displayName": "Apama Extensions",
   "description": "EPL language support for Apama",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "publisher": "CaribouJohn",
   "repository": {
     "url": "https://github.com/CaribouJohn/vscode-apama-extensions"
@@ -99,21 +99,21 @@
     "test": "npm run compile && node ./node_modules/vscode/bin/test"
   },
   "dependencies": {
-    "request": "^2.87.0",
+    "request": "^2.88.0",
     "request-promise-native": "^1.0.5",
-    "vscode-debugadapter": "^1.29.0",
-    "vscode-debugprotocol": "^1.29.0",
+    "vscode-debugadapter": "^1.32.1",
+    "vscode-debugprotocol": "^1.32.0",
     "xmldom": "^0.1.27",
     "xpath": "0.0.27"
   },
   "devDependencies": {
     "@types/mocha": "^2.2.42",
-    "@types/node": "^7.0.66",
+    "@types/node": "^7.10.2",
     "@types/request-promise-native": "^1.0.15",
     "@types/xmldom": "^0.1.29",
-    "tslint": "^5.8.0",
-    "typescript": "^2.6.1",
-    "vscode": "^1.1.6"
+    "tslint": "^5.11.0",
+    "typescript": "^2.9.2",
+    "vscode": "^1.1.22"
   },
   "activationEvents": [
     "onDebug",
