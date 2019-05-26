@@ -6,11 +6,9 @@
 
 import {
   IPCMessageReader, IPCMessageWriter,
-  createConnection, IConnection, TextDocumentSyncKind,
-  TextDocuments, TextDocument, InitializeParams, InitializeResult, TextDocumentPositionParams,
+  createConnection, IConnection, TextDocuments, TextDocument, InitializeResult, TextDocumentPositionParams,
   CompletionItem, CompletionItemKind,
-  Hover, Files
-} from 'vscode-languageserver';
+  Hover} from 'vscode-languageserver';
 
 import { validateYamlConfig } from './yamlValidation/validateYamlConfig';
 import { EPLBuddy } from './eplbuddy/EPLBuddy';
@@ -31,9 +29,6 @@ let documents: TextDocuments = new TextDocuments();
 // for open, change and close text document events
 documents.listen(connection);
 
-// After the server has started the client sends an initialize request. The server receives
-// in the passed params the rootPath of the workspace plus the client capabilities. 
-let workspaceRoot: string | null | undefined;
 
 // The settings interface describe the server relevant settings part
 interface Settings {
@@ -46,9 +41,9 @@ interface EplSettings {
   maxNumberOfProblems: number;
 }
 
+
 // hold the maxNumberOfProblems setting
 let maxNumberOfProblems: number;
-
 export let eplbuddy = new EPLBuddy();
 
 
@@ -58,8 +53,7 @@ export let eplbuddy = new EPLBuddy();
 //let colors: Array<string>;
 //let shapes: Array<string>;
 
-connection.onInitialize((params): InitializeResult => {
-  workspaceRoot = params.rootPath;
+connection.onInitialize((): InitializeResult => {
 
   return {
     capabilities: {
@@ -99,7 +93,10 @@ documents.onDidChangeContent((change) => {
 let names: Array<any>;
 
 connection.onCompletion((textDocumentPosition: TextDocumentPositionParams): Promise<Array<CompletionItem> >  => {
-	return new Promise<Array<CompletionItem> >((resolve, request) => {
+  if ( maxNumberOfProblems <= 0 ) {
+    console.log('hello');
+  }
+	return new Promise<Array<CompletionItem> >((resolve) => {
 		let textDoc: TextDocument | undefined = documents.get(textDocumentPosition.textDocument.uri);
 
 		if (textDoc !== undefined) {
@@ -158,7 +155,7 @@ connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
   return item;
 });
 
-connection.onHover(({ textDocument, position }): Hover | undefined => {
+connection.onHover(({ position }): Hover | undefined => {
   if( names !== undefined ){
     for (var i = 0; i < names.length; i++) {
       if (names[i].line === position.line
@@ -177,8 +174,5 @@ connection.onHover(({ textDocument, position }): Hover | undefined => {
   //};
 });
 
-function fromUri(document: { uri: string; }) {
-  return Files.uriToFilePath(document.uri);
-}
 
 

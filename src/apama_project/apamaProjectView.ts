@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { window, commands, Disposable, workspace } from 'vscode';
+import { commands } from 'vscode';
 import { BundleItem } from './BundleItem';
 import { ApamaProject } from './apamaProject';
 import { runApamaProject } from './runApamaProject';
@@ -9,33 +9,27 @@ export class PopulateProjects implements vscode.TreeDataProvider<string|BundleIt
 	private _onDidChangeTreeData: vscode.EventEmitter<BundleItem | ApamaProject | undefined> = new vscode.EventEmitter<BundleItem | ApamaProject | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<BundleItem | ApamaProject | undefined> = this._onDidChangeTreeData.event;
 
-	//private textDocuments: vscode.TextDocument[] = [];
-	//we want to have a list of top level nodes (projects)
-	private projects: ApamaProject[] = [];
 
-	private treeView: vscode.TreeView<{}>;
 
 	private fsWatcher : vscode.FileSystemWatcher;
 	private delWatcher : vscode.FileSystemWatcher;
 
 	constructor(private workspaceRoot: string, private context?: vscode.ExtensionContext) {
-		let subscriptions: Disposable[] = [];
 
 		this.registerCommands();
 
 		this.fsWatcher = vscode.workspace.createFileSystemWatcher("**/*.project");
 		this.delWatcher = vscode.workspace.createFileSystemWatcher("**/*"); //if you delete a directory it will not trigger all contents
 
-		this.fsWatcher.onDidCreate((item) => {
+		this.fsWatcher.onDidCreate(() => {
 			this.refresh();
 		 });
 		 this.delWatcher.onDidDelete(() => {
 			this.refresh();
 		 });
-		 this.fsWatcher.onDidChange((item) => {
+		 this.fsWatcher.onDidChange(() => {
 			this.refresh();
 		 });
-		this.treeView = vscode.window.createTreeView('apamaProjects', { treeDataProvider: this });
 	}
 
 	registerCommands(): void {
@@ -61,7 +55,7 @@ export class PopulateProjects implements vscode.TreeDataProvider<string|BundleIt
 									.catch((err: string[]) => {
 										vscode.window.showErrorMessage(`${err}`);
 									});
-								}
+								} 
 						});
 				}),
 
