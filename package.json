@@ -33,7 +33,7 @@
       {
         "language": "epl",
         "scopeName": "source.epl",
-        "path": "./syntaxes/epl.tmLanguage.json"
+        "path": "./src/syntaxes/epl.tmLanguage.json"
       }
     ],
     "snippets": [
