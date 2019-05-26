@@ -1,32 +1,29 @@
 {
-  "name": "apama-extensions",
-  "displayName": "Apama Extensions",
-  "description": "EPL language support for Apama",
-  "version": "0.0.10",
-  "publisher": "CaribouJohn",
-  "repository": {
-    "url": "https://github.com/CaribouJohn/vscode-apama-extensions"
-  },
+  "name": "apama-language-server",
+  "displayName": "apama-language-server",
+  "description": "A language server for EPL applications",
+  "version": "0.0.1",
   "engines": {
-    "vscode": "^1.24.0"
+    "vscode": "^1.32.0"
   },
   "categories": [
-    "Programming Languages"
+    "Other"
   ],
-  "main": "./out/extension",
+  "activationEvents": [
+    "onView:apamaProjectBundles",
+    "onLanguage:epl",
+    "onLanguage:yaml"
+  ],
+  "main": "./out/extension.js",
   "contributes": {
     "languages": [
       {
         "id": "epl",
-        "aliases": [
-          "epl",
-          "epl"
-        ],
         "extensions": [
           ".mon",
+          ".epl",
           ".evt"
-        ],
-        "configuration": "./language-configuration.json"
+        ]
       }
     ],
     "grammars": [
@@ -39,9 +36,113 @@
     "snippets": [
       {
         "language": "epl",
-        "path": "./snippets/epl.jsonc"
+        "path": "./src/snippets/epl.jsonc"
       }
     ],
+    "commands": [
+      {
+        "command": "extension.apamaProjects.apamaToolCreateProject",
+        "title": "Create Project",
+        "icon": {
+          "light": "resources/light/folder.svg",
+          "dark": "resources/dark/folder.svg"
+        }
+      },
+      {
+        "command": "extension.apamaProjects.apamaToolDeployProject",
+        "title": "Deploy Project",
+        "icon": {
+          "light": "resources/light/boolean.svg",
+          "dark": "resources/dark/boolean.svg"
+        }
+      },
+      {
+        "command": "extension.apamaProjects.refresh",
+        "title": "Refresh",
+        "icon": {
+          "light": "resources/light/refresh.svg",
+          "dark": "resources/dark/refresh.svg"
+        }
+      },
+      {
+        "command": "extension.apamaProjects.apamaToolAddBundles",
+        "title": "Add Bundle",
+        "icon": {
+          "light": "resources/light/add.svg",
+          "dark": "resources/dark/add.svg"
+        }
+      },
+      {
+        "command": "extension.apamaProjects.apamaToolRemoveBundle",
+        "title": "Remove Bundle",
+        "icon": {
+          "light": "resources/action-close.svg",
+          "dark": "resources/action-close-dark.svg"
+        }
+      },
+      {
+        "command": "extension.apamaProjects.close",
+        "title": "Close",
+        "icon": {
+          "light": "resources/action-close.svg",
+          "dark": "resources/action-close-dark.svg"
+        }
+      },
+      {
+        "command": "extension.apamaProjects.closeGroup",
+        "title": "Close Group",
+        "icon": {
+          "light": "resources/closeall.svg",
+          "dark": "resources/closeall_inverse.svg"
+        }
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "when": "explorerResourceIsFolder",
+          "command": "extension.apamaProjects.apamaToolCreateProject",
+          "group": "Create@1"
+        }
+      ],
+      "view/title": [
+        {
+          "when": "view == apamaProjects",
+          "command": "extension.apamaProjects.apamaToolCreateProject",
+          "group": "navigation"
+        },
+        {
+          "command": "extension.apamaProjects.refresh",
+          "when": "view == apamaProjects",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "when": "view == apamaProjects && viewItem == project",
+          "command": "extension.apamaProjects.apamaToolDeployProject",
+          "group": "inline@1"
+        },
+        {
+          "when": "view == apamaProjects && viewItem == project",
+          "command": "extension.apamaProjects.apamaToolAddBundles",
+          "group": "inline@2"
+        },
+        {
+          "when": "view == apamaProjects && viewItem == bundle",
+          "command": "extension.apamaProjects.apamaToolRemoveBundle",
+          "group": "inline"
+        }
+      ]
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "apamaProjects",
+          "name": "Apama Projects"
+        }
+      ]
+    },
     "configuration": {
       "type": "object",
       "title": "Apama configuration",
@@ -53,6 +154,21 @@
           ],
           "default": null,
           "description": "The Apama install directory."
+        },
+        "eplLanguageServer.maxNumberOfProblems": {
+          "type": "number",
+          "default": 100,
+          "description": "Controls the maximum number of problems produced by the server."
+        },
+        "eplLanguageServer.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VSCode and the eplLanguageServer service."
         }
       }
     },
@@ -98,25 +214,27 @@
     "postinstall": "node ./node_modules/vscode/bin/install",
     "test": "npm run compile && node ./node_modules/vscode/bin/test"
   },
+  "devDependencies": {
+    "typescript": "^3.3.1",
+    "vscode": "^1.1.28",
+    "tslint": "^5.12.1",
+    "@types/node": "^10.12.21",
+    "@types/mocha": "^2.2.42"
+  },
   "dependencies": {
-    "request": "^2.88.0",
-    "request-promise-native": "^1.0.5",
-    "vscode-debugadapter": "^1.32.1",
-    "vscode-debugprotocol": "^1.32.0",
+    "@types/glob": "^7.1.1",
+    "@types/js-yaml": "^3.12.0",
+    "@types/request": "^2.48.1",
+    "@types/request-promise-native": "^1.0.16",
+    "@types/xmldom": "^0.1.29",
+    "glob": "^7.1.3",
+    "js-yaml": "^3.13.1",
+    "jsonschema": "^1.2.4",
+    "request-promise-native": "^1.0.7",
+    "vscode-debugadapter": "^1.34.0",
+    "vscode-languageclient": "^5.2.1",
+    "vscode-languageserver": "^5.3.0-next.1",
     "xmldom": "^0.1.27",
     "xpath": "0.0.27"
-  },
-  "devDependencies": {
-    "@types/mocha": "^2.2.42",
-    "@types/node": "^7.10.2",
-    "@types/request-promise-native": "^1.0.15",
-    "@types/xmldom": "^0.1.29",
-    "tslint": "^5.11.0",
-    "typescript": "^2.9.2",
-    "vscode": "^1.1.22"
-  },
-  "activationEvents": [
-    "onDebug",
-    "onLanguage:epl"
-  ]
+  }
 }

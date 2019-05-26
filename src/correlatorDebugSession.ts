@@ -187,7 +187,7 @@ export class CorrelatorDebugSession extends DebugSession {
 				new Scope("Local", this.createVariablesRef(args.frameId, 'local')),
 				new Scope("Monitor", this.createVariablesRef(args.frameId, 'monitor'))
 			] 
-		}
+		};
 		this.sendResponse(response);		
 	}
 
@@ -279,7 +279,7 @@ export class CorrelatorDebugSession extends DebugSession {
 		return {
 			contextid,
 			frameidx
-		}
+		};
 	}
 
 	private createVariablesRef(frameId: number, variableType: 'monitor' | 'local'): number {

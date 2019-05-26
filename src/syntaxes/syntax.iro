@@ -1,0 +1,297 @@
+name = epl
+file_extensions[] = epl,mon,evt;
+
+__id = "([a-zA-Z][0-9a-zA-Z]*(?:_[0-9a-zA-Z]+)*)"; 
+__number = "[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?([df])?";
+__constants = "true|false|INFO|DEBUG|WARN|ERROR";
+__types = "(decimal|float|integer|string|boolean|any|listener|channel|context)"; 
+__container_types = "(sequence|optional|dictionary|stream)";
+__keywords = "(import|rstream|from|in|partition|retain|group|by|having|or|and|xor|not|select|constant|as|at|if|then|else|spawn|emit|route|enqueue|send|to|print|log|die|while|do|return|break|continue|for|try|catch|ifpresent|switch|case|default|throw|new|on|all|wait)"; 
+
+contexts[] {
+   
+   
+   main : context {
+      : include "using";
+      : include "event";
+      : include "monitor";
+      : include "comments";
+   }
+
+   using : context {
+      : pattern {
+         regex \= (using|package)(\s+)([a-zA-Z]+[.a-zA-Z]*)(;)
+         styles[] = .keyword, .ws,  .identifier , .body;
+      }
+   }
+   
+   punctuation : context {
+      : pattern {
+         regex \= (\+|\-|\*|=|,|>|<|;)
+         styles[] = .punctuation;
+      }
+   }
+
+   constants : context {
+      : pattern {
+         regex \= (\b)($${__constants})(\b)
+         styles[] = .constants;
+      }
+   }
+
+   numeric : context {
+      : pattern {
+         regex \= (\b)($${__number})(\b)
+         styles[] = .numeric;
+      }
+   }
+
+   keywords : context {
+      : pattern {
+         regex \= (\b)$${__keywords}(\b)
+         styles[] = .keyword;
+      }
+   }
+
+   types : context {
+      : pattern {
+         regex \= (\b)$${__types}(\b)
+         styles[] = .ws,.type, .ws;
+      }
+   }
+
+   containertypes : context {
+      : pattern {
+         regex \= $${__container_types}
+         styles[] = .type;
+      }
+      : inline_push {
+         regex         \= (\<)
+         styles []      = .punctuation;
+         : pop {
+            regex      \= (\>)
+            styles []   = .punctuation;
+         }
+         : include "containertypes";
+         : pattern {
+            regex \= $${__types}
+            styles[] = .type;
+         }      
+      }
+   }
+
+
+   comments : context {
+        : pattern {
+            regex         \= (//.*)
+            styles[]       = .comment;
+        }
+        : inline_push {
+            regex         \= (/\*)
+            styles []      = .comment;
+            default_style  = .comment
+            : pop {
+               regex      \= (.*?\*/)
+               styles []   = .comment;
+            }
+         }
+   }   
+   
+   string : context {
+      : push {
+         regex         \= (")
+         styles []      = .punctuation;
+         context []     = inside_quotes;
+      }
+   }
+
+   inside_quotes : context {
+      : pop {
+         regex      \= (")
+         styles []   = .punctuation;
+      }
+      : pattern {
+         regex      \= (\\(?:\\|"))
+         styles [] = .escaped_text;
+      }
+      : pattern {
+         regex      \= ([^"\\]+)
+         styles [] = .quoted_text;
+      }
+   }
+    
+    
+   assignment : context {
+      : pattern {
+         regex \= $${__id}(\s?)(\:=)
+         styles []   = .identifier, .ws, .punctuation;
+      }
+   }
+
+   method : context {
+      : push {
+         regex         \= \b(\.)$${__id}(\s?)(\()
+         styles []      = .punctuation, .identifier, .ws, .parameters;
+         context []     = parameters;
+      }
+  }
+
+   member : context {
+      : pattern {
+         regex         \= \b(\.)$${__id}\b
+         styles []      = .punctuation, .identifier;
+      }
+  }
+
+   bareVariable : context {
+      : pattern {
+         regex         \= \b$${__id}\b
+         styles []      =  .identifier;
+      }
+  }
+
+   array : context {
+      : push {
+         regex         \= (\[)
+         styles []      = .punctuation;
+         context []     = inside_array;
+      }
+  }
+  
+   inside_array : context {
+      : pop {
+         regex      \= (\])
+         styles []   = .punctuation;
+      }
+      : include "string";
+      : include "punctuation";
+      : include "constants";
+      : include "numeric";
+   }
+
+   event : context {
+      : pattern {
+         regex \= (event)(\s+)$${__id}
+         styles[] = .keyword, .ws, .identifier;
+      }
+      : push {
+         regex \= (\{)
+         styles[] = .body;
+         context[] = body;
+      }
+   }
+
+   action : context {
+      : pattern {
+         regex \= (action)(\s+)$${__id}
+         styles[] = .keyword, .ws, .identifier;
+      }
+      : push {
+         regex \= (\()
+         styles[] = .parameters;
+         context[] = parameters;
+      }
+      : push {
+         regex \= (\{)
+         styles[] = .body;
+         context[] = body;
+      }
+   }
+
+   monitor : context {
+      : pattern {
+         regex \= (monitor)(\s+)$${__id}(\s?)
+         styles[] = .keyword, .ws, .identifier,.ws;
+      }
+      : push {
+         regex \= (\{)
+         styles[] = .body;
+         context[] = body;
+      }
+   }
+
+   body : context {
+      : pop {
+         regex \= (})
+         styles[] = .body;
+      }
+      : include "keywords";
+      : include "comments";
+      : include "string";
+      : include "assignment";
+      : include "punctuation";
+      : include "constants";
+      : include "types";
+      : include "containertypes";
+      : include "action";
+      : include "method";
+      : include "numeric";
+  }
+
+   parameters : context {
+      : pop {
+         regex \= (\))
+         styles[] = .parameters;
+      }
+      : include "types";
+      : include "containertypes";
+      : include "punctuation";
+      : include "string";
+      : include "numeric";
+      : include "constants";
+      : include "member";
+      : include "bareVariable";
+  }
+  
+}
+
+
+styles[] {
+   .body : style { 
+      color = green 
+   }
+   .parameters : style { 
+      color = green 
+      textmate_scope  = variable.parameter
+   }
+   .ws : style { 
+      color = green 
+   }
+   .keyword : style { 
+      color = red 
+      textmate_scope  = keyword
+   }
+   .identifier : style { 
+      color = yellow 
+      textmate_scope  = variable
+   }
+   .numeric : style { 
+      color = yellow 
+      textmate_scope  = constant.numeric
+   }
+   .constants : style { 
+      color = yellow 
+      textmate_scope  = constant
+   }
+   .type : style { 
+      color = blue
+      textmate_scope  = entity.name.type
+   }
+   .punctuation : style {
+      color = orange
+      textmate_scope  = punctuation
+   }
+   .quoted_text : style {
+       color = light_yellow
+       textmate_scope  = string
+   }
+   .escaped_text : style {
+       color = light_yellow
+       textmate_scope  = string
+   }
+   .comment    : style {
+       color = light_green
+       textmate_scope  = comment
+   }
+}
+

@@ -1,113 +1,69 @@
-'use strict';
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
-import { WorkspaceFolder, DebugConfiguration, ProviderResult, CancellationToken } from 'vscode';
-import * as Net from 'net';
-import { CorrelatorDebugSession, normalizeCorrelatorFilePath } from './correlatorDebugSession';
-import { platform } from 'os';
-import { execFileSync } from 'child_process';
+"use_strict";
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
-    const provider = new ApamaConfigurationProvider();
-    context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('apama', provider));
+import * as path from 'path';
+
+import { Disposable, ExtensionContext, workspace, debug } from 'vscode';
+import {
+	LanguageClient, LanguageClientOptions, ServerOptions,
+	TransportKind, ForkOptions
+} from 'vscode-languageclient';
+
+import {ApamaConfigurationProvider} from './apamaconfig';
+
+
+
+
+//
+// client activation function, this is the entrypoint for the client
+//
+export function activate(context: ExtensionContext): void {
+	console.log('Started EPL language server');
+
+	let commands: Disposable[] = [];
+
+	// this is the code for the side bar apama-project parts.
+	if (workspace.rootPath !== undefined) {
+		const provider = new ApamaConfigurationProvider();
+    context.subscriptions.push(debug.registerDebugConfigurationProvider('apama', provider));
     context.subscriptions.push(provider);
+
+	}
+
+
+	// The server is implemented in server.ts - built when this is built
+	let serverModule: string = context.asAbsolutePath(path.join('out', 'server.js'));
+	// The debug options for the server
+	let debugOptions: ForkOptions = { execArgv: ["--nolazy", "--inspect=6009"] };
+
+	// If the extension is launched in debug mode then the debug server options are used
+	// Otherwise the  normal ones are used
+	let serverOptions: ServerOptions = {
+		run: { module: serverModule, transport: TransportKind.ipc },
+		debug: { module: serverModule, transport: TransportKind.ipc, options: debugOptions }
+	};
+
+	// Options of the language client
+	let clientOptions: LanguageClientOptions = {
+		// Activate the server for epl files
+		documentSelector: ['epl', 'yaml'],
+		synchronize: {
+			// Synchronize the section 'eplLanguageServer' of the settings to the server
+			configurationSection: 'eplLanguageServer',
+			// Notify the server about file changes to epl files contained in the workspace
+			// need to think about this
+			// fileEvents: workspace.createFileSystemWatcher('**/.epl')
+		}
+	};
+
+	// Create the language client and start the client.
+	let langServer: Disposable = new LanguageClient('eplLanguageServer', 'Language Server', serverOptions, clientOptions).start();
+
+	// Push the disposable to the context's subscriptions so that the 
+	// client can be deactivated on extension deactivation
+	commands.forEach(command => context.subscriptions.push(command));
+	context.subscriptions.push(langServer);
 }
+
 
 // this method is called when your extension is deactivated
-export function deactivate() {
-}
-
-class ApamaConfigurationProvider implements vscode.DebugConfigurationProvider {
-
-	private _server?: Net.Server;
-
-    /**
-     *  Return an initial debug configuration
-     */
-    provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
-        return [ {
-            type: "apama",
-            name: "Debug Apama Application",
-            request: "launch",
-            correlator: {
-                port: 15903,
-                args: ["-g"]
-            }
-        }];
-    }
-
-	/**
-	 * Add all missing config setting just before launch
-	 */
-	resolveDebugConfiguration(folder: WorkspaceFolder | undefined, config: DebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration> {
-        // Can't continue if there's no workspace
-        if (!folder) {
-            return undefined;
-        }
-
-        // If an empty config has been provided (because there's no existing launch.json) then we can delegate to provideDebugConfigurations by returning
-        if (Object.keys(config).length === 0) {
-            return config;
-        }
-
-        // Set + save the apamaHome path if it isn't already set in global or workspace settings
-        // It can be overwritten/moved to the workspace settings by the user
-        if (!config.apamaHome) {
-            const workspaceConfig = vscode.workspace.getConfiguration('apama');
-            if (!workspaceConfig.apamaHome) {
-                if (platform() === 'win32') {
-                    config.apamaHome = 'C:/SoftwareAG/Apama';
-                } else {
-                    config.apamaHome = '/opt/softwareag/Apama';
-                }
-                
-                workspaceConfig.update('apamaHome', config.apamaHome, true);
-            } else {
-                config.apamaHome = workspaceConfig.apamaHome;
-            }
-        }
-
-        config = Object.assign({
-            injectionList: getInjectionList(config.apamaHome, folder.uri.fsPath),
-            correlator: { /* Defaulted below */ }
-        }, config);
-
-        config.correlator = Object.assign({
-            host: "localhost",
-            port: 15903,
-            args: ["-g"]
-        }, config.correlator);
-
-        config.correlator.port = Math.floor(config.correlator.port);
-
-        if (!this._server) {
-            this._server = Net.createServer(socket => {
-                const session = new CorrelatorDebugSession(config.apamaHome, config.correlator);
-                session.setRunAsServer(true);
-                session.start(<NodeJS.ReadableStream>socket, socket);
-            }).listen(0);
-        }
-
-        config.debugServer = this._server.address().port;
-
-		return config;
-	}
-
-	dispose() {
-		if (this._server) {
-			this._server.close();
-		}
-	}
-}
-
-function getInjectionList(apamaHome: string, workspaceFolderPath: string) {
-    return execFileSync(apamaHome + '/bin/engine_deploy', ['--outputList', 'stdout', workspaceFolderPath], {
-            encoding: 'utf8'
-        })
-        .split(/\r?\n/)
-        .filter(fileName => fileName !== '')
-        .map(normalizeCorrelatorFilePath);
-}
+export function deactivate() { }
