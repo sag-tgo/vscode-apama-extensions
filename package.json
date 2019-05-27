@@ -12,7 +12,8 @@
   "activationEvents": [
     "onView:apamaProjectBundles",
     "onLanguage:epl",
-    "onLanguage:yaml"
+    "onLanguage:yaml",
+    "onDebug"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -23,7 +24,8 @@
           ".mon",
           ".epl",
           ".evt"
-        ]
+        ],
+        "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
@@ -36,7 +38,7 @@
     "snippets": [
       {
         "language": "epl",
-        "path": "./src/snippets/epl.jsonc"
+        "path": "./src/snippets/epl.json"
       }
     ],
     "commands": [

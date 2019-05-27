@@ -7,8 +7,7 @@
 import {
   IPCMessageReader, IPCMessageWriter,
   createConnection, IConnection, TextDocuments, TextDocument, InitializeResult, TextDocumentPositionParams,
-  CompletionItem, CompletionItemKind,
-  Hover} from 'vscode-languageserver';
+  CompletionItem, CompletionItemKind} from 'vscode-languageserver';
 
 import { validateYamlConfig } from './yamlValidation/validateYamlConfig';
 import { EPLBuddy } from './eplbuddy/EPLBuddy';
@@ -59,12 +58,12 @@ connection.onInitialize((): InitializeResult => {
     capabilities: {
       // Tell the client that the server works in FULL text document sync mode
       textDocumentSync: documents.syncKind,
-      // Tell the client that the server support code complete
-      completionProvider: {
-        resolveProvider: true,
-        "triggerCharacters": ['=',"."]
-      },
-      hoverProvider: true
+            // Tell the client that the server support code complete
+            // completionProvider: {
+            //   resolveProvider: true,
+            //   "triggerCharacters": ['=',"."]
+            // },
+            // hoverProvider: false
     }
   };
 });
@@ -90,11 +89,13 @@ documents.onDidChangeContent((change) => {
   }
 });
 
-let names: Array<any>;
+//let names: Array<any>;
+
+
 
 connection.onCompletion((textDocumentPosition: TextDocumentPositionParams): Promise<Array<CompletionItem> >  => {
   if ( maxNumberOfProblems <= 0 ) {
-    console.log('hello');
+    console.log("hello");
   }
 	return new Promise<Array<CompletionItem> >((resolve) => {
 		let textDoc: TextDocument | undefined = documents.get(textDocumentPosition.textDocument.uri);
@@ -141,38 +142,38 @@ connection.onCompletion((textDocumentPosition: TextDocumentPositionParams): Prom
 	});
 });
 
-connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
-  if (item.data.startsWith("Completion")) {
-    item.detail = 'Example 1';
-    item.documentation = 'http://www.graphviz.org/doc/info/colors.html';
-  }
+// connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
+//   if (item.data.startsWith("Completion")) {
+//     item.detail = 'Example 1';
+//     item.documentation = 'http://www.graphviz.org/doc/info/colors.html';
+//   }
 
-  if (item.data.startsWith('Item')) {
-    item.detail = 'Example 2';
-    item.documentation = 'http://www.graphviz.org/doc/info/shapes.html';
-  }
+//   if (item.data.startsWith('Item')) {
+//     item.detail = 'Example 2';
+//     item.documentation = 'http://www.graphviz.org/doc/info/shapes.html';
+//   }
 
-  return item;
-});
+//   return item;
+// });
 
-connection.onHover(({ position }): Hover | undefined => {
-  if( names !== undefined ){
-    for (var i = 0; i < names.length; i++) {
-      if (names[i].line === position.line
-        && (names[i].start <= position.character && names[i].end >= position.character)) {
-        // we return an answer only if we find something
-        // otherwise no hover information is given
-        return {
-          contents: names[i].text
-        };
-      }
-    }
-  }
-  //disabled example hover because I want to see validation errors shown.
-  //return {
-  //  contents: "Example Hover"
-  //};
-});
+// connection.onHover(({ position }): Hover | undefined => {
+//   if( names !== undefined ){
+//     for (var i = 0; i < names.length; i++) {
+//       if (names[i].line === position.line
+//         && (names[i].start <= position.character && names[i].end >= position.character)) {
+//         // we return an answer only if we find something
+//         // otherwise no hover information is given
+//         return {
+//           contents: names[i].text
+//         };
+//       }
+//     }
+//   }
+//   //disabled example hover because I want to see validation errors shown.
+//   //return {
+//   //  contents: "Example Hover"
+//   //};
+// });
 
 
 

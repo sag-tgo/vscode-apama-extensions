@@ -2,10 +2,6 @@
 	"Monitor Declaration": {
 		"prefix": "monitor",
 		"body": [
-			// Monitor names usually match the filename, except:
-			// - Must start with a letter
-			// - Can't contain spaces
-			// - Generally PascalCase rather than kebab-case or snake_case
 			"/**",
 			" * ${3:This monitor is responsible for...}",
 			" */",
@@ -20,10 +16,6 @@
 	"Event Declaration": {
 		"prefix": "event",
 		"body": [
-			// Event names often match the filename, except:
-			// - Must start with a letter
-			// - Can't contain spaces
-			// - Generally PascalCase rather than kebab-case or snake_case
 			"event ${1:${TM_FILENAME_BASE/(?:^[\\W\\d_]*|\\s|-|_)+(.)/${1:/upcase}/g}} {",
 				"\t${2:string stringField;}",
 			"}"
