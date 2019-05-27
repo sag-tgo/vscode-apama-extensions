@@ -9,9 +9,10 @@ import {
 } from 'vscode-languageclient';
 
 import {ApamaConfigurationProvider} from './apamaconfig';
+import { PopulateProjects } from './apama_project/apamaProjectView';
 
 
-
+let placeholder: PopulateProjects;
 
 //
 // client activation function, this is the entrypoint for the client
@@ -23,10 +24,12 @@ export function activate(context: ExtensionContext): void {
 
 	// this is the code for the side bar apama-project parts.
 	if (workspace.rootPath !== undefined) {
-		const provider = new ApamaConfigurationProvider();
-    context.subscriptions.push(debug.registerDebugConfigurationProvider('apama', provider));
-    context.subscriptions.push(provider);
 
+		console.log('Starting EPL language server');
+		placeholder = new PopulateProjects(workspace.rootPath,context);
+		const provider = new ApamaConfigurationProvider();
+		context.subscriptions.push(debug.registerDebugConfigurationProvider('apama', provider));
+    context.subscriptions.push(provider);
 	}
 
 
