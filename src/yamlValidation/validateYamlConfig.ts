@@ -14,7 +14,7 @@ export function validateYamlConfig(textDocument: TextDocument): void {
     //this is for diagnostic purposes while I code...
     //for the time being
     //last test 
-    //console.log(result);
+    //logger.appendLine(result);
     if (result.errors.length > 0) {
       result.errors.forEach((value: jsonschema.ValidationError, index: number) => {
         diagnostics.push({
@@ -30,8 +30,8 @@ export function validateYamlConfig(textDocument: TextDocument): void {
     }
   }
   catch (error) {
-    //console.log(error.mark.line);
-    //console.log(error.mark.column);
+    //logger.appendLine(error.mark.line);
+    //logger.appendLine(error.mark.column);
     let item = {
       severity: DiagnosticSeverity.Error,
       range: {

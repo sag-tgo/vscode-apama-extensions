@@ -11,7 +11,7 @@ export function runApamaProject(command: string, workingDir: string): Promise<st
 				return;
 			}
 			//whole output is a list of bundles we can add :
-			//console.log( stdout );
+			//logger.appendLine( stdout );
 			let lines: string[] = stdout.split(/\r?\n/);
 			for (let index = 0; index < lines.length; index++) {
 				const element = lines[index];

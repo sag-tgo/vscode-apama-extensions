@@ -9,15 +9,16 @@
             "problemMatcher": [
                 "$tsc-watch"
             ],
-            "isBackground": true
-        },
-        {
-            "type": "npm",
-            "script": "install",
+            "isBackground": true,
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "type": "npm",
+            "script": "install",
+            "group": "build"
         }
     ]
 }

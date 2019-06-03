@@ -1,12 +1,13 @@
 import { BundleItem } from './BundleItem';
-import * as vscode from 'vscode';
+import { OutputChannel, TreeItem, TreeItemCollapsibleState, Command } from 'vscode';
 
-export class ApamaProject extends vscode.TreeItem {
+export class ApamaProject extends TreeItem {
 	constructor(
+		private logger:OutputChannel,
     public readonly label: string,
-    public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+    public readonly collapsibleState: TreeItemCollapsibleState,
     public readonly fspath: string,
-    public readonly command?: vscode.Command
+    public readonly command?: Command
     ) {
 		super(label, collapsibleState);
 	}

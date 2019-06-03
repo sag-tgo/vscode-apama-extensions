@@ -1,10 +1,10 @@
-import * as vscode from 'vscode';
 import * as path from 'path';
 import {ApamaProject} from './apamaProject';
+import { OutputChannel, TreeItemCollapsibleState, TreeItem, Command } from 'vscode';
 
-export class BundleItem extends vscode.TreeItem {
+export class BundleItem extends TreeItem {
 	constructor(public readonly projectPath: string, public project : ApamaProject) {
-		super(projectPath, vscode.TreeItemCollapsibleState.None);
+		super(projectPath, TreeItemCollapsibleState.None);
 		this.label = path.basename(this.projectPath);
 		this.dirname = path.dirname(this.projectPath);
 	}
@@ -12,7 +12,7 @@ export class BundleItem extends vscode.TreeItem {
 	label: string = '';
 	dirname: string = '';
 	ext: string = '';
-	get command(): vscode.Command {
+	get command(): Command {
 		return {
 			command: 'extension.apamaProjects.SelectItem',
 			title: '',
@@ -22,7 +22,7 @@ export class BundleItem extends vscode.TreeItem {
 	close(): void {
 		(async () => {
 			await console.log(this.projectPath);
-			//vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+			//commands.executeCommand('workbench.action.closeActiveEditor');
 		})();
 	}
 }

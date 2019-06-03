@@ -1,6 +1,7 @@
 import * as requestPromise from 'request-promise-native';
 import { DOMParser } from 'xmldom';
 import * as xpath from 'xpath';
+import { OutputChannel } from 'vscode';
 
 export interface CorrelatorBreakpoint {
     filename: string;
@@ -53,7 +54,7 @@ export interface CorrelatorVariable {
 
 export class CorrelatorHttpInterface {
     private url: string;
-    constructor(host: string, port: number) {
+    constructor(private logger:OutputChannel, host: string, port: number) {
         this.url = `http://${host}:${port}`;
     }
 

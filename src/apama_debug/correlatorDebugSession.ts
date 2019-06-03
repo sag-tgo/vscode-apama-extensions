@@ -15,6 +15,7 @@ import { DebugProtocol } from 'vscode-debugprotocol';
 import { CorrelatorCommandLineInterface, CorrelatorConfig } from './correlatorCommandLineInterface';
 import { CorrelatorHttpInterface, CorrelatorBreakpoint, CorrelatorPaused } from './correlatorHttpInterface';
 import { basename } from 'path';
+import { OutputChannel } from 'vscode';
 
 const MAX_STACK_SIZE = 1000;
 
@@ -36,10 +37,10 @@ export class CorrelatorDebugSession extends DebugSession {
 	private correlatorCmd: CorrelatorCommandLineInterface;
 	private correlatorHttp: CorrelatorHttpInterface;
 
-	public constructor(apamaHome: string, config: CorrelatorConfig) {
+	public constructor(private logger:OutputChannel, apamaHome: string, config: CorrelatorConfig) {
 		super();
-		this.correlatorCmd = new CorrelatorCommandLineInterface(apamaHome, config);
-		this.correlatorHttp = new CorrelatorHttpInterface(config.host, config.port);
+		this.correlatorCmd = new CorrelatorCommandLineInterface(logger, apamaHome, config);
+		this.correlatorHttp = new CorrelatorHttpInterface(logger,config.host, config.port);
 	}
 
 	/**
@@ -47,7 +48,7 @@ export class CorrelatorDebugSession extends DebugSession {
 	 * to interrogate the features the debug adapter provides.
 	 */
 	protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
-        console.log("Initialize called");
+        this.logger.appendLine("Initialize called");
 
 		if (!response.body) {
 			response.body = {};
@@ -70,7 +71,7 @@ export class CorrelatorDebugSession extends DebugSession {
      * Frontend requested that the application be launched
      */
 	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
-        console.log("Launch requested");
+        this.logger.appendLine("Launch requested");
 
 		const correlatorProcess = this.correlatorCmd.start();
 
@@ -92,7 +93,7 @@ export class CorrelatorDebugSession extends DebugSession {
      * Frontend requested that breakpoints be set
      */
     protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
-		console.log('Breakpoints requested');
+		this.logger.appendLine('Breakpoints requested');
 		// TODO: It'll probably set the breakpoints twice in a file if a new breakpoint is added while running - so we should fix that
 		if (args.source.path) {
 			const filePath = this.convertClientPathToDebugger(args.source.path);
@@ -139,7 +140,7 @@ export class CorrelatorDebugSession extends DebugSession {
 	 * Indication that the frontend is done setting breakpoints etc
 	 */
     protected configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, args: DebugProtocol.ConfigurationDoneArguments): void {
-		console.log('Configuration done');
+		this.logger.appendLine('Configuration done');
 		this.correlatorHttp.resume()
 			.then(() => this.sendResponse(response))
 			.then(() => this.waitForCorrelatorPause());
@@ -149,12 +150,12 @@ export class CorrelatorDebugSession extends DebugSession {
 	 * Frontend requested that the application terminate
 	 */
 	protected disconnectRequest(response: DebugProtocol.DisconnectResponse, args: DebugProtocol.DisconnectArguments): void {
-		console.log("Stop requested");
+		this.logger.appendLine("Stop requested");
 		this.correlatorCmd.stop().then(() => this.sendResponse(response));
 	}
 
 	protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
-		console.log("Threads requested");
+		this.logger.appendLine("Threads requested");
 		this.correlatorHttp.getContextStatuses()
 			.then(contextStatuses => contextStatuses.map(status => new Thread(status.contextid, status.context)))
 			.then(threads => {
@@ -169,7 +170,7 @@ export class CorrelatorDebugSession extends DebugSession {
 	 * Frontend requested stacktrace
 	 */
     protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments): void {
-		console.log("Stacktrace requested");
+		this.logger.appendLine("Stacktrace requested");
 		this.correlatorHttp.getStackTrace(args.threadId)
 			.then(correlatorStackFrames => correlatorStackFrames.stackframes.map((stackframe, i) => new StackFrame(this.createFrameId(correlatorStackFrames.contextid, i), stackframe.action, this.createSource(stackframe.filename), stackframe.lineno)))
 			.then(stackFrames => {
@@ -181,7 +182,7 @@ export class CorrelatorDebugSession extends DebugSession {
 	}
 
 	protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments): void {
-		console.log("Scopes requested");
+		this.logger.appendLine("Scopes requested");
 		response.body = {
 			scopes: [
 				new Scope("Local", this.createVariablesRef(args.frameId, 'local')),
@@ -192,7 +193,7 @@ export class CorrelatorDebugSession extends DebugSession {
 	}
 
     protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments): void {
-		console.log("Variables requested");
+		this.logger.appendLine("Variables requested");
 		const { contextid, frameidx, type } = this.parseVariablesRef(args.variablesReference);
 
 		this.getVariablesForType(type, contextid, frameidx)
@@ -218,35 +219,35 @@ export class CorrelatorDebugSession extends DebugSession {
 	}
 
     protected continueRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments): void {
-		console.log("Continue requested");
+		this.logger.appendLine("Continue requested");
 		this.correlatorHttp.resume()
 			.then(() => this.sendResponse(response))
 			.then(() => this.waitForCorrelatorPause());
 	}
 
 	protected nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
-		console.log("Next requested");
+		this.logger.appendLine("Next requested");
 		this.correlatorHttp.stepOver()
 			.then(() => this.sendResponse(response))
 			.then(() => this.waitForCorrelatorPause());
 	}
 
     protected stepInRequest(response: DebugProtocol.StepInResponse, args: DebugProtocol.StepInArguments): void {
-		console.log("Step In requested");
+		this.logger.appendLine("Step In requested");
 		this.correlatorHttp.stepIn()
 			.then(() => this.sendResponse(response))
 			.then(() => this.waitForCorrelatorPause());
 	}
 
     protected stepOutRequest(response: DebugProtocol.StepOutResponse, args: DebugProtocol.StepOutArguments): void {
-		console.log("Step Out requested");
+		this.logger.appendLine("Step Out requested");
 		this.correlatorHttp.stepOut()
 			.then(() => this.sendResponse(response))
 			.then(() => this.waitForCorrelatorPause());
 	}
 
     protected setExceptionBreakPointsRequest(response: DebugProtocol.SetExceptionBreakpointsResponse, args: DebugProtocol.SetExceptionBreakpointsArguments): void {
-		console.log("Exception breakpoint requested");
+		this.logger.appendLine("Exception breakpoint requested");
 		const breakOnUncaught = args.filters.indexOf('uncaught') !== -1;
 		this.correlatorHttp.setBreakOnErrors(breakOnUncaught)
 			.then(() => this.sendResponse(response));

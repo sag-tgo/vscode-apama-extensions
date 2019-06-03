@@ -1,4 +1,4 @@
-import { WorkspaceFolder, DebugConfiguration, ProviderResult, CancellationToken, DebugConfigurationProvider, workspace } from 'vscode';
+import { WorkspaceFolder, DebugConfiguration, ProviderResult, CancellationToken, DebugConfigurationProvider, workspace, OutputChannel } from 'vscode';
 import * as Net from 'net';
 import { platform } from 'os';
 import { execFileSync } from 'child_process';
@@ -6,12 +6,17 @@ import { CorrelatorDebugSession, normalizeCorrelatorFilePath } from './correlato
 
 export class ApamaConfigurationProvider implements DebugConfigurationProvider {
 
-	private _server?: Net.Server;
+    private _server?: Net.Server;
+    
+    constructor( private logger:OutputChannel ) {
+        
+    }
 
     /**
      *  Return an initial debug configuration
      */
     provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
+        this.logger.appendLine("provideDebugConfigurations");
         return [ {
             type: "apama",
             name: "Debug Apama Application",
@@ -27,13 +32,16 @@ export class ApamaConfigurationProvider implements DebugConfigurationProvider {
 	 * Add all missing config setting just before launch
 	 */
 	resolveDebugConfiguration(folder: WorkspaceFolder | undefined, config: DebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration> {
+        this.logger.appendLine("resolveDebugConfiguration");
         // Can't continue if there's no workspace
         if (!folder) {
+            this.logger.appendLine("no folder");
             return undefined;
         }
 
         // If an empty config has been provided (because there's no existing launch.json) then we can delegate to provideDebugConfigurations by returning
         if (Object.keys(config).length === 0) {
+            this.logger.appendLine("empty config");
             return config;
         }
 
@@ -67,17 +75,21 @@ export class ApamaConfigurationProvider implements DebugConfigurationProvider {
 
         config.correlator.port = Math.floor(config.correlator.port);
 
+
         if (!this._server) {
+            this.logger.appendLine("starting server");
             this._server = Net.createServer(socket => {
-                const session = new CorrelatorDebugSession(config.apamaHome, config.correlator);
+                const session = new CorrelatorDebugSession(this.logger,config.apamaHome, config.correlator);
                 session.setRunAsServer(true);
                 session.start(<NodeJS.ReadableStream>socket, socket);
             }).listen(0);
         }
 
-        //config.debugServer = this._server.address().port;
-        config.debugServer = this._server.address();
+        config.debugServer = (<Net.AddressInfo>this._server.address()).port;
+        //config.debugServer = this._server.address();
 
+        this.logger.appendLine("config - ");
+        this.logger.appendLine( JSON.stringify(config));
 		return config;
 	}
 

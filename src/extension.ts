@@ -2,32 +2,33 @@
 
 import * as path from 'path';
 
-import { Disposable, ExtensionContext, workspace, debug } from 'vscode';
+import { Disposable, ExtensionContext, workspace, debug, OutputChannel, window } from 'vscode';
 import {
 	LanguageClient, LanguageClientOptions, ServerOptions,
 	TransportKind, ForkOptions
 } from 'vscode-languageclient';
 
-import {ApamaConfigurationProvider} from './apamaconfig';
+import {ApamaConfigurationProvider} from './apama_debug/apamaconfig';
 import { PopulateProjects } from './apama_project/apamaProjectView';
 
 
 let placeholder: PopulateProjects;
-
+let logger:OutputChannel; 
 //
 // client activation function, this is the entrypoint for the client
 //
 export function activate(context: ExtensionContext): void {
-	console.log('Started EPL language server');
-
 	let commands: Disposable[] = [];
+	logger = window.createOutputChannel('Apama Extension');
+	logger.show();
+	logger.appendLine('Started EPL language server');
 
 	// this is the code for the side bar apama-project parts.
 	if (workspace.rootPath !== undefined) {
 
-		console.log('Starting EPL language server');
-		placeholder = new PopulateProjects(workspace.rootPath,context);
-		const provider = new ApamaConfigurationProvider();
+		logger.appendLine('Starting EPL language server');
+		placeholder = new PopulateProjects(logger,workspace.rootPath,context);
+		const provider = new ApamaConfigurationProvider(logger);
 		context.subscriptions.push(debug.registerDebugConfigurationProvider('apama', provider));
     context.subscriptions.push(provider);
 	}

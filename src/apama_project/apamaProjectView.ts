@@ -1,151 +1,152 @@
 import * as path from 'path';
-import * as vscode from 'vscode';
-import { window, commands, Disposable, workspace } from 'vscode';
+import { window, commands, Disposable, workspace, OutputChannel, TreeDataProvider, EventEmitter, Event, TreeView, FileSystemWatcher, ExtensionContext, QuickPickItem, TextDocument, Uri, TreeItemCollapsibleState, TreeItem } from 'vscode';
 import { BundleItem } from './BundleItem';
 import { ApamaProject } from './apamaProject';
 import { runApamaProject } from './runApamaProject';
 
-export class PopulateProjects implements vscode.TreeDataProvider<string|BundleItem|ApamaProject> {
-	private _onDidChangeTreeData: vscode.EventEmitter<BundleItem | ApamaProject | undefined> = new vscode.EventEmitter<BundleItem | ApamaProject | undefined>();
-	readonly onDidChangeTreeData: vscode.Event<BundleItem | ApamaProject | undefined> = this._onDidChangeTreeData.event;
+export class PopulateProjects implements TreeDataProvider<string | BundleItem | ApamaProject> {
+	private _onDidChangeTreeData: EventEmitter<BundleItem | ApamaProject | undefined> = new EventEmitter<BundleItem | ApamaProject | undefined>();
+	readonly onDidChangeTreeData: Event<BundleItem | ApamaProject | undefined> = this._onDidChangeTreeData.event;
 
-	//private textDocuments: vscode.TextDocument[] = [];
+	//private textDocuments: TextDocument[] = [];
 	//we want to have a list of top level nodes (projects)
 	private projects: ApamaProject[] = [];
 
-	private treeView: vscode.TreeView<{}>;
+	private treeView: TreeView<{}>;
 
-	private fsWatcher : vscode.FileSystemWatcher;
-	private delWatcher : vscode.FileSystemWatcher;
+	private fsWatcher: FileSystemWatcher;
+	private delWatcher: FileSystemWatcher;
 
-	constructor(private workspaceRoot: string, private context?: vscode.ExtensionContext) {
+	constructor(private logger: OutputChannel, private workspaceRoot: string, private context?: ExtensionContext) {
 		let subscriptions: Disposable[] = [];
 
 		this.registerCommands();
 
-		this.fsWatcher = vscode.workspace.createFileSystemWatcher("**/*.project");
-		this.delWatcher = vscode.workspace.createFileSystemWatcher("**/*"); //if you delete a directory it will not trigger all contents
+		this.fsWatcher = workspace.createFileSystemWatcher("**/*.project");
+		this.delWatcher = workspace.createFileSystemWatcher("**/*"); //if you delete a directory it will not trigger all contents
 
 		this.fsWatcher.onDidCreate((item) => {
 			this.refresh();
-		 });
-		 this.delWatcher.onDidDelete(() => {
+		});
+		this.delWatcher.onDidDelete(() => {
 			this.refresh();
-		 });
-		 this.fsWatcher.onDidChange((item) => {
+		});
+		this.fsWatcher.onDidChange((item) => {
 			this.refresh();
-		 });
-		this.treeView = vscode.window.createTreeView('apamaProjects', { treeDataProvider: this });
+		});
+		this.treeView = window.createTreeView('apamaProjects', { treeDataProvider: this });
 	}
 
 	registerCommands(): void {
-    if( this.context !== undefined ){
-      this.context.subscriptions.push.apply(this.context.subscriptions, [
+		if (this.context !== undefined) {
+			this.context.subscriptions.push.apply(this.context.subscriptions, [
 
 				//
 				// Create project 
 				//
 				commands.registerCommand('extension.apamaProjects.apamaToolCreateProject', () => {
 					//display prompt.
-					vscode.window.showInputBox({
+					window.showInputBox({
 						value: "apama_project",
 						placeHolder: "Project directory name"
 					})
 						.then(result => {
-							if (typeof result === "string" && vscode.workspace.rootPath !== undefined) {
-								console.log(result);
-								runApamaProject(`apama_project create ${result}`, vscode.workspace.rootPath)
+							if (typeof result === "string" && workspace.rootPath !== undefined) {
+								this.logger.appendLine(result);
+								runApamaProject(`apama_project create ${result}`, workspace.rootPath)
 									.then((result: string[]) => {
-										vscode.window.showInformationMessage(`${result}`);
+										window.showInformationMessage(`${result}`);
 									})
 									.catch((err: string[]) => {
-										vscode.window.showErrorMessage(`${err}`);
+										window.showErrorMessage(`${err}`);
 									});
-								}
+							}
 						});
 				}),
 
 				//
 				// Add Bundle
 				//
-				vscode.commands.registerCommand('extension.apamaProjects.apamaToolAddBundles', (project: ApamaProject) => {
-					console.log(project.fspath);
+				commands.registerCommand('extension.apamaProjects.apamaToolAddBundles', (project: ApamaProject) => {
+					this.logger.appendLine(project.fspath);
 					runApamaProject("apama_project list bundles", project.fspath)
 						.then((result: string[]) => {
-							let displayList: vscode.QuickPickItem[] = [];
-							result.forEach( (item) => {
+							let displayList: QuickPickItem[] = [];
+							result.forEach((item) => {
 								item = item.trim();
 								//matches number followed by text
-								if( item.search(/^[0-9][0-9]?\s.*$/) === 0 ) {
-									item = item.replace(/^([0-9][0-9]?\s)(.*)$/g , (cap1,cap2,cap3) => {return cap3;});
-									displayList.push ( {label: item});
-								} 
+								if (item.search(/^[0-9][0-9]?\s.*$/) === 0) {
+									item = item.replace(/^([0-9][0-9]?\s)(.*)$/g, (cap1, cap2, cap3) => { return cap3; });
+									displayList.push({ label: item });
+								}
 							});
-							console.log(displayList);
-							return vscode.window.showQuickPick(displayList,{placeHolder:"Choose a bundle to add"});
+							this.logger.appendLine(displayList.join('\n'));
+							return window.showQuickPick(displayList, { placeHolder: "Choose a bundle to add" });
 						})
-						.then( (picked) => {
-							console.log(picked);
-							if( picked === undefined ){
+						.then((picked) => {
+							if (picked === undefined) {
 								return;
 							}
+							
+							this.logger.appendLine("User chose " + picked.label);
+
 							runApamaProject(`apama_project add bundle \"${picked.label}\"`, project.fspath)
-							.then((result: string[]) => {
-								vscode.window.showInformationMessage(`${result}`);
-							})
-							.catch((err: string[]) => {
-								vscode.window.showErrorMessage(`${err}`);
-							});
+								.then((result: string[]) => {
+									window.showInformationMessage(`${result}`);
+								})
+								.catch((err: string[]) => {
+									window.showErrorMessage(`${err}`);
+								});
 						})
 						.catch((err: string[]) => {
-							vscode.window.showErrorMessage(`${err}`);
+							window.showErrorMessage(`${err}`);
 						});
-						this.refresh();
-					}),
+					this.refresh();
+				}),
 
 				//
 				// Remove Bundle
 				//
-				vscode.commands.registerCommand('extension.apamaProjects.apamaToolRemoveBundle', (bundle: BundleItem) => {
-					console.log(bundle.dirname);
+				commands.registerCommand('extension.apamaProjects.apamaToolRemoveBundle', (bundle: BundleItem) => {
+					this.logger.appendLine(bundle.dirname);
 					runApamaProject(`apama_project remove bundle \"${bundle.label}\"`, bundle.project.fspath)
 						.then((result: string[]) => {
-							vscode.window.showInformationMessage(`${result}`);
+							window.showInformationMessage(`${result}`);
 						})
 						.catch((err: string[]) => {
-							vscode.window.showErrorMessage(`${err}`);
+							window.showErrorMessage(`${err}`);
 						});
-						this.refresh();
+					this.refresh();
 				}),
 
 				//
 				// Engine Deploy
 				//
-				vscode.commands.registerCommand('extension.apamaProjects.apamaToolDeployProject', (project: ApamaProject) => {
-					console.log(project.label);
+				commands.registerCommand('extension.apamaProjects.apamaToolDeployProject', (project: ApamaProject) => {
+					this.logger.appendLine(project.label);
 					runApamaProject(`engine_deploy --outputDeployDir ${project.label}_deployed ${project.label}`, this.workspaceRoot)
 						.then((result: string[]) => {
-							vscode.window.showInformationMessage(`${result}`);
+							window.showInformationMessage(`${result}`);
 						})
-						.catch((theError: string[]) => console.log(`ERROR: ${theError}`));
-						this.refresh();
+						.catch((theError: string[]) => this.logger.appendLine(`ERROR: ${theError}`));
+					this.refresh();
 				}),
 
 				//
 				// Placeholder for clicking on a bundle/project - will open files possibly or navigate to the right directory.
 				//
-				commands.registerCommand('extension.apamaProjects.SelectItem', (document: vscode.TextDocument) => {
-          console.log(document);
-        }),
-  
+				commands.registerCommand('extension.apamaProjects.SelectItem', (document: TextDocument) => {
+					this.logger.appendLine(document.fileName);
+				}),
+
 				//
 				// refresh projects
 				//
-        commands.registerCommand('extension.apamaProjects.refresh', () => {
-          this.refresh();
-        })
-      ]);
-    }
+				commands.registerCommand('extension.apamaProjects.refresh', () => {
+					this.refresh();
+				})
+			]);
+		}
 	}
 
 	//
@@ -159,23 +160,23 @@ export class PopulateProjects implements vscode.TreeDataProvider<string|BundleIt
 	// get the children of the current item (group or item)
 	// made this async so we can avoid race conditions on updates
 	//
-	async getChildren(item?: BundleItem | ApamaProject | undefined ): Promise<undefined | BundleItem[] | ApamaProject[]> {
+	async getChildren(item?: BundleItem | ApamaProject | undefined): Promise<undefined | BundleItem[] | ApamaProject[]> {
 
 		//if this is a bundle - then there are no children
 		if (item && item.contextValue === "bundle") {
-			console.log( "noChildren : " + item.toString());
+			this.logger.appendLine("noChildren : " + item.toString());
 			return [];
 		}
 
 		//if this is a project - we should have set up the bundles now
 		if (item instanceof ApamaProject) {
 			//lets get the bundles 
-			console.log( `getBundles : ${item.label} => ${item.items.length}`);
+			this.logger.appendLine(`getBundles : ${item.label} => ${item.items.length}`);
 			return (<ApamaProject>item).items;
 		}
 
 		//if we need a root or two
-		let rVal:BundleItem[] | ApamaProject[] = await this.scanProjects();
+		let rVal: BundleItem[] | ApamaProject[] = await this.scanProjects();
 		return rVal;
 	}
 
@@ -186,18 +187,18 @@ export class PopulateProjects implements vscode.TreeDataProvider<string|BundleIt
 		let result: ApamaProject[] = [];
 		//find .projects, but exclude anything with _deployed suffix
 		//also covers all roots of a multi root workspace
-		let projectNames = await vscode.workspace.findFiles("**/.project","**/*_deployed/**");
-		console.log("projects found: " +  projectNames.length );
+		let projectNames = await workspace.findFiles("**/.project", "**/*_deployed/**");
+		this.logger.appendLine("projects found: " + projectNames.length);
 		for (let index = 0; index < projectNames.length; index++) {
-			const project:vscode.Uri = projectNames[index];
-			let current:ApamaProject = new ApamaProject(          
+			const project: Uri = projectNames[index];
+			let current: ApamaProject = new ApamaProject(this.logger,
 				path.relative(this.workspaceRoot, path.dirname(project.fsPath)),
-				vscode.TreeItemCollapsibleState.Collapsed,
+				TreeItemCollapsibleState.Collapsed,
 				path.dirname(project.fsPath)
 			);
-			 await this.getBundlesFromProject(current);
-			console.log( `getBundles updated project : ${current.label} => ${current.items.length}`);
-			result.push(current);			
+			await this.getBundlesFromProject(current);
+			this.logger.appendLine(`getBundles updated project : ${current.label} => ${current.items.length}`);
+			result.push(current);
 		}
 		return result;
 	}
@@ -209,36 +210,36 @@ export class PopulateProjects implements vscode.TreeDataProvider<string|BundleIt
 		project.items = [];
 		let result = await runApamaProject("apama_project list bundles", project.fspath);
 		let withinInstalledRegion: boolean = false;
-		result.forEach( (item) => {
+		result.forEach((item) => {
 			//matches number followed by text
-			if( withinInstalledRegion && item.search("Bundles that can be added:") === -1 ) {
+			if (withinInstalledRegion && item.search("Bundles that can be added:") === -1) {
 				let current = item.trim();
-				project.items.push ( new BundleItem(current,project) );
+				project.items.push(new BundleItem(current, project));
 			} else {
 				//hacky way to capture the installed bundles.
-				if( item.search("Bundles that have already been added:") > -1 ) {
+				if (item.search("Bundles that have already been added:") > -1) {
 					withinInstalledRegion = true;
-				}else if(item.search("Bundles that can be added:") > -1) {
+				} else if (item.search("Bundles that can be added:") > -1) {
 					withinInstalledRegion = false;
 				}
-			}									
+			}
 		});
-		console.log( `Bundles Added : ${project.label} => ${project.items.length}`);
+		this.logger.appendLine(`Bundles Added : ${project.label} => ${project.items.length}`);
 	}
 
 	//
 	// interface requirement
 	//
-	getTreeItem(element: BundleItem | ApamaProject | string): vscode.TreeItem {
+	getTreeItem(element: BundleItem | ApamaProject | string): TreeItem {
 
 		//No string nodes in my tree so should never happen
 		if (typeof element === "string") {
-			console.log("ERROR ???? getTreeItem -- " + element.toString());
-			return new vscode.TreeItem(element,vscode.TreeItemCollapsibleState.None);
+			this.logger.appendLine("ERROR ???? getTreeItem -- " + element.toString());
+			return new TreeItem(element, TreeItemCollapsibleState.None);
 		}
 
 		//should just be the element clicked on
-    return <vscode.TreeItem>element;
+		return <TreeItem>element;
 	}
 }
 
