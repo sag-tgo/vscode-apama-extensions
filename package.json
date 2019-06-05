@@ -149,7 +149,7 @@
       "type": "object",
       "title": "Apama configuration",
       "properties": {
-        "apama.apamaHome": {
+        "eplLanguageServer.apamaHome": {
           "type": [
             "string",
             "null"

@@ -1,6 +1,6 @@
 import { spawn, ChildProcess, execFileSync } from 'child_process';
 import { OutputChannel, window } from 'vscode';
-import * as shell from 'shelljs';
+import { ApamaEnvironment } from '../util/apamaenvironment';
 
 export interface CorrelatorConfig {
     host: string;
@@ -12,12 +12,12 @@ export class CorrelatorCommandLineInterface {
     correlatorProcess?: ChildProcess;
     stdoutChannel?: OutputChannel;
 
-    constructor(private logger:OutputChannel , private apamaHome: string, private config: CorrelatorConfig) {}
+    constructor(private logger: OutputChannel, private apamaEnv: ApamaEnvironment, private config: CorrelatorConfig) { }
 
 	/**
 	 * Start the correlator
 	 */
-	public start(): ChildProcess {
+    public start(): ChildProcess {
         if (this.correlatorProcess && !this.correlatorProcess.killed) {
             this.logger.appendLine("Correlator already started, stopping...");
             this.correlatorProcess.kill('SIGKILL');
@@ -28,12 +28,11 @@ export class CorrelatorCommandLineInterface {
         this.stdoutChannel = window.createOutputChannel('Apama Correlator');
         this.stdoutChannel.show();
 
-        //this.correlatorProcess = spawn('. ' + this.apamaHome + '/bin/apama_env &&' + this.apamaHome + '/bin/correlator ', ["-p", this.config.port.toString()].concat(this.config.args), {
-        //    stdio: ['ignore', 'pipe', 'pipe']
-        //});
-
         let args = ["-p", this.config.port.toString()].concat(this.config.args);
-        this.correlatorProcess = shell.exec('. ' + this.apamaHome + '/bin/apama_env &&' + this.apamaHome + '/bin/correlator ' + args.join(' ') , {async:true} );
+        this.correlatorProcess = spawn(this.apamaEnv.startCorrelator() + args.join(' '), {
+            shell: true,
+            stdio: ['ignore', 'pipe', 'pipe']
+        });
 
         this.logger.appendLine("Correlator started, PID:" + this.correlatorProcess.pid);
 
@@ -52,8 +51,7 @@ export class CorrelatorCommandLineInterface {
      * Inject files into the correlator
      */
     public injectFiles(files: string[]) {
-        shell.exec('. ' + this.apamaHome + '/bin/apama_env &&' + ' engine_inject ' + files.join(' ') , {async:false} );
-        //execFileSync(this.apamaHome + '/bin/engine_inject', files);
+        execFileSync(this.apamaEnv.startInject() + files.join(' '));
     }
 
 
@@ -69,7 +67,7 @@ export class CorrelatorCommandLineInterface {
                     }
                     resolve();
                 });
-                
+
                 this.logger.appendLine("Correlator stopping...");
                 this.correlatorProcess.kill();
                 const attemptedToKill = this.correlatorProcess;

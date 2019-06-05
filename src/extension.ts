@@ -8,8 +8,9 @@ import {
 	TransportKind, ForkOptions
 } from 'vscode-languageclient';
 
-import {ApamaConfigurationProvider} from './apama_debug/apamaconfig';
+import {ApamaConfigurationProvider} from './apama_debug/apamadebugconfig';
 import { PopulateProjects } from './apama_project/apamaProjectView';
+import { ApamaEnvironment } from './util/apamaenvironment';
 
 
 let placeholder: PopulateProjects;
@@ -23,12 +24,14 @@ export function activate(context: ExtensionContext): void {
 	logger.show();
 	logger.appendLine('Started EPL language server');
 
+	let apamaEnv:ApamaEnvironment = new ApamaEnvironment(logger);
+
 	// this is the code for the side bar apama-project parts.
 	if (workspace.rootPath !== undefined) {
 
 		logger.appendLine('Starting EPL language server');
 		placeholder = new PopulateProjects(logger,workspace.rootPath,context);
-		const provider = new ApamaConfigurationProvider(logger);
+		const provider = new ApamaConfigurationProvider(logger,apamaEnv);
 		context.subscriptions.push(debug.registerDebugConfigurationProvider('apama', provider));
     context.subscriptions.push(provider);
 	}

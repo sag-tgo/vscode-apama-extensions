@@ -16,6 +16,7 @@ import { CorrelatorCommandLineInterface, CorrelatorConfig } from './correlatorCo
 import { CorrelatorHttpInterface, CorrelatorBreakpoint, CorrelatorPaused } from './correlatorHttpInterface';
 import { basename } from 'path';
 import { OutputChannel } from 'vscode';
+import { ApamaEnvironment } from '../util/apamaenvironment';
 
 const MAX_STACK_SIZE = 1000;
 
@@ -37,9 +38,9 @@ export class CorrelatorDebugSession extends DebugSession {
 	private correlatorCmd: CorrelatorCommandLineInterface;
 	private correlatorHttp: CorrelatorHttpInterface;
 
-	public constructor(private logger:OutputChannel, apamaHome: string, config: CorrelatorConfig) {
+	public constructor(private logger:OutputChannel, apamaEnv: ApamaEnvironment, config: CorrelatorConfig) {
 		super();
-		this.correlatorCmd = new CorrelatorCommandLineInterface(logger, apamaHome, config);
+		this.correlatorCmd = new CorrelatorCommandLineInterface(logger, apamaEnv, config);
 		this.correlatorHttp = new CorrelatorHttpInterface(logger,config.host, config.port);
 	}
 

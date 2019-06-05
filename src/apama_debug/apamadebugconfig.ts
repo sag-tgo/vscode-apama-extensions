@@ -3,12 +3,13 @@ import * as Net from 'net';
 import { platform } from 'os';
 import { execFileSync } from 'child_process';
 import { CorrelatorDebugSession, normalizeCorrelatorFilePath } from './correlatorDebugSession';
+import { ApamaEnvironment } from '../util/apamaenvironment';
 
 export class ApamaConfigurationProvider implements DebugConfigurationProvider {
 
     private _server?: Net.Server;
     
-    constructor( private logger:OutputChannel ) {
+    constructor( private logger:OutputChannel , private apamaEnv: ApamaEnvironment ) {
         
     }
 
@@ -45,25 +46,9 @@ export class ApamaConfigurationProvider implements DebugConfigurationProvider {
             return config;
         }
 
-        // Set + save the apamaHome path if it isn't already set in global or workspace settings
-        // It can be overwritten/moved to the workspace settings by the user
-        if (!config.apamaHome) {
-            const workspaceConfig = workspace.getConfiguration('apama');
-            if (!workspaceConfig.apamaHome) {
-                if (platform() === 'win32') {
-                    config.apamaHome = 'C:/SoftwareAG/Apama';
-                } else {
-                    config.apamaHome = '/opt/softwareag/Apama';
-                }
-                
-                workspaceConfig.update('apamaHome', config.apamaHome, true);
-            } else {
-                config.apamaHome = workspaceConfig.apamaHome;
-            }
-        }
 
         config = Object.assign({
-            injectionList: getInjectionList(config.apamaHome, folder.uri.fsPath),
+            injectionList: getInjectionList(this.apamaEnv, folder.uri.fsPath),
             correlator: { /* Defaulted below */ }
         }, config);
 
@@ -79,7 +64,7 @@ export class ApamaConfigurationProvider implements DebugConfigurationProvider {
         if (!this._server) {
             this.logger.appendLine("starting server");
             this._server = Net.createServer(socket => {
-                const session = new CorrelatorDebugSession(this.logger,config.apamaHome, config.correlator);
+                const session = new CorrelatorDebugSession(this.logger, this.apamaEnv, config.correlator);
                 session.setRunAsServer(true);
                 session.start(<NodeJS.ReadableStream>socket, socket);
             }).listen(0);
@@ -100,8 +85,8 @@ export class ApamaConfigurationProvider implements DebugConfigurationProvider {
 	}
 }
 
-function getInjectionList(apamaHome: string, workspaceFolderPath: string) {
-    return execFileSync(apamaHome + '/bin/engine_deploy', ['--outputList', 'stdout', workspaceFolderPath], {
+function getInjectionList(apamaEnv: ApamaEnvironment, workspaceFolderPath: string) {
+    return execFileSync(apamaEnv.startDeploy(), ['--outputList', 'stdout', workspaceFolderPath], {
             encoding: 'utf8'
         })
         .split(/\r?\n/)
