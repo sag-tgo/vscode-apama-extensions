@@ -10,8 +10,8 @@ import {
   CompletionItem, CompletionItemKind} from 'vscode-languageserver';
 
 import { validateYamlConfig } from './yamlValidation/validateYamlConfig';
-import { EPLBuddy } from './eplbuddy/EPLBuddy';
-import { validateEplDocument } from './eplbuddy/validateEplDocument';
+import { EPLBuddy } from './apama_language/EPLBuddy';
+import { validateEplDocument } from './apama_language/validateEplDocument';
 
 // Create a connection for the server. The connection uses Node's IPC as a transport
 export let connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));

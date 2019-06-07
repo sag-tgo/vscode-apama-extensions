@@ -16,7 +16,7 @@ import { CorrelatorCommandLineInterface, CorrelatorConfig } from './correlatorCo
 import { CorrelatorHttpInterface, CorrelatorBreakpoint, CorrelatorPaused } from './correlatorHttpInterface';
 import { basename } from 'path';
 import { OutputChannel } from 'vscode';
-import { ApamaEnvironment } from '../util/apamaenvironment';
+import { ApamaEnvironment } from '../apama_util/apamaenvironment';
 
 const MAX_STACK_SIZE = 1000;
 

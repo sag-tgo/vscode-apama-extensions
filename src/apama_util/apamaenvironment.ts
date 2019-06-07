@@ -11,6 +11,8 @@ const default_linux_deploy: string = 'engine_deploy';
 const default_windows_deploy: string = 'engine_deploy.exe';
 const default_linux_inject: string = 'engine_inject';
 const default_windows_inject: string = 'engine_inject.exe';
+const default_linux_project: string = 'apama_project';
+const default_windows_project: string = 'apama_project.exe';
 const default_linux_env: string = 'apama_env';
 const default_windows_env: string = 'apama_env.bat';
 const default_linux_source: string = '. ';
@@ -31,6 +33,7 @@ export class ApamaEnvironment {
   private cmd_correlator: string;
   private cmd_deploy: string;
   private cmd_inject: string;
+  private cmd_project: string;
 
   constructor( private logger:OutputChannel ) {
     this.workspaceConfig = workspace.getConfiguration(confignode);
@@ -62,6 +65,7 @@ export class ApamaEnvironment {
       this.cmd_correlator = join(this.apamaHome, 'bin', default_linux_correlator);
       this.cmd_deploy = join(this.apamaHome, 'bin', default_linux_deploy);
       this.cmd_inject = join(this.apamaHome, 'bin', default_linux_inject);
+      this.cmd_project = join(this.apamaHome, 'bin', default_linux_project);
     }
     else {
       this.cmd_source = default_windows_source;
@@ -69,6 +73,7 @@ export class ApamaEnvironment {
       this.cmd_correlator = join(this.apamaHome, 'bin', default_windows_correlator);
       this.cmd_deploy = join(this.apamaHome, 'bin', default_windows_deploy);
       this.cmd_inject = join(this.apamaHome, 'bin', default_windows_inject);
+      this.cmd_project = join(this.apamaHome, 'bin', default_windows_project);
     }
 
 
@@ -78,22 +83,28 @@ export class ApamaEnvironment {
     return this.cmd_source + this.cmd_env + ' ';
   }
 
-  startCorrelator(): string {
+  getCorrelatorCmdline(): string {
     let r = this.sourceEnv() + ' && ' + this.cmd_correlator + ' '; 
     this.logger.appendLine('startCorrelator ' + r);
     return r;
   }
 
   //doesn't need environment
-  startDeploy(): string {
+  getDeployCmdline(): string {
     let r = this.cmd_deploy + ' '; 
     this.logger.appendLine('startDeploy ' + r);
     return r;
   }
 
-  startInject(): string {
+  getInjectCmdline(): string {
     let r = this.sourceEnv() + ' && ' + this.cmd_inject + ' '; 
     this.logger.appendLine('startInject ' + r);
+    return r;
+  }
+
+  getApamaProjectCmdline(): string {
+    let r = this.sourceEnv() + ' && ' + this.cmd_project + ' '; 
+    this.logger.appendLine('startProject ' + r);
     return r;
   }
 

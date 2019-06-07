@@ -1,6 +1,6 @@
-import { spawn, ChildProcess, execFileSync } from 'child_process';
+import { spawn, ChildProcess, execFileSync, execSync } from 'child_process';
 import { OutputChannel, window } from 'vscode';
-import { ApamaEnvironment } from '../util/apamaenvironment';
+import { ApamaEnvironment } from '../apama_util/apamaenvironment';
 
 export interface CorrelatorConfig {
     host: string;
@@ -29,7 +29,7 @@ export class CorrelatorCommandLineInterface {
         this.stdoutChannel.show();
 
         let args = ["-p", this.config.port.toString()].concat(this.config.args);
-        this.correlatorProcess = spawn(this.apamaEnv.startCorrelator() + args.join(' '), {
+        this.correlatorProcess = spawn(this.apamaEnv.getCorrelatorCmdline() + args.join(' '), {
             shell: true,
             detached: true,
             stdio: ['ignore', 'pipe', 'pipe']
@@ -53,7 +53,7 @@ export class CorrelatorCommandLineInterface {
      */
     public injectFiles(files: string[]) {
         //execFileSync(this.apamaEnv.startInject() + ' -p ' + port + ' ' + files.join(' '));
-        execFileSync(this.apamaEnv.startInject()+ ' ' + files.join(' '));
+        execSync(this.apamaEnv.getInjectCmdline()+ ' ' + files.join(' '));
     }
 
 

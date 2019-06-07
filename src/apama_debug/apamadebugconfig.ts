@@ -3,7 +3,7 @@ import * as Net from 'net';
 import { platform } from 'os';
 import { execFileSync } from 'child_process';
 import { CorrelatorDebugSession, normalizeCorrelatorFilePath } from './correlatorDebugSession';
-import { ApamaEnvironment } from '../util/apamaenvironment';
+import { ApamaEnvironment } from '../apama_util/apamaenvironment';
 
 export class ApamaConfigurationProvider implements DebugConfigurationProvider {
 
@@ -86,7 +86,7 @@ export class ApamaConfigurationProvider implements DebugConfigurationProvider {
 }
 
 function getInjectionList(apamaEnv: ApamaEnvironment, workspaceFolderPath: string) {
-    return execFileSync(apamaEnv.startDeploy(), ['--outputList', 'stdout', workspaceFolderPath], {
+    return execFileSync(apamaEnv.getDeployCmdline(), ['--outputList', 'stdout', workspaceFolderPath], {
             encoding: 'utf8'
         })
         .split(/\r?\n/)

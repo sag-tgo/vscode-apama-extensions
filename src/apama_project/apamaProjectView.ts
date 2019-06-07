@@ -1,30 +1,46 @@
-import * as path from 'path';
-import { window, commands, Disposable, workspace, OutputChannel, TreeDataProvider, EventEmitter, Event, TreeView, FileSystemWatcher, ExtensionContext, QuickPickItem, TextDocument, Uri, TreeItemCollapsibleState, TreeItem } from 'vscode';
-import { BundleItem } from './BundleItem';
-import { ApamaProject } from './apamaProject';
+import { window, commands, Disposable, workspace, OutputChannel, TreeDataProvider, EventEmitter, Event, TreeView, FileSystemWatcher, ExtensionContext, QuickPickItem, TextDocument, Uri, TreeItemCollapsibleState, TreeItem, WorkspaceFolder, RelativePattern } from 'vscode';
+import { ApamaProject, ApamaProjectWorkspace, ApamaTreeItem, BundleItem } from './apamaProject';
 import { runApamaProject } from './runApamaProject';
+import { ApamaRunner } from '../apama_util/apamarunner';
+import { ApamaEnvironment } from '../apama_util/apamaenvironment';
 
-export class ApamaProjectView implements TreeDataProvider<string | BundleItem | ApamaProject> {
-	private _onDidChangeTreeData: EventEmitter<BundleItem | ApamaProject | undefined> = new EventEmitter<BundleItem | ApamaProject | undefined>();
-	readonly onDidChangeTreeData: Event<BundleItem | ApamaProject | undefined> = this._onDidChangeTreeData.event;
+export class ApamaProjectView implements TreeDataProvider<string | ApamaTreeItem> {
+	private _onDidChangeTreeData: EventEmitter<ApamaTreeItem | undefined> = new EventEmitter<ApamaTreeItem | undefined>();
+	readonly onDidChangeTreeData: Event<ApamaTreeItem | undefined> = this._onDidChangeTreeData.event;
 
-	//private textDocuments: TextDocument[] = [];
 	//we want to have a list of top level nodes (projects)
+	private workspaceList: ApamaProjectWorkspace[] = []; 
+	
 	private projects: ApamaProject[] = [];
 
 	private treeView: TreeView<{}>;
 
 	private fsWatcher: FileSystemWatcher;
 	private delWatcher: FileSystemWatcher;
+	private apama_project: ApamaRunner;
+	private apama_deploy: ApamaRunner;
 
-	constructor(private logger: OutputChannel, private workspaceRoot: string, private context?: ExtensionContext) {
+	//
+	// Added facilities for multiple workspaces - this will hopefully allow 
+	// ssh remote etc to work better later on, plus allows some extra organisational
+	// facilities....
+	constructor(private apamaEnv: ApamaEnvironment, private logger: OutputChannel, private workspaces: WorkspaceFolder[], private context?: ExtensionContext) {
 		let subscriptions: Disposable[] = [];
+		
+		this.apama_project = new ApamaRunner('apama_project', apamaEnv.getApamaProjectCmdline(), logger);
+		this.apama_deploy = new ApamaRunner('apama_deploy', apamaEnv.getDeployCmdline(), logger);
+		let ws: WorkspaceFolder;
+		workspaces.forEach( ws => this.workspaceList.push(new ApamaProjectWorkspace(logger,ws.name,ws.uri.fsPath,ws,this.apama_project) ) );
+		
 
+		//project commands 
 		this.registerCommands();
 
-		this.fsWatcher = workspace.createFileSystemWatcher("**/*.project");
+		//this file is created/updated/deleted as projects come and go and depends on the "current" file system
+		this.fsWatcher = workspace.createFileSystemWatcher("**/*.dependencies");
+		//but for deletions of the entire space we need 
 		this.delWatcher = workspace.createFileSystemWatcher("**/*"); //if you delete a directory it will not trigger all contents
-
+		//handlers 
 		this.fsWatcher.onDidCreate((item) => {
 			this.refresh();
 		});
@@ -34,6 +50,8 @@ export class ApamaProjectView implements TreeDataProvider<string | BundleItem | 
 		this.fsWatcher.onDidChange((item) => {
 			this.refresh();
 		});
+
+		//the component
 		this.treeView = window.createTreeView('apamaProjects', { treeDataProvider: this });
 	}
 
@@ -52,13 +70,9 @@ export class ApamaProjectView implements TreeDataProvider<string | BundleItem | 
 					})
 						.then(result => {
 							if (typeof result === "string" && workspace.rootPath !== undefined) {
-								this.logger.appendLine(result);
-								runApamaProject(`apama_project create ${result}`, workspace.rootPath)
-									.then((result: string[]) => {
-										window.showInformationMessage(`${result}`);
-									})
-									.catch((err: string[]) => {
-										window.showErrorMessage(`${err}`);
+								this.apama_project.run(workspace.rootPath, ['create', result])
+									.catch((err: string) => {
+										this.logger.appendLine(err);
 									});
 							}
 						});
@@ -68,11 +82,13 @@ export class ApamaProjectView implements TreeDataProvider<string | BundleItem | 
 				// Add Bundle
 				//
 				commands.registerCommand('extension.apamaProjects.apamaToolAddBundles', (project: ApamaProject) => {
-					this.logger.appendLine(project.fspath);
-					runApamaProject("apama_project list bundles", project.fspath)
-						.then((result: string[]) => {
+					this.apama_project.run(project.fsDir, ['list', 'bundles'])
+						.then((result) => {
+							//whole output is a list of bundles we can add :
+							//logger.appendLine( stdout );
+							let lines: string[] = result.stdout.split(/\r?\n/);
 							let displayList: QuickPickItem[] = [];
-							result.forEach((item) => {
+							lines.forEach((item) => {
 								item = item.trim();
 								//matches number followed by text
 								if (item.search(/^[0-9][0-9]?\s.*$/) === 0) {
@@ -80,55 +96,37 @@ export class ApamaProjectView implements TreeDataProvider<string | BundleItem | 
 									displayList.push({ label: item });
 								}
 							});
-							this.logger.appendLine(displayList.join('\n'));
 							return window.showQuickPick(displayList, { placeHolder: "Choose a bundle to add" });
 						})
-						.then((picked) => {
+						.then(picked => {
 							if (picked === undefined) {
 								return;
 							}
-							
-							this.logger.appendLine("User chose " + picked.label);
 
-							runApamaProject(`apama_project add bundle \"${picked.label}\"`, project.fspath)
-								.then((result: string[]) => {
-									window.showInformationMessage(`${result}`);
-								})
-								.catch((err: string[]) => {
-									window.showErrorMessage(`${err}`);
-								});
+							this.apama_project.run(project.fsDir, ['add', 'bundle', '"' + picked.label.trim()+ '"'])
+								.then(result => window.showInformationMessage(`${result.stdout}`))
+								.catch(err => window.showErrorMessage(`${err}`));
 						})
-						.catch((err: string[]) => {
-							window.showErrorMessage(`${err}`);
-						});
-					this.refresh();
+						.catch(err => window.showErrorMessage(`${err}`));
 				}),
 
 				//
 				// Remove Bundle
 				//
 				commands.registerCommand('extension.apamaProjects.apamaToolRemoveBundle', (bundle: BundleItem) => {
-					this.logger.appendLine(bundle.dirname);
-					runApamaProject(`apama_project remove bundle \"${bundle.label}\"`, bundle.project.fspath)
-						.then((result: string[]) => {
-							window.showInformationMessage(`${result}`);
-						})
-						.catch((err: string[]) => {
-							window.showErrorMessage(`${err}`);
-						});
-					this.refresh();
+
+					this.apama_project.run(bundle.fsDir, ['remove', 'bundle', '"' + bundle.label + '"'])
+					.then(result => window.showInformationMessage(`${result.stdout}`))
+					.catch(err => window.showErrorMessage(`${err}`));					
 				}),
 
 				//
 				// Engine Deploy
 				//
 				commands.registerCommand('extension.apamaProjects.apamaToolDeployProject', (project: ApamaProject) => {
-					this.logger.appendLine(project.label);
-					runApamaProject(`engine_deploy --outputDeployDir ${project.label}_deployed ${project.label}`, this.workspaceRoot)
-						.then((result: string[]) => {
-							window.showInformationMessage(`${result}`);
-						})
-						.catch((theError: string[]) => this.logger.appendLine(`ERROR: ${theError}`));
+					this.apama_deploy.run(project.ws.uri.fsPath, ['--outputDeployDir', project.label + '_deployed',  project.label])
+					.then(result => window.showInformationMessage(`${result.stdout}`))
+					.catch(err => window.showErrorMessage(`${err}`));					
 					this.refresh();
 				}),
 
@@ -160,72 +158,38 @@ export class ApamaProjectView implements TreeDataProvider<string | BundleItem | 
 	// get the children of the current item (group or item)
 	// made this async so we can avoid race conditions on updates
 	//
-	async getChildren(item?: BundleItem | ApamaProject | undefined): Promise<undefined | BundleItem[] | ApamaProject[]> {
+	async getChildren(item?: BundleItem | ApamaProject | ApamaProjectWorkspace | undefined): Promise<undefined | BundleItem[] | ApamaProject[] | ApamaProjectWorkspace[] > {
 
 		//if this is a bundle - then there are no children
 		if (item && item.contextValue === "bundle") {
-			this.logger.appendLine("noChildren : " + item.toString());
-			return [];
+			if( item.items.length === 0 ) {
+				this.logger.appendLine("noChildren : " + item.toString());
+				return [];
+			}
+			else {
+				return item.items;
+			}
 		}
 
 		//if this is a project - we should have set up the bundles now
 		if (item instanceof ApamaProject) {
 			//lets get the bundles 
-			this.logger.appendLine(`getBundles : ${item.label} => ${item.items.length}`);
-			return (<ApamaProject>item).items;
+			let index = this.workspaceList[item.ws.index].items.findIndex( proj => proj === item );
+			this.workspaceList[item.ws.index].items[index].items = await item.getBundlesFromProject();
+			return this.workspaceList[item.ws.index].items[index].items;
 		}
 
-		//if we need a root or two
-		let rVal: BundleItem[] | ApamaProject[] = await this.scanProjects();
-		return rVal;
-	}
-
-	//
-	// Find all the projects 
-	//
-	async scanProjects(): Promise<ApamaProject[]> {
-		let result: ApamaProject[] = [];
-		//find .projects, but exclude anything with _deployed suffix
-		//also covers all roots of a multi root workspace
-		let projectNames = await workspace.findFiles("**/.project", "**/*_deployed/**");
-		this.logger.appendLine("projects found: " + projectNames.length);
-		for (let index = 0; index < projectNames.length; index++) {
-			const project: Uri = projectNames[index];
-			let current: ApamaProject = new ApamaProject(this.logger,
-				path.relative(this.workspaceRoot, path.dirname(project.fsPath)),
-				TreeItemCollapsibleState.Collapsed,
-				path.dirname(project.fsPath)
-			);
-			await this.getBundlesFromProject(current);
-			this.logger.appendLine(`getBundles updated project : ${current.label} => ${current.items.length}`);
-			result.push(current);
+		//if this is a project - we should have set up the bundles now
+		if (item instanceof ApamaProjectWorkspace) {
+			//lets get the projects for a workspace 
+			this.workspaceList[item.ws.index].items = await item.scanProjects();
+			return await this.workspaceList[item.ws.index].items;
 		}
-		return result;
+
+		return this.workspaceList;
 	}
 
-	//
-	// Use apama project tool to populate ApamaProject objects list of Bundles
-	//
-	async getBundlesFromProject(project: ApamaProject): Promise<void> {
-		project.items = [];
-		let result = await runApamaProject("apama_project list bundles", project.fspath);
-		let withinInstalledRegion: boolean = false;
-		result.forEach((item) => {
-			//matches number followed by text
-			if (withinInstalledRegion && item.search("Bundles that can be added:") === -1) {
-				let current = item.trim();
-				project.items.push(new BundleItem(current, project));
-			} else {
-				//hacky way to capture the installed bundles.
-				if (item.search("Bundles that have already been added:") > -1) {
-					withinInstalledRegion = true;
-				} else if (item.search("Bundles that can be added:") > -1) {
-					withinInstalledRegion = false;
-				}
-			}
-		});
-		this.logger.appendLine(`Bundles Added : ${project.label} => ${project.items.length}`);
-	}
+
 
 	//
 	// interface requirement
