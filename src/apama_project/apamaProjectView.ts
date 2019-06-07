@@ -4,7 +4,7 @@ import { BundleItem } from './BundleItem';
 import { ApamaProject } from './apamaProject';
 import { runApamaProject } from './runApamaProject';
 
-export class PopulateProjects implements TreeDataProvider<string | BundleItem | ApamaProject> {
+export class ApamaProjectView implements TreeDataProvider<string | BundleItem | ApamaProject> {
 	private _onDidChangeTreeData: EventEmitter<BundleItem | ApamaProject | undefined> = new EventEmitter<BundleItem | ApamaProject | undefined>();
 	readonly onDidChangeTreeData: Event<BundleItem | ApamaProject | undefined> = this._onDidChangeTreeData.event;
 

@@ -31,10 +31,11 @@ export class CorrelatorCommandLineInterface {
         let args = ["-p", this.config.port.toString()].concat(this.config.args);
         this.correlatorProcess = spawn(this.apamaEnv.startCorrelator() + args.join(' '), {
             shell: true,
+            detached: true,
             stdio: ['ignore', 'pipe', 'pipe']
         });
-
-        this.logger.appendLine("Correlator started, PID:" + this.correlatorProcess.pid);
+        //Running with process Id
+        this.logger.appendLine("Shell started, PID:" + this.correlatorProcess.pid);
 
         this.correlatorProcess.once('exit', (exitCode) => this.logger.appendLine("Correlator stopped, exit code: " + exitCode));
         this.correlatorProcess.stdout.setEncoding('utf8');
@@ -51,7 +52,8 @@ export class CorrelatorCommandLineInterface {
      * Inject files into the correlator
      */
     public injectFiles(files: string[]) {
-        execFileSync(this.apamaEnv.startInject() + files.join(' '));
+        //execFileSync(this.apamaEnv.startInject() + ' -p ' + port + ' ' + files.join(' '));
+        execFileSync(this.apamaEnv.startInject()+ ' ' + files.join(' '));
     }
 
 
@@ -69,7 +71,8 @@ export class CorrelatorCommandLineInterface {
                 });
 
                 this.logger.appendLine("Correlator stopping...");
-                this.correlatorProcess.kill();
+                process.kill(-this.correlatorProcess.pid);
+                //this.correlatorProcess.kill();
                 const attemptedToKill = this.correlatorProcess;
                 setTimeout(() => {
                     if (!attemptedToKill.killed) {

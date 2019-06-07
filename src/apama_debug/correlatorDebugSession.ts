@@ -72,7 +72,9 @@ export class CorrelatorDebugSession extends DebugSession {
      * Frontend requested that the application be launched
      */
 	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
-        this.logger.appendLine("Launch requested");
+		this.logger.appendLine("Launch requested");
+		this.logger.appendLine('ARGS:' +  JSON.stringify(args));
+				
 
 		const correlatorProcess = this.correlatorCmd.start();
 

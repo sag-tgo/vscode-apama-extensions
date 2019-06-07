@@ -10,7 +10,7 @@
             "name": "Debug Apama Application",
             "request": "launch",
             "correlator": {
-                "port": 30030,
+                "port": 15903,
                 "args": [
                     "-g"
                 ]
