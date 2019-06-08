@@ -83,6 +83,14 @@
         }
       },
       {
+        "command": "extension.apamaProjects.apamaToolInject",
+        "title": "Inject File"
+      },
+      {
+        "command": "extension.apamaProjects.apamaDebug",
+        "title": "Debug File"
+      },
+      {
         "command": "extension.apamaProjects.close",
         "title": "Close",
         "icon": {
@@ -102,10 +110,16 @@
     "menus": {
       "explorer/context": [
         {
-          "when": "explorerResourceIsFolder",
-          "command": "extension.apamaProjects.apamaToolCreateProject",
-          "group": "Create@1"
+          "when": "resourceLangId == epl",
+          "command": "extension.apamaProjects.apamaToolInject",
+          "group": "Apama@1"
+        },
+        {
+          "when": "resourceLangId == epl",
+          "command": "extension.apamaProjects.apamaDebug",
+          "group": "Apama@1"
         }
+
       ],
       "view/title": [
         {
@@ -138,10 +152,20 @@
       ]
     },
     "views": {
+      "debug": [
+        {
+          "id": "apamaCorrelators",
+          "name": "Apama Correlators"
+        }
+      ],
       "explorer": [
         {
           "id": "apamaProjects",
           "name": "Apama Projects"
+        },
+        {
+          "id": "apamaCorrelators",
+          "name": "Apama Correlators"
         }
       ]
     },

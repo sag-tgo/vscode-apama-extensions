@@ -1,6 +1,5 @@
 import { window, commands, Disposable, workspace, OutputChannel, TreeDataProvider, EventEmitter, Event, TreeView, FileSystemWatcher, ExtensionContext, QuickPickItem, TextDocument, Uri, TreeItemCollapsibleState, TreeItem, WorkspaceFolder, RelativePattern } from 'vscode';
 import { ApamaProject, ApamaProjectWorkspace, ApamaTreeItem, BundleItem } from './apamaProject';
-import { runApamaProject } from './runApamaProject';
 import { ApamaRunner } from '../apama_util/apamarunner';
 import { ApamaEnvironment } from '../apama_util/apamaenvironment';
 
@@ -36,7 +35,7 @@ export class ApamaProjectView implements TreeDataProvider<string | ApamaTreeItem
 		//project commands 
 		this.registerCommands();
 
-		//this file is created/updated/deleted as projects come and go and depends on the "current" file system
+		//this file is created/updated/deleted as projects come and go and depends on the "current" set of file systems
 		this.fsWatcher = workspace.createFileSystemWatcher("**/*.dependencies");
 		//but for deletions of the entire space we need 
 		this.delWatcher = workspace.createFileSystemWatcher("**/*"); //if you delete a directory it will not trigger all contents
@@ -127,7 +126,6 @@ export class ApamaProjectView implements TreeDataProvider<string | ApamaTreeItem
 					this.apama_deploy.run(project.ws.uri.fsPath, ['--outputDeployDir', project.label + '_deployed',  project.label])
 					.then(result => window.showInformationMessage(`${result.stdout}`))
 					.catch(err => window.showErrorMessage(`${err}`));					
-					this.refresh();
 				}),
 
 				//
