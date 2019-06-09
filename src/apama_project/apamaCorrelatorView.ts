@@ -98,19 +98,19 @@ export class ApamaCorrelatorView implements TreeDataProvider<string | ApamaTreeI
 		//if this is a project - we should have set up the bundles now
 		if (item instanceof ApamaProject) {
 			//lets get the bundles 
-			let index = this.workspaceList[item.ws.index].items.findIndex( proj => proj === item );
-			this.workspaceList[item.ws.index].items[index].items = await item.getBundlesFromProject();
-			return this.workspaceList[item.ws.index].items[index].items;
+			let index = this.definedList[item.ws.index].items.findIndex( proj => proj === item );
+			this.definedList[item.ws.index].items[index].items = await item.getBundlesFromProject();
+			return this.definedList[item.ws.index].items[index].items;
 		}
 
 		//if this is a project - we should have set up the bundles now
 		if (item instanceof ApamaProjectWorkspace) {
 			//lets get the projects for a workspace 
-			this.workspaceList[item.ws.index].items = await item.scanProjects();
-			return await this.workspaceList[item.ws.index].items;
+			this.definedList[item.ws.index].items = await item.scanProjects();
+			return await this.definedList[item.ws.index].items;
 		}
 
-		return this.workspaceList;
+		return this.definedList;
 	}
 
 

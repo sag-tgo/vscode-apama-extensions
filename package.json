@@ -83,6 +83,15 @@
         }
       },
       {
+        "command": "extension.apamaProjects.apamaToolDefineCorrelator",
+        "title": "Define Correlator",
+        "icon": {
+          "light": "resources/light/folder.svg",
+          "dark": "resources/dark/folder.svg"
+        }
+
+      },
+      {
         "command": "extension.apamaProjects.apamaToolInject",
         "title": "Inject File"
       },
@@ -122,6 +131,11 @@
 
       ],
       "view/title": [
+        {
+          "when": "view == apamaCorrelators",
+          "command": "extension.apamaProjects.apamaToolDefineCorrelator",
+          "group": "navigation"
+        },
         {
           "when": "view == apamaProjects",
           "command": "extension.apamaProjects.apamaToolCreateProject",
