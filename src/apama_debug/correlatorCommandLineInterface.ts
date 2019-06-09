@@ -86,7 +86,7 @@ export class CorrelatorCommandLineInterface {
                 });
 
                 this.logger.appendLine("Correlator stopping...");
-                //process.kill(-this.correlatorProcess.pid);
+                process.kill(this.correlatorPid);
                 this.correlatorProcess.kill('SIGINT');
                 const attemptedToKill = this.correlatorProcess;
                 setTimeout(() => {
@@ -94,7 +94,7 @@ export class CorrelatorCommandLineInterface {
                         this.logger.appendLine("Failed to stop correlator in 5 seconds, killing...");
                         attemptedToKill.kill('SIGKILL');
                     }
-                }, 5000);
+                }, 30000);
             } else {
                 resolve();
             }
