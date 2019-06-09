@@ -11,8 +11,11 @@ export interface CorrelatorConfig {
 export class CorrelatorCommandLineInterface {
     correlatorProcess?: ChildProcess;
     stdoutChannel?: OutputChannel;
+    correlatorPid: number;
 
-    constructor(private logger: OutputChannel, private apamaEnv: ApamaEnvironment, private config: CorrelatorConfig) { }
+    constructor(private logger: OutputChannel, private apamaEnv: ApamaEnvironment, private config: CorrelatorConfig) { 
+        this.correlatorPid = -1;
+    }
 
 	/**
 	 * Start the correlator
@@ -20,18 +23,19 @@ export class CorrelatorCommandLineInterface {
     public start(): ChildProcess {
         if (this.correlatorProcess && !this.correlatorProcess.killed) {
             this.logger.appendLine("Correlator already started, stopping...");
+            if( this.correlatorPid !== -1 ) {
+                process.kill(this.correlatorPid,"SIGKILL");
+            } 
             this.correlatorProcess.kill('SIGKILL');
         }
 
         this.logger.appendLine("Starting Correlator");
-
         this.stdoutChannel = window.createOutputChannel('Apama Correlator');
         this.stdoutChannel.show();
 
         let args = ["-p", this.config.port.toString()].concat(this.config.args);
         this.correlatorProcess = spawn(this.apamaEnv.getCorrelatorCmdline() + args.join(' '), {
             shell: true,
-            detached: true,
             stdio: ['ignore', 'pipe', 'pipe']
         });
         //Running with process Id
@@ -40,6 +44,17 @@ export class CorrelatorCommandLineInterface {
         this.correlatorProcess.once('exit', (exitCode) => this.logger.appendLine("Correlator stopped, exit code: " + exitCode));
         this.correlatorProcess.stdout.setEncoding('utf8');
         this.correlatorProcess.stdout.on('data', (data: string) => {
+
+            //set the pid of the correlator process so we can stop it.
+            //Running with process Id
+            if( data.includes("Running with process Id") ) {
+                let result = data.match("Running with process Id (\d+)") || ['-1','-1'];
+                this.correlatorPid = +result[1];
+                if( this.correlatorPid === -1 ) {
+                    throw "bad pid";
+                }
+            }
+
             if (this.stdoutChannel) {
                 this.stdoutChannel.append(data);
             }
@@ -71,8 +86,8 @@ export class CorrelatorCommandLineInterface {
                 });
 
                 this.logger.appendLine("Correlator stopping...");
-                process.kill(-this.correlatorProcess.pid);
-                //this.correlatorProcess.kill();
+                //process.kill(-this.correlatorProcess.pid);
+                this.correlatorProcess.kill('SIGINT');
                 const attemptedToKill = this.correlatorProcess;
                 setTimeout(() => {
                     if (!attemptedToKill.killed) {

@@ -43,7 +43,7 @@ export class ApamaProjectView implements TreeDataProvider<string | ApamaTreeItem
 		this.fsWatcher.onDidCreate((item) => {
 			this.refresh();
 		});
-		this.delWatcher.onDidDelete(() => {
+		this.delWatcher.onDidDelete(() => { 
 			this.refresh();
 		});
 		this.fsWatcher.onDidChange((item) => {

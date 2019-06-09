@@ -13,7 +13,7 @@ import { ApamaProjectView } from './apama_project/apamaProjectView';
 import { ApamaEnvironment } from './apama_util/apamaenvironment';
 
 
-let placeholder: ApamaProjectView;
+let projView: ApamaProjectView;
 let logger:OutputChannel; 
 //
 // client activation function, this is the entrypoint for the client
@@ -30,7 +30,7 @@ export function activate(context: ExtensionContext): void {
 	if (workspace.workspaceFolders !== undefined) {
 
 		logger.appendLine('Starting EPL language server');
-		placeholder = new ApamaProjectView(apamaEnv, logger, workspace.workspaceFolders ,context);
+		projView = new ApamaProjectView(apamaEnv, logger, workspace.workspaceFolders ,context);
 		const provider = new ApamaConfigurationProvider(logger,apamaEnv);
 		context.subscriptions.push(debug.registerDebugConfigurationProvider('apama', provider));
     context.subscriptions.push(provider);
