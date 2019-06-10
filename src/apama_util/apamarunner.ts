@@ -59,10 +59,9 @@ export class ApamaAsyncRunner {
     this.child.stdout.on('data', (data: string) => {
 
       if (data.includes("Running with process Id")) {
-        let result = data.match("Running with process Id (\d+)") || ['-1', '-1'];
-        this.correlatorPid = +result[1];
-        if (this.correlatorPid === -1) {
-          throw "bad pid";
+        let result: RegExpMatchArray | null = data.match("/Running with process Id (\d+)/gi");
+        if (result !== null) {
+          this.correlatorPid = +result[1];
         }
       }
 
