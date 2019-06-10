@@ -17,6 +17,7 @@ import { CorrelatorHttpInterface, CorrelatorBreakpoint, CorrelatorPaused } from 
 import { basename } from 'path';
 import { OutputChannel } from 'vscode';
 import { ApamaEnvironment } from '../apama_util/apamaenvironment';
+import { ApamaAsyncRunner, ApamaRunner } from '../apama_util/apamarunner';
 
 const MAX_STACK_SIZE = 1000;
 
@@ -35,12 +36,14 @@ interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArguments {
  * - ConfigurationDone
  */
 export class CorrelatorDebugSession extends DebugSession {
-	private correlatorCmd: CorrelatorCommandLineInterface;
+	private injectCmd: ApamaRunner;
+	private correlatorCmd: ApamaAsyncRunner;
 	private correlatorHttp: CorrelatorHttpInterface;
 
 	public constructor(private logger:OutputChannel, apamaEnv: ApamaEnvironment, config: CorrelatorConfig) {
 		super();
-		this.correlatorCmd = new CorrelatorCommandLineInterface(logger, apamaEnv, config);
+		this.correlatorCmd = new ApamaAsyncRunner("correlator",apamaEnv.getCorrelatorCmdline(),logger);//  (logger, apamaEnv, config);
+		this.injectCmd = new ApamaRunner("injector",apamaEnv.getInjectCmdline(),logger);
 		this.correlatorHttp = new CorrelatorHttpInterface(logger,config.host, config.port);
 	}
 
@@ -76,7 +79,7 @@ export class CorrelatorDebugSession extends DebugSession {
 		this.logger.appendLine('ARGS:' +  JSON.stringify(args));
 				
 
-		const correlatorProcess = this.correlatorCmd.start();
+		const correlatorProcess = this.correlatorCmd.start( ['-g'] );
 
         correlatorProcess.stderr.setEncoding('utf8');
         correlatorProcess.stderr.on('data', (data: string) => this.sendEvent(new OutputEvent(data, 'stderr')));
@@ -87,7 +90,7 @@ export class CorrelatorDebugSession extends DebugSession {
 
 		this.correlatorHttp.enableDebugging()
 			.then(() => this.correlatorHttp.pause()) // Pause correlator while we wait for the configuration to finish, we want breakpoints to be set first
-			.then(() => this.correlatorCmd.injectFiles(args.injectionList.map(filePath => this.convertClientPathToDebugger(filePath))))
+			.then(() => this.injectCmd.run('.',args.injectionList.map(filePath => this.convertClientPathToDebugger(filePath))))
 			.then(() => this.sendEvent(new InitializedEvent())) // We're ready to start recieving breakpoints
 			.then(() => this.sendResponse(response));
 	}
