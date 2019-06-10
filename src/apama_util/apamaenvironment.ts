@@ -13,6 +13,8 @@ const default_linux_inject: string = 'engine_inject';
 const default_windows_inject: string = 'engine_inject.exe';
 const default_linux_project: string = 'apama_project';
 const default_windows_project: string = 'apama_project.exe';
+const default_linux_management: string = 'engine_management';
+const default_windows_management: string = 'engine_management.exe';
 const default_linux_env: string = 'apama_env';
 const default_windows_env: string = 'apama_env.bat';
 const default_linux_source: string = '. ';
@@ -34,6 +36,7 @@ export class ApamaEnvironment {
   private cmd_deploy: string;
   private cmd_inject: string;
   private cmd_project: string;
+  private cmd_management: string;
 
   constructor( private logger:OutputChannel ) {
     this.workspaceConfig = workspace.getConfiguration(confignode);
@@ -66,6 +69,7 @@ export class ApamaEnvironment {
       this.cmd_deploy = join(this.apamaHome, 'bin', default_linux_deploy);
       this.cmd_inject = join(this.apamaHome, 'bin', default_linux_inject);
       this.cmd_project = join(this.apamaHome, 'bin', default_linux_project);
+      this.cmd_management = join(this.apamaHome, 'bin', default_linux_management);
     }
     else {
       this.cmd_source = default_windows_source;
@@ -74,6 +78,7 @@ export class ApamaEnvironment {
       this.cmd_deploy = join(this.apamaHome, 'bin', default_windows_deploy);
       this.cmd_inject = join(this.apamaHome, 'bin', default_windows_inject);
       this.cmd_project = join(this.apamaHome, 'bin', default_windows_project);
+      this.cmd_management = join(this.apamaHome, 'bin', default_windows_management);
     }
 
 
@@ -105,6 +110,12 @@ export class ApamaEnvironment {
   getApamaProjectCmdline(): string {
     let r = this.sourceEnv() + ' && ' + this.cmd_project + ' '; 
     this.logger.appendLine('startProject ' + r);
+    return r;
+  }
+
+  getManagerCmdline(): string {
+    let r = this.sourceEnv() + ' && ' + this.cmd_management + ' '; 
+    this.logger.appendLine('startManager ' + r);
     return r;
   }
 

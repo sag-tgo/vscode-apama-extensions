@@ -11,12 +11,10 @@ export class ApamaRunner {
   stderr: string = '';
 
   constructor(public name: string, public command: string, private logger: OutputChannel) {
-    logger.appendLine("Created " + this.name);
   }
 
   async run(workingDir: string, args: string[]): Promise<any> {
     //if fails returns promise.reject including err 
-    this.logger.appendLine("Running in " + workingDir);
     return await exec(this.command + ' ' + args.join(' '), { cwd: workingDir });
   }
 }
@@ -27,22 +25,16 @@ export class ApamaAsyncRunner {
   stdout: string = '';
   stderr: string = '';
   child?: ChildProcess;
-  correlatorPid: number;
 
   constructor(public name: string, public command: string, private logger: OutputChannel) {
     this.logger = window.createOutputChannel(this.name);
     this.logger.show();
-    logger.appendLine("Created " + this.name);
-    this.correlatorPid = -1;
   }
 
   public start(args: string[]): ChildProcess {
 
     if (this.child && !this.child.killed) {
       this.logger.appendLine(this.name + " already started, stopping...");
-      if( this.correlatorPid !== -1) {
-        process.kill(this.correlatorPid , 'SIGKILL');
-      }
       this.child.kill('SIGKILL');
     }
 
@@ -57,14 +49,6 @@ export class ApamaAsyncRunner {
     this.child.once('exit', (exitCode) => this.logger.appendLine(this.name + " stopped, exit code: " + exitCode));
     this.child.stdout.setEncoding('utf8');
     this.child.stdout.on('data', (data: string) => {
-
-      if (data.includes("Running with process Id")) {
-        let result: RegExpMatchArray | null = data.match("/Running with process Id (\d+)/gi");
-        if (result !== null) {
-          this.correlatorPid = +result[1];
-        }
-      }
-
       if (this.logger) {
         this.logger.append(data);
       }
@@ -81,17 +65,14 @@ export class ApamaAsyncRunner {
         });
 
         this.logger.appendLine("Correlator stopping...");
-        if( this.correlatorPid !== -1) {
-          process.kill(this.correlatorPid , 'SIGKILL');
-        }
         this.child.kill('SIGINT');
         const attemptedToKill = this.child;
         setTimeout(() => {
           if (!attemptedToKill.killed) {
-            this.logger.appendLine("Failed to stop correlator in 30 seconds, killing...");
+            this.logger.appendLine("Failed to stop shell in 5 seconds, killing...");
             attemptedToKill.kill('SIGKILL');
           }
-        }, 30000);
+        }, 5000);
       } else {
         resolve();
       }
