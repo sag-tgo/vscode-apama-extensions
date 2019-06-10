@@ -83,8 +83,6 @@ export class ApamaProjectView implements TreeDataProvider<string | ApamaTreeItem
 				commands.registerCommand('extension.apamaProjects.apamaToolAddBundles', (project: ApamaProject) => {
 					this.apama_project.run(project.fsDir, ['list', 'bundles'])
 						.then((result) => {
-							//whole output is a list of bundles we can add :
-							//logger.appendLine( stdout );
 							let lines: string[] = result.stdout.split(/\r?\n/);
 							let displayList: QuickPickItem[] = [];
 							lines.forEach((item) => {
@@ -132,7 +130,8 @@ export class ApamaProjectView implements TreeDataProvider<string | ApamaTreeItem
 				// Placeholder for clicking on a bundle/project - will open files possibly or navigate to the right directory.
 				//
 				commands.registerCommand('extension.apamaProjects.SelectItem', (document: TextDocument) => {
-					this.logger.appendLine(document.fileName);
+					//this.logger.appendLine(document.fileName);
+					return;
 				}),
 
 				//
@@ -161,7 +160,6 @@ export class ApamaProjectView implements TreeDataProvider<string | ApamaTreeItem
 		//if this is a bundle - then there are no children
 		if (item && item.contextValue === "bundle") {
 			if( item.items.length === 0 ) {
-				this.logger.appendLine("noChildren : " + item.toString());
 				return [];
 			}
 			else {
@@ -184,6 +182,7 @@ export class ApamaProjectView implements TreeDataProvider<string | ApamaTreeItem
 			return await this.workspaceList[item.ws.index].items;
 		}
 
+		//Root nodes
 		return this.workspaceList;
 	}
 

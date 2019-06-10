@@ -96,14 +96,13 @@ export class ApamaProject extends TreeItem  implements ApamaTreeItem {
 					indentation = indentation - current.length;
 
 					if( indentation === 12) {
-						previousBundle.instance = true;
+						previousBundle.instance = true; //TODO : this is wrong the thing im creating here is an instance...
 						previousBundle.items.push(new BundleItem(this.logger, current, this.fsDir,this.ws,this.apama_project));
 					} else {
 						if( previousBundle !== undefined) {
-							this.logger.appendLine(`Adding : ${previousBundle.label}`);
 							items.push( previousBundle );
 						}
-						this.logger.appendLine(`Creating : ${current}`);
+						//this.logger.appendLine(`Creating : ${current}`);
 						previousBundle = new BundleItem(this.logger, current, this.fsDir,this.ws,this.apama_project);
 					}
 
@@ -115,14 +114,14 @@ export class ApamaProject extends TreeItem  implements ApamaTreeItem {
 				} else if (item.search("Bundles that can be added:") > -1) {
 					//if we have dropped out add the last bundle 
 					if( previousBundle !== undefined ){
-						this.logger.appendLine(`Adding : ${previousBundle.label}`);
+						//this.logger.appendLine(`Adding : ${previousBundle.label}`);
 						items.push( previousBundle );
 					}
 					withinInstalledRegion = false;
 				}
 			}
 		});
-		this.logger.appendLine(`Bundles Added : ${this.label} => ${items.length}`);
+		//this.logger.appendLine(`Bundles Added : ${this.label} => ${items.length}`);
 		return items;
 	}
 }

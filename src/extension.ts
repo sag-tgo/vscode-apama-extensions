@@ -5,7 +5,7 @@ import * as path from 'path';
 import { Disposable, ExtensionContext, workspace, debug, OutputChannel, window } from 'vscode';
 import {
 	LanguageClient, LanguageClientOptions, ServerOptions,
-	TransportKind, ForkOptions, WorkspaceFolder
+	TransportKind, ForkOptions
 } from 'vscode-languageclient';
 
 import {ApamaConfigurationProvider} from './apama_debug/apamadebugconfig';

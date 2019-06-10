@@ -94,9 +94,6 @@ documents.onDidChangeContent((change) => {
 
 
 connection.onCompletion((textDocumentPosition: TextDocumentPositionParams): Promise<Array<CompletionItem> >  => {
-  if ( maxNumberOfProblems <= 0 ) {
-    console.log("hello");
-  }
 	return new Promise<Array<CompletionItem> >((resolve) => {
 		let textDoc: TextDocument | undefined = documents.get(textDocumentPosition.textDocument.uri);
 
