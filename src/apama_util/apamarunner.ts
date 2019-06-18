@@ -1,7 +1,6 @@
 import { OutputChannel, window } from 'vscode';
 import { promisify } from 'util';
 import { ChildProcess, spawn } from 'child_process';
-import { rejects } from 'assert';
 
 const exec = promisify(require('child_process').exec);
 
@@ -31,28 +30,45 @@ export class ApamaAsyncRunner {
     this.logger.show();
   }
 
-  public start(args: string[]): ChildProcess {
+  //
+  // If you call this withShell = true it will run the command under that shell 
+  // this means the process may need to be managed separately as it may get detached 
+  // when you kill the parent (correlator behaves that way)
+  // I use engine_management to control the running correlator
+  //
+  // TODO: pipes configuration might be worth passing as an argument
+  //
+  public start(args: string[], withShell: boolean, defaultHandlers: boolean): ChildProcess {
 
+    //N.B. this potentially will leave the correlator running - future work required...
     if (this.child && !this.child.killed) {
       this.logger.appendLine(this.name + " already started, stopping...");
       this.child.kill('SIGKILL');
-    }
+    } 
 
     this.logger.appendLine("Starting " + this.name);
     this.child = spawn(this.command + args.join(' '), {
-      shell: true,
-      stdio: ['ignore', 'pipe', 'pipe']
+      shell: withShell,
+      stdio: ['pipe', 'pipe', 'pipe']
     });
-    //Running with process Id
-    this.logger.appendLine("Shell started, PID:" + this.child.pid);
 
-    this.child.once('exit', (exitCode) => this.logger.appendLine(this.name + " stopped, exit code: " + exitCode));
-    this.child.stdout.setEncoding('utf8');
-    this.child.stdout.on('data', (data: string) => {
-      if (this.logger) {
-        this.logger.append(data);
-      }
-    });
+    //Running with process Id
+    this.logger.appendLine(this.name + " started, PID:" + this.child.pid);
+
+
+    //Notify the logger if it stopped....
+    this.child.once('exit', 
+      (exitCode) => this.logger.appendLine(this.name + " stopped, exit code: " + exitCode)
+    );
+
+    if( defaultHandlers ) {
+      this.child.stdout.setEncoding('utf8');
+      this.child.stdout.on('data', (data: string) => {
+        if (this.logger) {
+          this.logger.append(data);
+        }
+      });
+    }
 
     return this.child;
   }
@@ -64,7 +80,7 @@ export class ApamaAsyncRunner {
           resolve();
         });
 
-        this.logger.appendLine("Correlator stopping...");
+        this.logger.appendLine("Process "+ this.name + " stopping...");
         this.child.kill('SIGINT');
         const attemptedToKill = this.child;
         setTimeout(() => {

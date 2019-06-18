@@ -84,7 +84,7 @@ export class CorrelatorDebugSession extends DebugSession {
 	 */
 	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
 		this.logger.appendLine("Launch requested on port " + this.config.port.toString());
-		const correlatorProcess = this.correlatorCmd.start(this.config.args.concat(['-p',this.config.port.toString()]));
+		const correlatorProcess = this.correlatorCmd.start(this.config.args.concat(['-p',this.config.port.toString()]),true,true);
 
 		correlatorProcess.stderr.setEncoding('utf8');
 		correlatorProcess.stderr.on('data', (data: string) => this.sendEvent(new OutputEvent(data, 'stderr')));

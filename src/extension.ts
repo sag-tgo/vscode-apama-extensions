@@ -2,7 +2,7 @@
 
 import * as path from 'path';
 
-import { Disposable, ExtensionContext, workspace, debug, OutputChannel, window } from 'vscode';
+import { Disposable, ExtensionContext, workspace, debug, OutputChannel, window, tasks } from 'vscode';
 import {
 	LanguageClient, LanguageClientOptions, ServerOptions,
 	TransportKind, ForkOptions
@@ -11,16 +11,14 @@ import {
 import {ApamaConfigurationProvider} from './apama_debug/apamadebugconfig';
 import { ApamaProjectView } from './apama_project/apamaProjectView';
 import { ApamaEnvironment } from './apama_util/apamaenvironment';
-
-
-let projView: ApamaProjectView;
-let logger:OutputChannel; 
+import { ApamaProcessView } from './apama_project/apamaProcessView';
+import { ApamaTaskProvider } from './apama_util/apamataskprovider';
 //
 // client activation function, this is the entrypoint for the client
 //
 export function activate(context: ExtensionContext): void {
 	let commands: Disposable[] = [];
-	logger = window.createOutputChannel('Apama Extension');
+	const logger = window.createOutputChannel('Apama Extension');
 	logger.show();
 	logger.appendLine('Started EPL language server');
 
@@ -30,9 +28,12 @@ export function activate(context: ExtensionContext): void {
 	if (workspace.workspaceFolders !== undefined) {
 
 		logger.appendLine('Starting EPL language server');
-		projView = new ApamaProjectView(apamaEnv, logger, workspace.workspaceFolders ,context);
+		const projView = new ApamaProjectView(apamaEnv, logger, workspace.workspaceFolders ,context);
+		const procView = new ApamaProcessView(apamaEnv,logger,context);
 		const provider = new ApamaConfigurationProvider(logger,apamaEnv);
+		const taskProvider = new ApamaTaskProvider(logger,apamaEnv);
 		context.subscriptions.push(debug.registerDebugConfigurationProvider('apama', provider));
+		context.subscriptions.push(tasks.registerTaskProvider('apama',taskProvider ));
     context.subscriptions.push(provider);
 	}
 

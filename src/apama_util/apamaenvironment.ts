@@ -15,6 +15,8 @@ const default_linux_project: string = 'apama_project';
 const default_windows_project: string = 'apama_project.exe';
 const default_linux_management: string = 'engine_management';
 const default_windows_management: string = 'engine_management.exe';
+const default_linux_eplbuddy: string = 'eplbuddy';
+const default_windows_eplbuddy: string = 'eplbuddy.exe';
 const default_linux_env: string = 'apama_env';
 const default_windows_env: string = 'apama_env.bat';
 const default_linux_source: string = '. ';
@@ -37,6 +39,7 @@ export class ApamaEnvironment {
   private cmd_inject: string;
   private cmd_project: string;
   private cmd_management: string;
+  private cmd_eplbuddy: string;
 
   constructor( private logger:OutputChannel ) {
     this.workspaceConfig = workspace.getConfiguration(confignode);
@@ -70,6 +73,7 @@ export class ApamaEnvironment {
       this.cmd_inject = join(this.apamaHome, 'bin', default_linux_inject);
       this.cmd_project = join(this.apamaHome, 'bin', default_linux_project);
       this.cmd_management = join(this.apamaHome, 'bin', default_linux_management);
+      this.cmd_eplbuddy = join(this.apamaHome, 'bin', default_linux_eplbuddy);
     }
     else {
       this.cmd_source = default_windows_source;
@@ -79,6 +83,7 @@ export class ApamaEnvironment {
       this.cmd_inject = join(this.apamaHome, 'bin', default_windows_inject);
       this.cmd_project = join(this.apamaHome, 'bin', default_windows_project);
       this.cmd_management = join(this.apamaHome, 'bin', default_windows_management);
+      this.cmd_eplbuddy = join(this.apamaHome, 'bin', default_windows_eplbuddy);
     }
 
 
@@ -119,4 +124,9 @@ export class ApamaEnvironment {
     return r;
   }
 
+  getEplBuddyCmdline(): string {
+    let r = this.sourceEnv() + ' && ' + this.cmd_eplbuddy + ' '; 
+    this.logger.appendLine('starteplBuddy ' + r);
+    return r;
+  }
 }
