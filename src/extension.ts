@@ -29,12 +29,12 @@ export function activate(context: ExtensionContext): void {
 
 		logger.appendLine('Starting EPL language server');
 		const projView = new ApamaProjectView(apamaEnv, logger, workspace.workspaceFolders ,context);
-		const procView = new ApamaProcessView(apamaEnv,logger,context);
+		//const procView = new ApamaProcessView(apamaEnv,logger,context);
 		const provider = new ApamaConfigurationProvider(logger,apamaEnv);
 		const taskProvider = new ApamaTaskProvider(logger,apamaEnv);
 		context.subscriptions.push(debug.registerDebugConfigurationProvider('apama', provider));
 		context.subscriptions.push(tasks.registerTaskProvider('apama',taskProvider ));
-    context.subscriptions.push(provider);
+		context.subscriptions.push(provider);
 	}
 
 

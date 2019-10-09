@@ -246,10 +246,6 @@
         {
           "id": "apamaProjects",
           "name": "Apama Projects"
-        },
-        {
-          "id": "apamaProcesses",
-          "name": "Apama Processes"
         }
       ]
     },
@@ -290,7 +286,6 @@
     "taskDefinitions": [
       {
         "type": "Apama",
-        "isBackground": true,
         "properties": {
           "port": {
             "type": "number",
