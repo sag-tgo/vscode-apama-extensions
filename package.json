@@ -51,14 +51,6 @@
         }
       },
       {
-        "command": "extension.apamaProcess.newCorrelator",
-        "title": "Add Correlator",
-        "icon": {
-          "light": "resources/light/add.svg",
-          "dark": "resources/dark/add.svg"
-        }
-      },
-      {
         "command": "extension.apamaProjects.apamaToolDeployProject",
         "title": "Deploy Project",
         "icon": {
@@ -68,14 +60,6 @@
       },
       {
         "command": "extension.apamaProjects.refresh",
-        "title": "Refresh",
-        "icon": {
-          "light": "resources/light/refresh.svg",
-          "dark": "resources/dark/refresh.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProcess.refresh",
         "title": "Refresh",
         "icon": {
           "light": "resources/light/refresh.svg",
@@ -115,46 +99,6 @@
         }
       },
       {
-        "command": "extension.apamaProcess.start",
-        "title": "Run",
-        "icon": {
-          "light": "resources/light/start.svg",
-          "dark": "resources/dark/start.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProcess.stop",
-        "title": "Stop",
-        "icon": {
-          "light": "resources/light/stop.svg",
-          "dark": "resources/dark/stop.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProcess.startWatcher",
-        "title": "Watch",
-        "icon": {
-          "light": "resources/light/eye.svg",
-          "dark": "resources/dark/eye.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProcess.stopWatcher",
-        "title": "Stop Watcher",
-        "icon": {
-          "light": "resources/light/stop.svg",
-          "dark": "resources/dark/stop.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProcess.inject",
-        "title": "Inject EPL",
-        "icon": {
-          "light": "resources/light/syringe.svg",
-          "dark": "resources/dark/syringe.svg"
-        }
-      },
-      {
         "command": "extension.apamaProjects.closeGroup",
         "title": "Close Group",
         "icon": {
@@ -186,44 +130,9 @@
           "command": "extension.apamaProjects.refresh",
           "when": "view == apamaProjects",
           "group": "navigation"
-        },
-        {
-          "when": "view == apamaProcesses",
-          "command": "extension.apamaProcess.newCorrelator",
-          "group": "navigation"
-        },
-        {
-          "when": "view == apamaProcesses",
-          "command": "extension.apamaProcess.refresh",
-          "group": "navigation"
         }
       ],
       "view/item/context": [
-        {
-          "when": "view == apamaProcesses && viewItem == correlator",
-          "command": "extension.apamaProcess.start",
-          "group": "inline@1"
-        },
-        {
-          "when": "view == apamaProcesses && viewItem == correlator",
-          "command": "extension.apamaProcess.stop",
-          "group": "inline@1"
-        },
-        {
-          "when": "view == apamaProcesses && viewItem == correlator",
-          "command": "extension.apamaProcess.inject",
-          "group": "inline@1"
-        },
-        {
-          "when": "view == apamaProcesses && viewItem == correlator",
-          "command": "extension.apamaProcess.startWatcher",
-          "group": "inline@1"
-        },
-        {
-          "when": "view == apamaProcesses && viewItem == watcher",
-          "command": "extension.apamaProcess.stopWatcher",
-          "group": "inline@1"
-        },
         {
           "when": "view == apamaProjects && viewItem == project",
           "command": "extension.apamaProjects.apamaToolDeployProject",
@@ -246,10 +155,6 @@
         {
           "id": "apamaProjects",
           "name": "Apama Projects"
-        },
-        {
-          "id": "apamaProcesses",
-          "name": "Apama Processes"
         }
       ]
     },
@@ -290,7 +195,6 @@
     "taskDefinitions": [
       {
         "type": "Apama",
-        "isBackground": true,
         "properties": {
           "port": {
             "type": "number",

@@ -11,7 +11,6 @@ import {
 import {ApamaConfigurationProvider} from './apama_debug/apamadebugconfig';
 import { ApamaProjectView } from './apama_project/apamaProjectView';
 import { ApamaEnvironment } from './apama_util/apamaenvironment';
-import { ApamaProcessView } from './apama_project/apamaProcessView';
 import { ApamaTaskProvider } from './apama_util/apamataskprovider';
 //
 // client activation function, this is the entrypoint for the client
@@ -25,16 +24,15 @@ export function activate(context: ExtensionContext): void {
 	let apamaEnv:ApamaEnvironment = new ApamaEnvironment(logger);
 
 	// this is the code for the side bar apama-project parts.
-	if (workspace.workspaceFolders !== undefined) {
+	if (workspace.workspaceFolders !== undefined) {  
 
 		logger.appendLine('Starting EPL language server');
 		const projView = new ApamaProjectView(apamaEnv, logger, workspace.workspaceFolders ,context);
-		const procView = new ApamaProcessView(apamaEnv,logger,context);
 		const provider = new ApamaConfigurationProvider(logger,apamaEnv);
 		const taskProvider = new ApamaTaskProvider(logger,apamaEnv);
 		context.subscriptions.push(debug.registerDebugConfigurationProvider('apama', provider));
 		context.subscriptions.push(tasks.registerTaskProvider('apama',taskProvider ));
-    context.subscriptions.push(provider);
+    	context.subscriptions.push(provider);
 	}
 
 
