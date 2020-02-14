@@ -15,11 +15,14 @@ contexts[] {
       : include "using";
       : include "event";
       : include "monitor";
+      : include "containertypes";
+      : include "types";
       : include "comments";
    }
 
    using : context {
       : pattern {
+         uid      = uid_using
          regex \= (using|package)(\s+)([a-zA-Z]+[.a-zA-Z]*)(;)
          styles[] = .keyword, .ws,  .identifier , .body;
       }
@@ -27,13 +30,15 @@ contexts[] {
    
    punctuation : context {
       : pattern {
-         regex \= (\+|\-|\*|=|,|>|<|;)
+         uid      = uid_punct
+         regex \= (\+|\-|\*|=|,|>|<|;|\s)
          styles[] = .punctuation;
       }
    }
 
    constants : context {
       : pattern {
+         uid      = uid_constants
          regex \= (\b)($${__constants})(\b)
          styles[] = .constants;
       }
@@ -41,6 +46,7 @@ contexts[] {
 
    numeric : context {
       : pattern {
+         uid      = uid_numeric
          regex \= (\b)($${__number})(\b)
          styles[] = .numeric;
       }
@@ -48,6 +54,7 @@ contexts[] {
 
    keywords : context {
       : pattern {
+         uid      = uid_keywords
          regex \= (\b)$${__keywords}(\b)
          styles[] = .keyword;
       }
@@ -55,6 +62,7 @@ contexts[] {
 
    types : context {
       : pattern {
+         uid      = uid_types
          regex \= (\b)$${__types}(\b)
          styles[] = .ws,.type, .ws;
       }
@@ -62,10 +70,12 @@ contexts[] {
 
    containertypes : context {
       : pattern {
+         uid      = uid_containertypes
          regex \= $${__container_types}
          styles[] = .type;
       }
       : inline_push {
+         uid      = uid_containertypes_param
          regex         \= (\<)
          styles []      = .punctuation;
          : pop {
@@ -74,6 +84,7 @@ contexts[] {
          }
          : include "containertypes";
          : pattern {
+            uid      = uid_containertypes_param_types
             regex \= $${__types}
             styles[] = .type;
          }      
@@ -83,14 +94,17 @@ contexts[] {
 
    comments : context {
         : pattern {
+            uid      = uid_comments
             regex         \= (//.*)
             styles[]       = .comment;
         }
         : inline_push {
+            uid      = uid_comments_block
             regex         \= (/\*)
             styles []      = .comment;
             default_style  = .comment
             : pop {
+               uid      = uid_comments_block
                regex      \= (.*?\*/)
                styles []   = .comment;
             }
@@ -99,6 +113,7 @@ contexts[] {
    
    string : context {
       : push {
+         uid      = uid_string
          regex         \= (")
          styles []      = .punctuation;
          context []     = inside_quotes;
@@ -111,10 +126,12 @@ contexts[] {
          styles []   = .punctuation;
       }
       : pattern {
+         uid      = uid_string_esc
          regex      \= (\\(?:\\|"))
          styles [] = .escaped_text;
       }
       : pattern {
+         uid      = uid_string_content
          regex      \= ([^"\\]+)
          styles [] = .quoted_text;
       }
@@ -123,6 +140,7 @@ contexts[] {
     
    assignment : context {
       : pattern {
+         uid      = uid_assign
          regex \= $${__id}(\s?)(\:=)
          styles []   = .identifier, .ws, .punctuation;
       }
@@ -130,6 +148,7 @@ contexts[] {
 
    method : context {
       : push {
+         uid      = uid_method
          regex         \= \b(\.)$${__id}(\s?)(\()
          styles []      = .punctuation, .identifier, .ws, .parameters;
          context []     = parameters;
@@ -138,6 +157,7 @@ contexts[] {
 
    member : context {
       : pattern {
+         uid      = uid_member
          regex         \= \b(\.)$${__id}\b
          styles []      = .punctuation, .identifier;
       }
@@ -145,68 +165,206 @@ contexts[] {
 
    bareVariable : context {
       : pattern {
+         uid      = uid_barevar
          regex         \= \b$${__id}\b
          styles []      =  .identifier;
       }
   }
 
    array : context {
-      : push {
+      : inline_push {
+         uid      = uid_array
          regex         \= (\[)
          styles []      = .punctuation;
-         context []     = inside_array;
+         : pop {
+            regex      \= (\])
+            styles []   = .punctuation;
+         }
+         : include "string";
+         : include "punctuation";
+         : include "constants";
+         : include "numeric";
       }
   }
-  
-   inside_array : context {
-      : pop {
-         regex      \= (\])
-         styles []   = .punctuation;
+
+
+   while_loop : context {
+      : pattern {
+         uid      = uid_while
+         regex \= (\s?)(while)(\s?)
+         styles[] = .ws,.keyword, .ws;
       }
-      : include "string";
-      : include "punctuation";
-      : include "constants";
-      : include "numeric";
+      : inline_push {
+         regex \= (\()
+         styles[] = .parameters;
+         : include "while_loop_expr";
+      }
+      : inline_push {
+         regex \= (\{)
+         styles[] = .body;
+         : include "body";
+      }
    }
+
+   while_loop_expr : context {
+      : pop {
+         regex \= (\))
+         styles[] = .parameters;
+      }
+      : include "types";
+      : include "array";
+      : include "punctuation";
+      : include "string";
+      : include "numeric";
+      : include "constants";
+      : include "member";
+      : include "bareVariable";
+  }
+
+
 
    event : context {
       : pattern {
-         regex \= (event)(\s+)$${__id}
-         styles[] = .keyword, .ws, .identifier;
+         uid      = uid_event
+         regex \= (event)(\s+)$${__id}(\s?)
+         styles[] = .keyword, .ws, .identifier, .ws;
       }
-      : push {
+      : inline_push {
+         uid      = uid_event_body
          regex \= (\{)
          styles[] = .body;
-         context[] = body;
+         : pop {
+         uid      = uid_event_body
+            regex \= (})
+            styles[] = .body;
+         }
+         : include "keywords";
+         : include "array";
+         : include "action";
+         : include "while_loop";
+         : include "comments";
+         : include "string";
+         : include "assignment";
+         : include "punctuation";
+         : include "constants";
+         : include "types";
+         : include "containertypes";
+         : include "method";
+         : include "numeric";
       }
    }
 
    action : context {
       : pattern {
-         regex \= (action)(\s+)$${__id}
-         styles[] = .keyword, .ws, .identifier;
+         uid      = uid_action
+         regex \= (\s?)(action)(\s+)$${__id}(\s?)
+         styles[] = .ws,.keyword, .ws, .identifier, .ws;
       }
-      : push {
+      : inline_push {
+         uid      = uid_action_parm
          regex \= (\()
          styles[] = .parameters;
-         context[] = parameters;
+         : pop {
+            uid      = uid_action_parm
+            regex \= (\s?)(\))(\s?)
+            styles[] = .parameters;
+         }
+         : include "types";
+         : include "array";
+         : include "containertypes";
+         : include "punctuation";
+         : include "string";
+         : include "numeric";
+         : include "constants";
+         : include "member";
+         : include "bareVariable";
       }
-      : push {
+      : inline_push {
+         uid      = uid_action_body
+         regex \= (\s?)(\{)(\s?)
+         styles[] = .ws, .body, .ws;
+         : pop {
+            uid      = uid_action_body
+            regex \= (})
+            styles[] = .body;
+         }
+         : include "keywords";
+         : include "array";
+         : include "action";
+         : include "while_loop";
+         : include "comments";
+         : include "string";
+         : include "assignment";
+         : include "punctuation";
+         : include "constants";
+         : include "types";
+         : include "containertypes";
+         : include "method";
+         : include "numeric";
+         : include "listener";
+      }
+   }
+
+   listener : context {
+      : pattern {
+         uid      = uid_listener_all
+         regex \= (\s?)(on)(\s+)(all)(\s+)$${__id}(\s?) 
+         styles[] = .ws,.keyword, .ws, .keyword, .ws,.identifier, .ws ;
+      }
+      : pattern {
+         uid      = uid_listener
+         regex \= (\s?)(on)(\s+)$${__id}(\s?)
+         styles[] = .ws,.keyword, .ws,.identifier, .ws;
+      }
+      : inline_push {
+         regex \= (\()
+         styles[] = .parameters;
+         : include "parameters";
+      }
+      : inline_push {
+         regex \= (\s?)(:)(\s?)
+         styles[] = .ws,.parameters,.ws;
+         : include "listener_variable";
+      }
+      : inline_push {
+         regex \= (\s+)(as)(\s+)
+         styles[] = .ws,.parameters,.ws;
+         : include "listener_variable";
+      }
+      : inline_push {
          regex \= (\{)
          styles[] = .body;
-         context[] = body;
+         : include "body";
       }
    }
 
    monitor : context {
       : pattern {
-         regex \= (monitor)(\s+)$${__id}(\s?)
-         styles[] = .keyword, .ws, .identifier,.ws;
+         uid      = uid_monitor
+         regex \= (\s?)(monitor)(\s+)$${__id}
+         styles[] = .ws,.keyword, .ws, .identifier;
       }
-      : push {
-         regex \= (\{)
-         styles[] = .body;
-         context[] = body;
+      : inline_push {
+         uid      = uid_monitor_body
+         regex \= (\s?)(\{)(\s?)
+         styles[] = .ws,.body,.ws;
+         : pop {
+            regex \= (})
+            styles[] = .body;
+         }
+         : include "keywords";
+         : include "array";
+         : include "action";
+         : include "while_loop";
+         : include "comments";
+         : include "string";
+         : include "assignment";
+         : include "punctuation";
+         : include "constants";
+         : include "types";
+         : include "containertypes";
+         : include "method";
+         : include "numeric";
       }
    }
 
@@ -216,6 +374,9 @@ contexts[] {
          styles[] = .body;
       }
       : include "keywords";
+      : include "array";
+      : include "action";
+      : include "while_loop";
       : include "comments";
       : include "string";
       : include "assignment";
@@ -223,17 +384,18 @@ contexts[] {
       : include "constants";
       : include "types";
       : include "containertypes";
-      : include "action";
       : include "method";
       : include "numeric";
   }
 
+   
    parameters : context {
       : pop {
          regex \= (\))
          styles[] = .parameters;
       }
       : include "types";
+      : include "array";
       : include "containertypes";
       : include "punctuation";
       : include "string";
@@ -243,6 +405,21 @@ contexts[] {
       : include "bareVariable";
   }
   
+   listener_variable : context {
+      : pop {
+         regex \= (\s+)
+         styles[] = .parameters;
+      }
+      : include "types";
+      : include "array";
+      : include "containertypes";
+      : include "punctuation";
+      : include "string";
+      : include "numeric";
+      : include "constants";
+      : include "member";
+      : include "bareVariable";
+  }
 }
 
 

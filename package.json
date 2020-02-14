@@ -10,10 +10,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onView:apamaProjectBundles",
-    "onLanguage:epl",
-    "onLanguage:yaml",
-    "onDebug"
+    "onLanguage:epl"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -42,220 +39,15 @@
       }
     ],
     "commands": [
-      {
-        "command": "extension.apamaProjects.apamaToolCreateProject",
-        "title": "Create Project",
-        "icon": {
-          "light": "resources/light/folder.svg",
-          "dark": "resources/dark/folder.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProjects.apamaToolDeployProject",
-        "title": "Deploy Project",
-        "icon": {
-          "light": "resources/light/boolean.svg",
-          "dark": "resources/dark/boolean.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProjects.refresh",
-        "title": "Refresh",
-        "icon": {
-          "light": "resources/light/refresh.svg",
-          "dark": "resources/dark/refresh.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProjects.apamaToolAddBundles",
-        "title": "Add Bundle",
-        "icon": {
-          "light": "resources/light/add.svg",
-          "dark": "resources/dark/add.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProjects.apamaToolRemoveBundle",
-        "title": "Remove Bundle",
-        "icon": {
-          "light": "resources/action-close.svg",
-          "dark": "resources/action-close-dark.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProjects.apamaToolInject",
-        "title": "Inject File"
-      },
-      {
-        "command": "extension.apamaProjects.apamaDebug",
-        "title": "Debug File"
-      },
-      {
-        "command": "extension.apamaProjects.close",
-        "title": "Close",
-        "icon": {
-          "light": "resources/action-close.svg",
-          "dark": "resources/action-close-dark.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProjects.closeGroup",
-        "title": "Close Group",
-        "icon": {
-          "light": "resources/closeall.svg",
-          "dark": "resources/closeall_inverse.svg"
-        }
-      }
     ],
     "menus": {
       "explorer/context": [
-        {
-          "when": "resourceLangId == epl",
-          "command": "extension.apamaProjects.apamaToolInject",
-          "group": "Apama@1"
-        },
-        {
-          "when": "resourceLangId == epl",
-          "command": "extension.apamaProjects.apamaDebug",
-          "group": "Apama@1"
-        }
       ],
       "view/title": [
-        {
-          "when": "view == apamaProjects",
-          "command": "extension.apamaProjects.apamaToolCreateProject",
-          "group": "navigation"
-        },
-        {
-          "command": "extension.apamaProjects.refresh",
-          "when": "view == apamaProjects",
-          "group": "navigation"
-        }
       ],
       "view/item/context": [
-        {
-          "when": "view == apamaProjects && viewItem == project",
-          "command": "extension.apamaProjects.apamaToolDeployProject",
-          "group": "inline@1"
-        },
-        {
-          "when": "view == apamaProjects && viewItem == project",
-          "command": "extension.apamaProjects.apamaToolAddBundles",
-          "group": "inline@2"
-        },
-        {
-          "when": "view == apamaProjects && viewItem == bundle",
-          "command": "extension.apamaProjects.apamaToolRemoveBundle",
-          "group": "inline"
-        }
       ]
-    },
-    "views": {
-      "explorer": [
-        {
-          "id": "apamaProjects",
-          "name": "Apama Projects"
-        }
-      ]
-    },
-    "configuration": {
-      "type": "object",
-      "title": "Apama configuration",
-      "properties": {
-        "eplLanguageServer.apamaHome": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "default": null,
-          "description": "The Apama install directory."
-        },
-        "eplLanguageServer.maxNumberOfProblems": {
-          "type": "number",
-          "default": 100,
-          "description": "Controls the maximum number of problems produced by the server."
-        },
-        "eplLanguageServer.trace.server": {
-          "type": "string",
-          "enum": [
-            "off",
-            "messages",
-            "verbose"
-          ],
-          "default": "off",
-          "description": "Traces the communication between VSCode and the eplLanguageServer service."
-        }
-      }
-    },
-    "breakpoints": [
-      {
-        "language": "epl"
-      }
-    ],
-    "taskDefinitions": [
-      {
-        "type": "Apama",
-        "properties": {
-          "port": {
-            "type": "number",
-            "description": "The port on which to run the correlator",
-            "default": 15903
-          },
-          "args": {
-            "type": "array",
-            "description": "List of arguments and values to provide to the correlator",
-            "default": [
-              "-g"
-            ]
-          }
-        }
-      }
-    ],
-    "problemMatchers": [
-      {
-        "name": "ApamaProblems",
-        "background": {
-          "activeOnStart": true
-        },
-        "pattern": [
-          {
-            "kind": "file",
-            "regexp": "(\\d+\\-\\d+\\-\\d+\\s\\d+\\:\\d+\\:\\d+\\.\\d+)\\s+(WARN|ERROR|FATAL)[^-]+\\-(.*)",
-            "file": 2,
-            "message": 3
-          }
-        ]
-      }
-    ],
-    "debuggers": [
-      {
-        "type": "apama",
-        "label": "Apama",
-        "configurationAttributes": {
-          "launch": {
-            "properties": {
-              "correlator": {
-                "type": "object",
-                "properties": {
-                  "port": {
-                    "type": "number",
-                    "description": "The port on which to run the correlator",
-                    "default": 15903
-                  },
-                  "args": {
-                    "type": "array",
-                    "description": "List of arguments and values to provide to the correlator",
-                    "default": [
-                      "-g"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
