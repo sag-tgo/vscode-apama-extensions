@@ -26,7 +26,6 @@ contexts[] {
       : include "constants";
       : include "types";
       : include "containertypes";
-      : include "method";
       : include "numeric";
    }
 
@@ -155,15 +154,6 @@ contexts[] {
          styles []   = .identifier, .ws, .punctuation;
       }
    }
-
-   method : context {
-      : push {
-         uid      = uid_method
-         regex         \= \b(\.)$${__id}(\s?)(\()
-         styles []      = .punctuation, .identifier, .ws, .parameters;
-         context []     = parameters;
-      }
-  }
 
    member : context {
       : pattern {
