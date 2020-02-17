@@ -27,6 +27,9 @@ contexts[] {
       : include "types";
       : include "containertypes";
       : include "numeric";
+      : include "member";
+      : include "method";
+      : include "bareVariable";
    }
 
    using : context {
@@ -41,7 +44,15 @@ contexts[] {
       : pattern {
          uid      = uid_punct
          regex \= (\+|\-|\*|=|,|>|<|;|\s)
-         styles[] = .punctuation;
+         styles[] = .operators;
+      }
+   }
+
+   brackets : context {
+      : pattern {
+         uid      = uid_brackets
+         regex \= (\(|\)|\{|\})
+         styles[] = .punctuation_br;
       }
    }
 
@@ -86,10 +97,10 @@ contexts[] {
       : inline_push {
          uid      = uid_containertypes_param
          regex         \= (\<)
-         styles []      = .punctuation;
+         styles []      = .punctuation_br;
          : pop {
             regex      \= (\>)
-            styles []   = .punctuation;
+            styles []   = .punctuation_br;
          }
          : include "containertypes";
          : pattern {
@@ -105,7 +116,7 @@ contexts[] {
         : pattern {
             uid      = uid_comments
             regex         \= (//.*)
-            styles[]       = .comment;
+            styles[]       = .comment_line;
         }
         : inline_push {
             uid      = uid_comments_block
@@ -124,7 +135,7 @@ contexts[] {
       : push {
          uid      = uid_string
          regex         \= (")
-         styles []      = .punctuation;
+         styles []      = .punctuation_br;
          context []     = inside_quotes;
       }
    }
@@ -132,7 +143,7 @@ contexts[] {
    inside_quotes : context {
       : pop {
          regex      \= (")
-         styles []   = .punctuation;
+         styles []   = .punctuation_br;
       }
       : pattern {
          uid      = uid_string_esc
@@ -151,7 +162,7 @@ contexts[] {
       : pattern {
          uid      = uid_assign
          regex \= $${__id}(\s?)(\:=)
-         styles []   = .identifier, .ws, .punctuation;
+         styles []   = .identifier, .ws, .operators;
       }
    }
 
@@ -159,7 +170,15 @@ contexts[] {
       : pattern {
          uid      = uid_member
          regex         \= \b(\.)$${__id}\b
-         styles []      = .punctuation, .identifier;
+         styles []      = .operators, .identifier;
+      }
+  }
+
+   method : context {
+      : pattern {
+         uid      = uid_member
+         regex         \= (\.)$${__id}(\s?)(\()
+         styles []      = .operators, .method,.ws,.punctuation_br;
       }
   }
 
@@ -175,10 +194,10 @@ contexts[] {
       : inline_push {
          uid      = uid_array
          regex         \= (\[)
-         styles []      = .punctuation;
+         styles []      = .punctuation_br;
          : pop {
             regex      \= (\])
-            styles []   = .punctuation;
+            styles []   = .punctuation_br;
          }
          : include "string";
          : include "punctuation";
@@ -201,7 +220,7 @@ contexts[] {
       : pattern {
          uid      = uid_event
          regex \= (\s?)(event)(\s+)$${__id}
-         styles[] = .ws,.keyword, .ws, .identifier;
+         styles[] = .ws,.structure, .ws, .identifier;
       }
    }
 
@@ -209,7 +228,7 @@ contexts[] {
       : pattern {
          uid      = uid_action
          regex \= (\s?)(action)(\s+)$${__id}(\s?)
-         styles[] = .ws,.keyword, .ws, .identifier, .ws;
+         styles[] = .ws,.structure, .ws, .identifier, .ws;
       }
    }
 
@@ -231,7 +250,7 @@ contexts[] {
       : pattern {
          uid      = uid_monitor
          regex \= (\s?)(monitor)(\s+)$${__id}
-         styles[] = .ws,.keyword, .ws, .identifier;
+         styles[] = .ws,.structure, .ws, .identifier;
       }
    }
 }
@@ -241,16 +260,16 @@ styles[] {
    .body : style { 
       color = green 
    }
-   .parameters : style { 
-      color = green 
-      textmate_scope  = variable.parameter
-   }
    .ws : style { 
       color = green 
    }
    .keyword : style { 
       color = red 
       textmate_scope  = keyword
+   }
+   .structure : style { 
+      color = light_blue 
+      textmate_scope  = entity.name.type
    }
    .identifier : style { 
       color = yellow 
@@ -262,27 +281,39 @@ styles[] {
    }
    .constants : style { 
       color = yellow 
-      textmate_scope  = constant
+      textmate_scope  = constant.language
    }
    .type : style { 
       color = blue
       textmate_scope  = entity.name.type
    }
-   .punctuation : style {
+   .operators : style {
+      color = orange
+      textmate_scope  = keyword.operator
+   }
+   .punctuation_br : style {
       color = orange
       textmate_scope  = punctuation
    }
    .quoted_text : style {
        color = light_yellow
-       textmate_scope  = string
+       textmate_scope  = string.quoted
    }
    .escaped_text : style {
-       color = light_yellow
-       textmate_scope  = string
+       color = yellow
+       textmate_scope  = string.quoted.other
    }
    .comment    : style {
        color = light_green
-       textmate_scope  = comment
+       textmate_scope  = comment.block
+   }
+   .comment_line    : style {
+       color = light_green
+       textmate_scope  = comment.line
+   }
+   .method    : style {
+       color = light_yellow
+       textmate_scope  = entity.name.function
    }
 }
 
