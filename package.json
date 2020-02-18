@@ -2,7 +2,7 @@
   "name": "apama-language-server",
   "displayName": "apama-language-server",
   "description": "A language server for EPL applications",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "engines": {
     "vscode": "^1.32.0"
   },
