@@ -1,7 +1,7 @@
 {
   "publisher": "cariboujohn",
-  "name": "apama-language-server",
-  "displayName": "apama-language-server",
+  "name": "apama-extensions",
+  "displayName": "apama-extensions",
   "description": "A language server for EPL applications",
   "version": "0.5.0",
   "repository": {
