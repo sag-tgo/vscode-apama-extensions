@@ -3,7 +3,7 @@
   "name": "apama-extensions",
   "displayName": "apama-extensions",
   "description": "A language server for EPL applications",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/CaribouJohn/vscode-apama-extensions"
