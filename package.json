@@ -34,7 +34,7 @@
       {
         "language": "epl",
         "scopeName": "source.epl",
-        "path": "./src/syntaxes/epl.tmLanguage.json"
+        "path": "./epl.tmLanguage.json"
       }
     ],
     "snippets": [
