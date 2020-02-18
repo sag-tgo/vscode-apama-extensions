@@ -2,7 +2,7 @@
   "name": "apama-language-server",
   "displayName": "apama-language-server",
   "description": "A language server for EPL applications",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.32.0"
   },
@@ -38,15 +38,11 @@
         "path": "./src/snippets/epl.json"
       }
     ],
-    "commands": [
-    ],
+    "commands": [],
     "menus": {
-      "explorer/context": [
-      ],
-      "view/title": [
-      ],
-      "view/item/context": [
-      ]
+      "explorer/context": [],
+      "view/title": [],
+      "view/item/context": []
     }
   },
   "scripts": {
