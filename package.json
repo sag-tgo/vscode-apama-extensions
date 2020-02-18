@@ -1,4 +1,5 @@
 {
+  "publisher": "cariboujohn",
   "name": "apama-language-server",
   "displayName": "apama-language-server",
   "description": "A language server for EPL applications",
