@@ -19,6 +19,16 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration" :{
+      "title": "Apama",
+      "properties": {
+        "softwareag.apama.apamahome" : {
+          "type" : "string",
+          "default" : "c:\\softwareag\\apama",
+          "description" : "Home directory for the Apama installation."
+        }
+      }
+    },
     "languages": [
       {
         "id": "epl",

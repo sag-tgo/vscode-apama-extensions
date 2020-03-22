@@ -4,7 +4,7 @@ import { join } from 'path';
 
 
 
-const confignode: string = 'eplLanguageServer';
+const confignode: string = 'softwareag.apama';
 const default_linux_correlator: string = 'correlator';
 const default_windows_correlator: string = 'correlator.exe';
 const default_linux_deploy: string = 'engine_deploy';
@@ -41,21 +41,30 @@ export class ApamaEnvironment {
   private cmd_management: string;
   private cmd_eplbuddy: string;
 
-  constructor( private logger:OutputChannel ) {
+  constructor( private logger:OutputChannel ) { 
     this.workspaceConfig = workspace.getConfiguration(confignode);
-
     this.isLinux = (platform() === 'linux');
-    if (this.isLinux) {
-      this.apamaHome = '/opt/softwareag/Apama';
-    }
-    else {
-      this.apamaHome = join('C:', 'SoftwareAG', 'Apama');
-    }
+    this.apamaHome = '';
 
-    //overridden in config? 
-    if (this.workspaceConfig.has('apamaHome')) {
+    //applications
+    //make sure separators correct for paths 
+      this.cmd_source = '';
+      this.cmd_env = '';
+      this.cmd_correlator = '';
+      this.cmd_deploy = '';
+      this.cmd_inject =  '';
+      this.cmd_project = '';
+      this.cmd_management = '';
+      this.cmd_eplbuddy = '';
+      this.updateCommands();
+  }
+
+  private updateCommands() {
+    this.workspaceConfig = workspace.getConfiguration(confignode);
+   //overridden in config? 
+    if (this.workspaceConfig.has('apamahome')) {
       //shouldn't be undefined here because has checks, but for linting need to cover
-      this.apamaHome = this.workspaceConfig.get('apamaHome') || this.apamaHome;
+      this.apamaHome = this.workspaceConfig.get('apamahome') || this.apamaHome;
     }
     else {
       //otherwise set default in config
@@ -90,10 +99,12 @@ export class ApamaEnvironment {
   }
 
   sourceEnv(): string {
+    this.updateCommands();
     return this.cmd_source + this.cmd_env + ' ';
   }
 
   getCorrelatorCmdline(): string {
+    this.updateCommands();
     let r = this.sourceEnv() + ' && ' + this.cmd_correlator + ' '; 
     this.logger.appendLine('startCorrelator ' + r);
     return r;
@@ -101,30 +112,35 @@ export class ApamaEnvironment {
 
   //doesn't need environment
   getDeployCmdline(): string {
+    this.updateCommands();
     let r = this.cmd_deploy + ' '; 
     this.logger.appendLine('startDeploy ' + r);
     return r;
   }
 
   getInjectCmdline(): string {
+    this.updateCommands();
     let r = this.sourceEnv() + ' && ' + this.cmd_inject + ' '; 
     this.logger.appendLine('startInject ' + r);
     return r;
   }
 
   getApamaProjectCmdline(): string {
+    this.updateCommands();
     let r = this.sourceEnv() + ' && ' + this.cmd_project + ' '; 
     this.logger.appendLine('startProject ' + r);
     return r;
   }
 
   getManagerCmdline(): string {
+    this.updateCommands();
     let r = this.sourceEnv() + ' && ' + this.cmd_management + ' '; 
     this.logger.appendLine('startManager ' + r);
     return r;
   }
 
   getEplBuddyCmdline(): string {
+    this.updateCommands();
     let r = this.sourceEnv() + ' && ' + this.cmd_eplbuddy + ' '; 
     this.logger.appendLine('starteplBuddy ' + r);
     return r;
