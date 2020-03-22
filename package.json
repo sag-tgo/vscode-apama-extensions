@@ -1,8 +1,13 @@
 {
-  "name": "apama-language-server",
-  "displayName": "apama-language-server",
+  "publisher": "cariboujohn",
+  "name": "apama-extensions",
+  "displayName": "apama-extensions",
   "description": "A language server for EPL applications",
-  "version": "0.0.1",
+  "version": "0.9.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CaribouJohn/vscode-apama-extensions"
+  },
   "engines": {
     "vscode": "^1.32.0"
   },
@@ -10,10 +15,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onView:apamaProjectBundles",
-    "onLanguage:epl",
-    "onLanguage:yaml",
-    "onDebug"
+    "onLanguage:epl"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -32,7 +34,7 @@
       {
         "language": "epl",
         "scopeName": "source.epl",
-        "path": "./src/syntaxes/epl.tmLanguage.json"
+        "path": "./epl.tmLanguage.json"
       }
     ],
     "snippets": [
@@ -41,312 +43,12 @@
         "path": "./src/snippets/epl.json"
       }
     ],
-    "commands": [
-      {
-        "command": "extension.apamaProjects.apamaToolCreateProject",
-        "title": "Create Project",
-        "icon": {
-          "light": "resources/light/folder.svg",
-          "dark": "resources/dark/folder.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProcess.newCorrelator",
-        "title": "Add Correlator",
-        "icon": {
-          "light": "resources/light/add.svg",
-          "dark": "resources/dark/add.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProjects.apamaToolDeployProject",
-        "title": "Deploy Project",
-        "icon": {
-          "light": "resources/light/boolean.svg",
-          "dark": "resources/dark/boolean.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProjects.refresh",
-        "title": "Refresh",
-        "icon": {
-          "light": "resources/light/refresh.svg",
-          "dark": "resources/dark/refresh.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProcess.refresh",
-        "title": "Refresh",
-        "icon": {
-          "light": "resources/light/refresh.svg",
-          "dark": "resources/dark/refresh.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProjects.apamaToolAddBundles",
-        "title": "Add Bundle",
-        "icon": {
-          "light": "resources/light/add.svg",
-          "dark": "resources/dark/add.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProjects.apamaToolRemoveBundle",
-        "title": "Remove Bundle",
-        "icon": {
-          "light": "resources/action-close.svg",
-          "dark": "resources/action-close-dark.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProjects.apamaToolInject",
-        "title": "Inject File"
-      },
-      {
-        "command": "extension.apamaProjects.apamaDebug",
-        "title": "Debug File"
-      },
-      {
-        "command": "extension.apamaProjects.close",
-        "title": "Close",
-        "icon": {
-          "light": "resources/action-close.svg",
-          "dark": "resources/action-close-dark.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProcess.start",
-        "title": "Run",
-        "icon": {
-          "light": "resources/light/start.svg",
-          "dark": "resources/dark/start.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProcess.stop",
-        "title": "Stop",
-        "icon": {
-          "light": "resources/light/stop.svg",
-          "dark": "resources/dark/stop.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProcess.startWatcher",
-        "title": "Watch",
-        "icon": {
-          "light": "resources/light/eye.svg",
-          "dark": "resources/dark/eye.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProcess.stopWatcher",
-        "title": "Stop Watcher",
-        "icon": {
-          "light": "resources/light/stop.svg",
-          "dark": "resources/dark/stop.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProcess.inject",
-        "title": "Inject EPL",
-        "icon": {
-          "light": "resources/light/syringe.svg",
-          "dark": "resources/dark/syringe.svg"
-        }
-      },
-      {
-        "command": "extension.apamaProjects.closeGroup",
-        "title": "Close Group",
-        "icon": {
-          "light": "resources/closeall.svg",
-          "dark": "resources/closeall_inverse.svg"
-        }
-      }
-    ],
+    "commands": [],
     "menus": {
-      "explorer/context": [
-        {
-          "when": "resourceLangId == epl",
-          "command": "extension.apamaProjects.apamaToolInject",
-          "group": "Apama@1"
-        },
-        {
-          "when": "resourceLangId == epl",
-          "command": "extension.apamaProjects.apamaDebug",
-          "group": "Apama@1"
-        }
-      ],
-      "view/title": [
-        {
-          "when": "view == apamaProjects",
-          "command": "extension.apamaProjects.apamaToolCreateProject",
-          "group": "navigation"
-        },
-        {
-          "command": "extension.apamaProjects.refresh",
-          "when": "view == apamaProjects",
-          "group": "navigation"
-        },
-        {
-          "when": "view == apamaProcesses",
-          "command": "extension.apamaProcess.newCorrelator",
-          "group": "navigation"
-        },
-        {
-          "when": "view == apamaProcesses",
-          "command": "extension.apamaProcess.refresh",
-          "group": "navigation"
-        }
-      ],
-      "view/item/context": [
-        {
-          "when": "view == apamaProcesses && viewItem == correlator",
-          "command": "extension.apamaProcess.start",
-          "group": "inline@1"
-        },
-        {
-          "when": "view == apamaProcesses && viewItem == correlator",
-          "command": "extension.apamaProcess.stop",
-          "group": "inline@1"
-        },
-        {
-          "when": "view == apamaProcesses && viewItem == correlator",
-          "command": "extension.apamaProcess.inject",
-          "group": "inline@1"
-        },
-        {
-          "when": "view == apamaProcesses && viewItem == correlator",
-          "command": "extension.apamaProcess.startWatcher",
-          "group": "inline@1"
-        },
-        {
-          "when": "view == apamaProcesses && viewItem == watcher",
-          "command": "extension.apamaProcess.stopWatcher",
-          "group": "inline@1"
-        },
-        {
-          "when": "view == apamaProjects && viewItem == project",
-          "command": "extension.apamaProjects.apamaToolDeployProject",
-          "group": "inline@1"
-        },
-        {
-          "when": "view == apamaProjects && viewItem == project",
-          "command": "extension.apamaProjects.apamaToolAddBundles",
-          "group": "inline@2"
-        },
-        {
-          "when": "view == apamaProjects && viewItem == bundle",
-          "command": "extension.apamaProjects.apamaToolRemoveBundle",
-          "group": "inline"
-        }
-      ]
-    },
-    "views": {
-      "explorer": [
-        {
-          "id": "apamaProjects",
-          "name": "Apama Projects"
-        }
-      ]
-    },
-    "configuration": {
-      "type": "object",
-      "title": "Apama configuration",
-      "properties": {
-        "eplLanguageServer.apamaHome": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "default": null,
-          "description": "The Apama install directory."
-        },
-        "eplLanguageServer.maxNumberOfProblems": {
-          "type": "number",
-          "default": 100,
-          "description": "Controls the maximum number of problems produced by the server."
-        },
-        "eplLanguageServer.trace.server": {
-          "type": "string",
-          "enum": [
-            "off",
-            "messages",
-            "verbose"
-          ],
-          "default": "off",
-          "description": "Traces the communication between VSCode and the eplLanguageServer service."
-        }
-      }
-    },
-    "breakpoints": [
-      {
-        "language": "epl"
-      }
-    ],
-    "taskDefinitions": [
-      {
-        "type": "Apama",
-        "properties": {
-          "port": {
-            "type": "number",
-            "description": "The port on which to run the correlator",
-            "default": 15903
-          },
-          "args": {
-            "type": "array",
-            "description": "List of arguments and values to provide to the correlator",
-            "default": [
-              "-g"
-            ]
-          }
-        }
-      }
-    ],
-    "problemMatchers": [
-      {
-        "name": "ApamaProblems",
-        "background": {
-          "activeOnStart": true
-        },
-        "pattern": [
-          {
-            "kind": "file",
-            "regexp": "(\\d+\\-\\d+\\-\\d+\\s\\d+\\:\\d+\\:\\d+\\.\\d+)\\s+(WARN|ERROR|FATAL)[^-]+\\-(.*)",
-            "file": 2,
-            "message": 3
-          }
-        ]
-      }
-    ],
-    "debuggers": [
-      {
-        "type": "apama",
-        "label": "Apama",
-        "configurationAttributes": {
-          "launch": {
-            "properties": {
-              "correlator": {
-                "type": "object",
-                "properties": {
-                  "port": {
-                    "type": "number",
-                    "description": "The port on which to run the correlator",
-                    "default": 15903
-                  },
-                  "args": {
-                    "type": "array",
-                    "description": "List of arguments and values to provide to the correlator",
-                    "default": [
-                      "-g"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    ]
+      "explorer/context": [],
+      "view/title": [],
+      "view/item/context": []
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -357,27 +59,30 @@
   },
   "devDependencies": {
     "@types/mocha": "^2.2.42",
-    "@types/node": "^10.14.21",
-    "tslint": "^5.20.0",
-    "typescript": "^3.6.3",
-    "vscode": "^1.1.36"
+    "@types/node": "^10.17.15",
+    "ts-loader": "^6.2.1",
+    "tslint": "^5.20.1",
+    "typescript": "^3.7.5",
+    "vscode": "^1.1.36",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11"
   },
   "dependencies": {
     "@types/glob": "^7.1.1",
-    "@types/js-yaml": "^3.12.0",
-    "@types/request": "^2.48.3",
+    "@types/js-yaml": "^3.12.2",
+    "@types/request": "^2.48.4",
     "@types/request-promise-native": "^1.0.17",
-    "@types/shelljs": "^0.8.5",
+    "@types/shelljs": "^0.8.6",
     "@types/xmldom": "^0.1.29",
-    "glob": "^7.1.3",
+    "glob": "^7.1.6",
     "js-yaml": "^3.13.1",
-    "jsonschema": "^1.2.4",
-    "request-promise-native": "^1.0.7",
+    "jsonschema": "^1.2.5",
+    "request-promise-native": "^1.0.8",
     "shelljs": "^0.8.3",
-    "vscode-debugadapter": "^1.37.1",
+    "vscode-debugadapter": "^1.38.0",
     "vscode-languageclient": "^5.2.1",
     "vscode-languageserver": "^5.3.0-next.10",
-    "xmldom": "^0.1.27",
+    "xmldom": "^0.1.31",
     "xpath": "0.0.27"
   }
 }

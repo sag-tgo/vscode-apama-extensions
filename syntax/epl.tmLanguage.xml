@@ -42,143 +42,19 @@
         </dict>
         <dict>
           <key>include</key>
-          <string>#comments</string>
+          <string>#keywords</string>
         </dict>
-       </array>
-    </dict>
-    <key>action</key>
-    <dict>
-      <key>patterns</key>
-      <array> 
-        <dict>
-          <key>match</key>
-          <string>(action)(\s+)([a-zA-Z][0-9a-zA-Z]*(?:_[0-9a-zA-Z]+)*)</string>
-          <key>captures</key>
-          <dict>
-            <key>1</key>
-            <dict>
-              <key>name</key>
-              <string>keyword.epl</string>
-            </dict>
-            <key>2</key>
-            <dict>
-              <key>name</key>
-              <string>text.epl</string>
-            </dict>
-            <key>3</key>
-            <dict>
-              <key>name</key>
-              <string>variable.epl</string>
-            </dict>
-          </dict>
-        </dict>
-        <dict>
-          <key>begin</key>
-          <string>(\()</string>
-          <key>beginCaptures</key>
-          <dict>
-            <key>1</key>
-            <dict>
-              <key>name</key>
-              <string>variable.parameter.epl</string>
-            </dict>
-          </dict>
-          <key>patterns</key>
-          <array> 
-            <dict>
-              <key>include</key>
-              <string>#parameters</string>
-            </dict>
-           </array>
-          <key>end</key>
-          <string>(\))</string>
-          <key>endCaptures</key>
-          <dict>
-            <key>1</key>
-            <dict>
-              <key>name</key>
-              <string>variable.parameter.epl</string>
-            </dict>
-          </dict>
-        </dict>
-        <dict>
-          <key>begin</key>
-          <string>(\{)</string>
-          <key>beginCaptures</key>
-          <dict>
-            <key>1</key>
-            <dict>
-              <key>name</key>
-              <string>text.epl</string>
-            </dict>
-          </dict>
-          <key>patterns</key>
-          <array> 
-            <dict>
-              <key>include</key>
-              <string>#body</string>
-            </dict>
-           </array>
-          <key>end</key>
-          <string>(})</string>
-          <key>endCaptures</key>
-          <dict>
-            <key>1</key>
-            <dict>
-              <key>name</key>
-              <string>text.epl</string>
-            </dict>
-          </dict>
-        </dict>
-       </array>
-    </dict>
-    <key>assignment</key>
-    <dict>
-      <key>patterns</key>
-      <array> 
-        <dict>
-          <key>match</key>
-          <string>([a-zA-Z][0-9a-zA-Z]*(?:_[0-9a-zA-Z]+)*)(\s?)(\:=)</string>
-          <key>captures</key>
-          <dict>
-            <key>1</key>
-            <dict>
-              <key>name</key>
-              <string>variable.epl</string>
-            </dict>
-            <key>2</key>
-            <dict>
-              <key>name</key>
-              <string>text.epl</string>
-            </dict>
-            <key>3</key>
-            <dict>
-              <key>name</key>
-              <string>punctuation.epl</string>
-            </dict>
-          </dict>
-        </dict>
-       </array>
-    </dict>
-    <key>bareVariable</key>
-    <dict>
-      <key>patterns</key>
-      <array> 
-        <dict>
-          <key>match</key>
-          <string>\b([a-zA-Z][0-9a-zA-Z]*(?:_[0-9a-zA-Z]+)*)\b</string>
-          <key>name</key>
-          <string>variable.epl</string>
-        </dict>
-       </array>
-    </dict>
-    <key>body</key>
-    <dict>
-      <key>patterns</key>
-      <array> 
         <dict>
           <key>include</key>
-          <string>#keywords</string>
+          <string>#array</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#action</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#while_loop</string>
         </dict>
         <dict>
           <key>include</key>
@@ -210,7 +86,11 @@
         </dict>
         <dict>
           <key>include</key>
-          <string>#action</string>
+          <string>#numeric</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#member</string>
         </dict>
         <dict>
           <key>include</key>
@@ -218,7 +98,120 @@
         </dict>
         <dict>
           <key>include</key>
-          <string>#numeric</string>
+          <string>#bareVariable</string>
+        </dict>
+       </array>
+    </dict>
+    <key>action</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>match</key>
+          <string>(\s?)(action)(\s+)([a-zA-Z][0-9a-zA-Z]*(?:_[0-9a-zA-Z]+)*)(\s?)</string>
+          <key>captures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>text.epl</string>
+            </dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>entity.name.type.epl</string>
+            </dict>
+            <key>3</key>
+            <dict>
+              <key>name</key>
+              <string>text.epl</string>
+            </dict>
+            <key>4</key>
+            <dict>
+              <key>name</key>
+              <string>variable.epl</string>
+            </dict>
+            <key>5</key>
+            <dict>
+              <key>name</key>
+              <string>text.epl</string>
+            </dict>
+          </dict>
+        </dict>
+       </array>
+    </dict>
+    <key>array</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>begin</key>
+          <string>(\[)</string>
+          <key>beginCaptures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>punctuation.epl</string>
+            </dict>
+          </dict>
+          <key>patterns</key>
+          <array> 
+            <dict>
+              <key>include</key>
+              <string>#uid_array</string>
+            </dict>
+           </array>
+          <key>end</key>
+          <string>(\])</string>
+          <key>endCaptures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>punctuation.epl</string>
+            </dict>
+          </dict>
+        </dict>
+       </array>
+    </dict>
+    <key>assignment</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>match</key>
+          <string>([a-zA-Z][0-9a-zA-Z]*(?:_[0-9a-zA-Z]+)*)(\s?)(\:=)</string>
+          <key>captures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>variable.epl</string>
+            </dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>text.epl</string>
+            </dict>
+            <key>3</key>
+            <dict>
+              <key>name</key>
+              <string>keyword.operator.epl</string>
+            </dict>
+          </dict>
+        </dict>
+       </array>
+    </dict>
+    <key>bareVariable</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>match</key>
+          <string>\b([a-zA-Z][0-9a-zA-Z]*(?:_[0-9a-zA-Z]+)*)\b</string>
+          <key>name</key>
+          <string>variable.epl</string>
         </dict>
        </array>
     </dict>
@@ -230,7 +223,7 @@
           <key>match</key>
           <string>(//.*)</string>
           <key>name</key>
-          <string>comment.epl</string>
+          <string>comment.line.epl</string>
         </dict>
         <dict>
           <key>begin</key>
@@ -240,11 +233,11 @@
             <key>1</key>
             <dict>
               <key>name</key>
-              <string>comment.epl</string>
+              <string>comment.block.epl</string>
             </dict>
           </dict>
           <key>contentName</key>
-          <string>comment.epl</string>
+          <string>comment.block.epl</string>
           <key>end</key>
           <string>(.*?\*/)</string>
           <key>endCaptures</key>
@@ -252,16 +245,10 @@
             <key>1</key>
             <dict>
               <key>name</key>
-              <string>comment.epl</string>
+              <string>comment.block.epl</string>
             </dict>
           </dict>
         </dict>
-       </array>
-    </dict>
-    <key>comments__1</key>
-    <dict>
-      <key>patterns</key>
-      <array> 
        </array>
     </dict>
     <key>constants</key>
@@ -272,7 +259,7 @@
           <key>match</key>
           <string>(\b)(true|false|INFO|DEBUG|WARN|ERROR)(\b)</string>
           <key>name</key>
-          <string>constant.epl</string>
+          <string>constant.language.epl</string>
         </dict>
        </array>
     </dict>
@@ -301,7 +288,7 @@
           <array> 
             <dict>
               <key>include</key>
-              <string>#containertypes__1</string>
+              <string>#uid_containertypes_param</string>
             </dict>
            </array>
           <key>end</key>
@@ -317,98 +304,36 @@
         </dict>
        </array>
     </dict>
-    <key>containertypes__1</key>
-    <dict>
-      <key>patterns</key>
-      <array> 
-        <dict>
-          <key>include</key>
-          <string>#containertypes</string>
-        </dict>
-        <dict>
-          <key>match</key>
-          <string>(decimal|float|integer|string|boolean|any|listener|channel|context)</string>
-          <key>name</key>
-          <string>entity.name.type.epl</string>
-        </dict>
-       </array>
-    </dict>
     <key>event</key>
     <dict>
       <key>patterns</key>
       <array> 
         <dict>
           <key>match</key>
-          <string>(event)(\s+)([a-zA-Z][0-9a-zA-Z]*(?:_[0-9a-zA-Z]+)*)</string>
+          <string>(\s?)(event)(\s+)([a-zA-Z][0-9a-zA-Z]*(?:_[0-9a-zA-Z]+)*)</string>
           <key>captures</key>
           <dict>
             <key>1</key>
             <dict>
               <key>name</key>
-              <string>keyword.epl</string>
+              <string>text.epl</string>
             </dict>
             <key>2</key>
             <dict>
               <key>name</key>
-              <string>text.epl</string>
+              <string>entity.name.type.epl</string>
             </dict>
             <key>3</key>
+            <dict>
+              <key>name</key>
+              <string>text.epl</string>
+            </dict>
+            <key>4</key>
             <dict>
               <key>name</key>
               <string>variable.epl</string>
             </dict>
           </dict>
-        </dict>
-        <dict>
-          <key>begin</key>
-          <string>(\{)</string>
-          <key>beginCaptures</key>
-          <dict>
-            <key>1</key>
-            <dict>
-              <key>name</key>
-              <string>text.epl</string>
-            </dict>
-          </dict>
-          <key>patterns</key>
-          <array> 
-            <dict>
-              <key>include</key>
-              <string>#body</string>
-            </dict>
-           </array>
-          <key>end</key>
-          <string>(})</string>
-          <key>endCaptures</key>
-          <dict>
-            <key>1</key>
-            <dict>
-              <key>name</key>
-              <string>text.epl</string>
-            </dict>
-          </dict>
-        </dict>
-       </array>
-    </dict>
-    <key>inside_array</key>
-    <dict>
-      <key>patterns</key>
-      <array> 
-        <dict>
-          <key>include</key>
-          <string>#string</string>
-        </dict>
-        <dict>
-          <key>include</key>
-          <string>#punctuation</string>
-        </dict>
-        <dict>
-          <key>include</key>
-          <string>#constants</string>
-        </dict>
-        <dict>
-          <key>include</key>
-          <string>#numeric</string>
         </dict>
        </array>
     </dict>
@@ -420,13 +345,13 @@
           <key>match</key>
           <string>(\\(?:\\|&quot;))</string>
           <key>name</key>
-          <string>string.epl</string>
+          <string>string.quoted.other.epl</string>
         </dict>
         <dict>
           <key>match</key>
           <string>([^\x{0022}\x{005c}]+)</string>
           <key>name</key>
-          <string>string.epl</string>
+          <string>string.quoted.epl</string>
         </dict>
        </array>
     </dict>
@@ -454,7 +379,7 @@
             <key>1</key>
             <dict>
               <key>name</key>
-              <string>punctuation.epl</string>
+              <string>keyword.operator.epl</string>
             </dict>
             <key>2</key>
             <dict>
@@ -470,19 +395,19 @@
       <key>patterns</key>
       <array> 
         <dict>
-          <key>begin</key>
-          <string>\b(\.)([a-zA-Z][0-9a-zA-Z]*(?:_[0-9a-zA-Z]+)*)(\s?)(\()</string>
-          <key>beginCaptures</key>
+          <key>match</key>
+          <string>(\.)([a-zA-Z][0-9a-zA-Z]*(?:_[0-9a-zA-Z]+)*)(\s?)(\()</string>
+          <key>captures</key>
           <dict>
             <key>1</key>
             <dict>
               <key>name</key>
-              <string>punctuation.epl</string>
+              <string>keyword.operator.epl</string>
             </dict>
             <key>2</key>
             <dict>
               <key>name</key>
-              <string>variable.epl</string>
+              <string>entity.name.function.epl</string>
             </dict>
             <key>3</key>
             <dict>
@@ -492,24 +417,7 @@
             <key>4</key>
             <dict>
               <key>name</key>
-              <string>variable.parameter.epl</string>
-            </dict>
-          </dict>
-          <key>patterns</key>
-          <array> 
-            <dict>
-              <key>include</key>
-              <string>#parameters</string>
-            </dict>
-           </array>
-          <key>end</key>
-          <string>(\))</string>
-          <key>endCaptures</key>
-          <dict>
-            <key>1</key>
-            <dict>
-              <key>name</key>
-              <string>variable.parameter.epl</string>
+              <string>punctuation.epl</string>
             </dict>
           </dict>
         </dict>
@@ -521,57 +429,28 @@
       <array> 
         <dict>
           <key>match</key>
-          <string>(monitor)(\s+)([a-zA-Z][0-9a-zA-Z]*(?:_[0-9a-zA-Z]+)*)(\s?)</string>
+          <string>(\s?)(monitor)(\s+)([a-zA-Z][0-9a-zA-Z]*(?:_[0-9a-zA-Z]+)*)</string>
           <key>captures</key>
           <dict>
             <key>1</key>
             <dict>
               <key>name</key>
-              <string>keyword.epl</string>
+              <string>text.epl</string>
             </dict>
             <key>2</key>
             <dict>
               <key>name</key>
-              <string>text.epl</string>
+              <string>entity.name.type.epl</string>
             </dict>
             <key>3</key>
             <dict>
               <key>name</key>
-              <string>variable.epl</string>
+              <string>text.epl</string>
             </dict>
             <key>4</key>
             <dict>
               <key>name</key>
-              <string>text.epl</string>
-            </dict>
-          </dict>
-        </dict>
-        <dict>
-          <key>begin</key>
-          <string>(\{)</string>
-          <key>beginCaptures</key>
-          <dict>
-            <key>1</key>
-            <dict>
-              <key>name</key>
-              <string>text.epl</string>
-            </dict>
-          </dict>
-          <key>patterns</key>
-          <array> 
-            <dict>
-              <key>include</key>
-              <string>#body</string>
-            </dict>
-           </array>
-          <key>end</key>
-          <string>(})</string>
-          <key>endCaptures</key>
-          <dict>
-            <key>1</key>
-            <dict>
-              <key>name</key>
-              <string>text.epl</string>
+              <string>variable.epl</string>
             </dict>
           </dict>
         </dict>
@@ -589,53 +468,15 @@
         </dict>
        </array>
     </dict>
-    <key>parameters</key>
-    <dict>
-      <key>patterns</key>
-      <array> 
-        <dict>
-          <key>include</key>
-          <string>#types</string>
-        </dict>
-        <dict>
-          <key>include</key>
-          <string>#containertypes</string>
-        </dict>
-        <dict>
-          <key>include</key>
-          <string>#punctuation</string>
-        </dict>
-        <dict>
-          <key>include</key>
-          <string>#string</string>
-        </dict>
-        <dict>
-          <key>include</key>
-          <string>#numeric</string>
-        </dict>
-        <dict>
-          <key>include</key>
-          <string>#constants</string>
-        </dict>
-        <dict>
-          <key>include</key>
-          <string>#member</string>
-        </dict>
-        <dict>
-          <key>include</key>
-          <string>#bareVariable</string>
-        </dict>
-       </array>
-    </dict>
     <key>punctuation</key>
     <dict>
       <key>patterns</key>
       <array> 
         <dict>
           <key>match</key>
-          <string>(\+|\-|\*|=|,|&gt;|&lt;|;)</string>
+          <string>(\+|\-|\*|=|,|&gt;|&lt;|;|\s)</string>
           <key>name</key>
-          <string>punctuation.epl</string>
+          <string>keyword.operator.epl</string>
         </dict>
        </array>
     </dict>
@@ -702,6 +543,50 @@
         </dict>
        </array>
     </dict>
+    <key>uid_array</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>include</key>
+          <string>#string</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#punctuation</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#constants</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#numeric</string>
+        </dict>
+       </array>
+    </dict>
+    <key>uid_comments_block</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+       </array>
+    </dict>
+    <key>uid_containertypes_param</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>include</key>
+          <string>#containertypes</string>
+        </dict>
+        <dict>
+          <key>match</key>
+          <string>(decimal|float|integer|string|boolean|any|listener|channel|context)</string>
+          <key>name</key>
+          <string>entity.name.type.epl</string>
+        </dict>
+       </array>
+    </dict>
     <key>using</key>
     <dict>
       <key>patterns</key>
@@ -727,6 +612,34 @@
               <string>variable.epl</string>
             </dict>
             <key>4</key>
+            <dict>
+              <key>name</key>
+              <string>text.epl</string>
+            </dict>
+          </dict>
+        </dict>
+       </array>
+    </dict>
+    <key>while_loop</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>match</key>
+          <string>(\s?)(while)(\s?)</string>
+          <key>captures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>text.epl</string>
+            </dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>keyword.epl</string>
+            </dict>
+            <key>3</key>
             <dict>
               <key>name</key>
               <string>text.epl</string>
