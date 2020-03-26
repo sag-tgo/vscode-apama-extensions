@@ -5,7 +5,7 @@ import { execFileSync } from 'child_process';
 import { CorrelatorDebugSession, normalizeCorrelatorFilePath } from './correlatorDebugSession';
 import { ApamaEnvironment } from '../apama_util/apamaenvironment';
 
-export class ApamaConfigurationProvider implements DebugConfigurationProvider {
+export class ApamaDebugConfigurationProvider implements DebugConfigurationProvider {
 
     private _server?: Net.Server;
     
@@ -86,10 +86,12 @@ export class ApamaConfigurationProvider implements DebugConfigurationProvider {
 }
 
 function getInjectionList(apamaEnv: ApamaEnvironment, workspaceFolderPath: string) {
-    return execFileSync(apamaEnv.getDeployCmdline(), ['--outputList', 'stdout', workspaceFolderPath], {
-            encoding: 'utf8'
-        })
-        .split(/\r?\n/)
-        .filter(fileName => fileName !== '')
-        .map(normalizeCorrelatorFilePath);
+
+    let cmd : string = apamaEnv.getDeployCmdline();
+    let output: string = execFileSync(cmd , ['--outputList', 'stdout', workspaceFolderPath], {
+        encoding: 'utf8'
+    });
+
+    //split the lines, remove blanks and then normalise for the correlator
+    return output.split(/\r?\n/).filter( filename => filename !== '' ).map( normalizeCorrelatorFilePath );
 }
