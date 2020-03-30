@@ -54,11 +54,103 @@
         "path": "./src/snippets/epl.json"
       }
     ],
-    "commands": [],
+    "commands": [
+      {
+        "command": "extension.apamaProjects.apamaToolCreateProject",
+        "title": "Create Project",
+        "icon": {
+          "light": "resources/light/folder.svg",
+          "dark": "resources/dark/folder.svg"
+        }
+      },
+      {
+        "command": "extension.apamaProjects.apamaToolDeployProject",
+        "title": "Deploy Project",
+        "icon": {
+          "light": "resources/light/boolean.svg",
+          "dark": "resources/dark/boolean.svg"
+        }
+      },
+      {
+        "command": "extension.apamaProjects.refresh",
+        "title": "Refresh",
+        "icon": {
+          "light": "resources/light/refresh.svg",
+          "dark": "resources/dark/refresh.svg"
+        }
+      },
+      {
+        "command": "extension.apamaProjects.apamaToolAddBundles",
+        "title": "Add Bundle",
+        "icon": {
+          "light": "resources/light/add.svg",
+          "dark": "resources/dark/add.svg"
+        }
+      },
+      {
+        "command": "extension.apamaProjects.apamaToolRemoveBundle",
+        "title": "Remove Bundle",
+        "icon": {
+          "light": "resources/action-close.svg",
+          "dark": "resources/action-close-dark.svg"
+        }
+      },
+      {
+        "command": "extension.apamaProjects.close",
+        "title": "Close",
+        "icon": {
+          "light": "resources/action-close.svg",
+          "dark": "resources/action-close-dark.svg"
+        }
+      },
+      {
+        "command": "extension.apamaProjects.closeGroup",
+        "title": "Close Group",
+        "icon": {
+          "light": "resources/closeall.svg",
+          "dark": "resources/closeall_inverse.svg"
+        }
+      }
+    ],
     "menus": {
       "explorer/context": [],
-      "view/title": [],
-      "view/item/context": []
+      "view/title": [
+        {
+          "when": "view == apamaProjects",
+          "command": "extension.apamaProjects.apamaToolCreateProject",
+          "group": "navigation"
+        },
+        {
+          "command": "extension.apamaProjects.refresh",
+          "when": "view == apamaProjects",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "when": "view == apamaProjects && viewItem == project",
+          "command": "extension.apamaProjects.apamaToolDeployProject",
+          "group": "inline@1"
+        },
+        {
+          "when": "view == apamaProjects && viewItem == project",
+          "command": "extension.apamaProjects.apamaToolAddBundles",
+          "group": "inline@2"
+        },
+        {
+          "when": "view == apamaProjects && viewItem == bundle",
+          "command": "extension.apamaProjects.apamaToolRemoveBundle",
+          "group": "inline"
+        }
+      ]    
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "apamaProjects",
+          "name": "Apama Projects"
+        }
+      ]
     },
     "breakpoints": [
       {
