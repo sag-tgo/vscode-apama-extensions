@@ -7,6 +7,7 @@ import { Disposable, ExtensionContext, workspace, debug, OutputChannel, window, 
 import { ApamaEnvironment } from './apama_util/apamaenvironment';
 import { ApamaTaskProvider } from './apama_util/apamataskprovider';
 import { ApamaDebugConfigurationProvider } from './apama_debug/apamadebugconfig';
+import { ApamaProjectView } from './apama_project/apamaProjectView';
 
 //
 // client activation function, this is the entrypoint for the client
@@ -25,6 +26,12 @@ export function activate(context: ExtensionContext): void {
 	context.subscriptions.push(debug.registerDebugConfigurationProvider('apama', provider));
 	context.subscriptions.push(provider);
 
+	//this needs a workspace folder which under some circumstances can be undefined. 
+	//but we can ignore in that case and things shjould still work
+	if (workspace.workspaceFolders !== undefined) 
+	{
+		const projView = new ApamaProjectView(apamaEnv, logger, workspace.workspaceFolders ,context);
+	}
 
 	// Push the disposable to the context's subscriptions so that the 
 	// client can be deactivated on extension deactivation
