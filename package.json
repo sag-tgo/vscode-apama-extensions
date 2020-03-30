@@ -110,6 +110,10 @@
           "light": "resources/closeall.svg",
           "dark": "resources/closeall_inverse.svg"
         }
+      },
+      {
+        "command": "myExtension.sayHello",
+        "title": "Say Hello"
       }
     ],
     "menus": {
