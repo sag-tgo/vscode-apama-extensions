@@ -14,7 +14,7 @@ import {
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { CorrelatorHttpInterface, CorrelatorBreakpoint, CorrelatorPaused } from './correlatorHttpInterface';
 import { basename } from 'path';
-import { OutputChannel } from 'vscode';
+import * as vscode from 'vscode';
 import { ApamaEnvironment } from '../apama_util/apamaenvironment';
 import { ApamaAsyncRunner, ApamaRunner } from '../apama_util/apamarunner';
 
@@ -42,16 +42,18 @@ export interface CorrelatorConfig {
 }
 
 export class CorrelatorDebugSession extends DebugSession {
+	private deployCmd: ApamaRunner;
 	private injectCmd: ApamaRunner;
 	private correlatorCmd: ApamaAsyncRunner;
 	private correlatorHttp: CorrelatorHttpInterface;
 	private manager: ApamaRunner;
-	public constructor(private logger: OutputChannel, apamaEnv: ApamaEnvironment, private config: CorrelatorConfig) {
+	public constructor(private logger: vscode.OutputChannel, apamaEnv: ApamaEnvironment, private config: CorrelatorConfig) {
 		super();
 
 		this.manager = new ApamaRunner("engine_management", apamaEnv.getManagerCmdline(),logger);
 		this.correlatorCmd = new ApamaAsyncRunner("correlator", apamaEnv.getCorrelatorCmdline(), logger);//  (logger, apamaEnv, config);
-		this.injectCmd = new ApamaRunner("injector", apamaEnv.getInjectCmdline(), logger);
+		this.injectCmd = new ApamaRunner("engine_inject", apamaEnv.getInjectCmdline(), logger);
+		this.deployCmd = new ApamaRunner("engine_deploy", apamaEnv.getDeployCmdline(), logger);
 		this.correlatorHttp = new CorrelatorHttpInterface(logger, config.host, config.port);
 	}
 
@@ -94,12 +96,20 @@ export class CorrelatorDebugSession extends DebugSession {
 		});
 
 		this.correlatorHttp.enableDebugging()
-			.then(() => this.correlatorHttp.pause()) // Pause correlator while we wait for the configuration to finish, we want breakpoints to be set first
-			.then(() => this.injectCmd.run('.', 
-				['-p',this.config.port.toString()].concat(
-						args.injectionList.map(filePath => this.convertClientPathToDebugger(filePath)))))
-			.then(() => this.sendEvent(new InitializedEvent())) // We're ready to start recieving breakpoints
-			.then(() => this.sendResponse(response));
+			.then(async () => {
+				// Pause correlator while we wait for the configuration to finish, we want breakpoints to be set first
+				await this.correlatorHttp.pause();
+				const folder = await vscode.window.showWorkspaceFolderPick();
+				if (folder !== undefined) {
+					await this.deployCmd.run('.', ['--inject', this.config.host.toString(), this.config.port.toString()]
+						.concat(folder.uri.fsPath));
+					this.sendEvent(new InitializedEvent()); // We're ready to start recieving breakpoints
+					this.sendResponse(response);
+				}
+			})
+			.catch((error) => {
+				console.error(error);
+			});
 	}
 
 	/**
