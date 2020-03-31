@@ -79,7 +79,7 @@ export function activate(context: vscode.ExtensionContext): void {
 		};
 	
 		// Create the language client and start the client.
-		let langServer: Disposable = new LanguageClient('eplLanguageServer', 'Language Server', serverOptions, clientOptions).start();
+		let langServer: vscode.Disposable = new LanguageClient('eplLanguageServer', 'Language Server', serverOptions, clientOptions).start();
 	
 
 
