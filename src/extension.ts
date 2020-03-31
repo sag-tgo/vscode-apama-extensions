@@ -45,9 +45,8 @@ export function activate(context: ExtensionContext): void {
 	//---------------------------------
 
 		// This is the EPL Buddy application
-		
 		//let serverModule: string = context.asAbsolutePath(path.join('out', 'server.js'));
-		let serverModule: string = apamaEnv.getEplBuddyCmdline();
+		let serverModule: string = apamaEnv.getEplBuddyCmdline(); //needs changing once we have the correct name....
 		
 
 
@@ -55,8 +54,9 @@ export function activate(context: ExtensionContext): void {
 		//let debugOptions: ForkOptions = { execArgv: ["--nolazy", "--inspect=6009"] };
 		let debugOptions: ForkOptions = { execArgv: [] };
 	
-		// If the extension is launched in debug mode then the debug server options are used
-		// Otherwise the  normal ones are used
+		// Start the command in a shell - note that the current EPL buddy doesn't repond 
+		// so this will fail until we do have a working lang-server app
+		// https://github.com/Microsoft/vscode-languageserver-node/issues/358
 		let serverOptions: ServerOptions = {
 			command: serverModule,
 			args: [],
