@@ -86,16 +86,6 @@ export function activate(context: vscode.ExtensionContext): void {
 	// Push the disposable to the context's subscriptions so that the 
 	// client can be deactivated on extension deactivation
 	commands.forEach(command => context.subscriptions.push(command));
-
-	const commands2 = new Map();
-	commands2.set("myExtension.sayHello", (name: string = "world") => {
-		console.log(`Hello ${name}!!!`);
-	});
-
-	for (let [command, commandHandler] of commands2) {
-		context.subscriptions.push(vscode.commands.registerCommand(command, commandHandler));
-	}
-
 }
 
 
