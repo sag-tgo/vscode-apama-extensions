@@ -29,6 +29,11 @@
           "default": "c:\\softwareag\\apama",
           "description": "Home directory for the Apama installation."
         },
+        "softwareag.apama.debugport": {
+          "type": "integer",
+          "default": "15903",
+          "description": "Default port for correlator debugging."
+        },
         "softwareag.c8y.url": {
           "type": "string",
           "default": "https://demos.cumulocity.com/",
@@ -139,10 +144,31 @@
           "light": "resources/closeall.svg",
           "dark": "resources/closeall_inverse.svg"
         }
+      },
+      {
+        "command": "extension.apama.engine_inject",
+        "title": "correlator: engine inject"
+      },
+      {
+        "command": "extension.apama.engine_send",
+        "title": "correlator: engine send"
+      },
+      {
+        "command": "extension.apama.engine_delete",
+        "title": "correlator: engine delete"
       }
     ],
     "menus": {
-      "explorer/context": [],
+      "explorer/context": [
+        {
+          "when": "resourceExtname == .mon",
+          "command": "extension.apama.engine_inject"
+        },
+        {
+          "when": "resourceExtname == .evt",
+          "command": "extension.apama.engine_send"
+        }
+      ],
       "view/title": [
         {
           "when": "view == apamaProjects",

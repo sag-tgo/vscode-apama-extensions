@@ -2,7 +2,7 @@
 
 import * as net from 'net';
 
-import { Disposable, ExtensionContext, workspace, debug, OutputChannel, window, tasks } from 'vscode';
+import * as vscode from 'vscode';
 
 import {
 	LanguageClient, LanguageClientOptions, ServerOptions,
@@ -15,29 +15,34 @@ import { ApamaTaskProvider } from './apama_util/apamataskprovider';
 import { ApamaDebugConfigurationProvider } from './apama_debug/apamadebugconfig';
 import { ApamaProjectView } from './apama_project/apamaProjectView';
 import { cumulocityView } from './c8y/cumulocityView';
+import { ApamaCommandProvider } from './apama_util/commands';//MY CHANGES
 
 //
 // client activation function, this is the entrypoint for the client
 //
-export function activate(context: ExtensionContext): void {
-	let commands: Disposable[] = [];
-	const logger = window.createOutputChannel('Apama Extension');
+export function activate(context: vscode.ExtensionContext): void {
+	let commands: vscode.Disposable[] = [];
+	const logger = vscode.window.createOutputChannel('Apama Extension');
 	logger.show();
 	logger.appendLine('Started EPL Extension');
 
 	let apamaEnv:ApamaEnvironment = new ApamaEnvironment(logger);
 	const taskprov = new ApamaTaskProvider(logger,apamaEnv);
-	context.subscriptions.push(tasks.registerTaskProvider( "apama" , taskprov ));
+	context.subscriptions.push(vscode.tasks.registerTaskProvider( "apama" , taskprov ));
 
 	const provider = new ApamaDebugConfigurationProvider(logger,apamaEnv);
-	context.subscriptions.push(debug.registerDebugConfigurationProvider('apama', provider));
-	context.subscriptions.push(provider);
+
+	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('apama', provider));
+
+  context.subscriptions.push(provider);
+
+	const commandprov = new ApamaCommandProvider(logger, apamaEnv, context);
 
 	//this needs a workspace folder which under some circumstances can be undefined. 
 	//but we can ignore in that case and things shjould still work
-	if (workspace.workspaceFolders !== undefined) 
+	if (vscode.workspace.workspaceFolders !== undefined) 
 	{
-		const projView = new ApamaProjectView(apamaEnv, logger, workspace.workspaceFolders ,context);
+		const projView = new ApamaProjectView(apamaEnv, logger, vscode.workspace.workspaceFolders, context);
 	}
 
 	const c8yView = new cumulocityView(apamaEnv, logger, context);
@@ -46,22 +51,13 @@ export function activate(context: ExtensionContext): void {
 	// Language server start-up and support
 	//---------------------------------
 
-		// This is the EPL Buddy application
-		//let serverModule: string = context.asAbsolutePath(path.join('out', 'server.js'));
-		let serverModule: string = apamaEnv.getEplBuddyCmdline(); //needs changing once we have the correct name....
-		
-
-
-		// The debug options for the server
-		//let debugOptions: ForkOptions = { execArgv: ["--nolazy", "--inspect=6009"] };
-		let debugOptions: ForkOptions = { execArgv: [] };
-	
 		// Start the command in a shell - note that the current EPL buddy doesn't repond 
 		// so this will fail until we do have a working lang-server app
 		// https://github.com/Microsoft/vscode-languageserver-node/issues/358
 
 
-		let langServer: Disposable = startLangServerTCP(12346).start();
+		//start with the connection to the server
+		let langServer: vscode.Disposable = startLangServerTCP(12346).start();
 	
 
 
