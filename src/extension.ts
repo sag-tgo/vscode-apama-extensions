@@ -36,7 +36,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	//but we can ignore in that case and things shjould still work
 	if (vscode.workspace.workspaceFolders !== undefined) 
 	{
-		const projView = new ApamaProjectView(apamaEnv, logger, vscode.workspace.workspaceFolders, context);
+		const projView = new ApamaProjectView(apamaEnv, logger, context);
 	}
 
 

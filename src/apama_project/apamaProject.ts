@@ -1,30 +1,30 @@
-import { OutputChannel, TreeItem, TreeItemCollapsibleState, Command, WorkspaceFolder, Uri, RelativePattern, workspace } from 'vscode';
+import * as vscode from 'vscode';
 import * as path from 'path';
 import { ApamaRunner } from '../apama_util/apamarunner';
 
 
 
 export interface ApamaTreeItem {
-	logger:OutputChannel;
+	logger: vscode.OutputChannel;
 	label: string;
 	fsDir: string;
 	items: ApamaTreeItem[];
 	contextValue: string;
 	instance: boolean;
-	ws: WorkspaceFolder;
+	ws: vscode.WorkspaceFolder;
 	apama_project: ApamaRunner;
 }
 
-export class ApamaProjectWorkspace extends TreeItem implements ApamaTreeItem {
+export class ApamaProjectWorkspace extends vscode.TreeItem implements ApamaTreeItem {
 
 	constructor(
-		public logger:OutputChannel,
+		public logger: vscode.OutputChannel,
 		public readonly label: string,
     public readonly fsDir: string,
-		public ws: WorkspaceFolder,
+		public ws: vscode.WorkspaceFolder,
 		public apama_project: ApamaRunner
     ) {
-		super(label, TreeItemCollapsibleState.Collapsed);
+		super(label, vscode.TreeItemCollapsibleState.Collapsed);
 	}
 
 	items: ApamaProject[] = [];
@@ -36,38 +36,61 @@ export class ApamaProjectWorkspace extends TreeItem implements ApamaTreeItem {
 	//
 	async scanProjects(): Promise<ApamaProject[]> {
 
-		let result: ApamaProject[] = [];
+		const result: ApamaProject[] = [];
 
 		//find .projects, but exclude anything with _deployed suffix
 		//also covers all roots of a multi root workspace
-		let projectsPattern: RelativePattern = new RelativePattern( this.ws , "**/.project" );
-		let ignorePattern: RelativePattern = new RelativePattern( this.ws , "**/*_deployed/**" );
-		let projectNames = await workspace.findFiles( projectsPattern, ignorePattern);
+		const rootPattern: vscode.RelativePattern = new vscode.RelativePattern(this.ws , "/.project");
+		const ignorePattern: vscode.RelativePattern = new vscode.RelativePattern(this.ws , "**/*_deployed/**");
+
+		if (vscode.workspace.workspaceFolders !== undefined) {
+			const rootFolder: vscode.WorkspaceFolder = vscode.workspace.workspaceFolders[0];
+
+			try {
+				const projectFile: vscode.Uri = vscode.Uri.file(rootFolder.uri.fsPath + "/.project");
+				await vscode.workspace.fs.stat(projectFile);
+				// .project file exists in the root...
+				result.push(new ApamaProject(this.logger,
+					path.relative(this.ws.uri.fsPath, path.dirname(rootFolder.uri.fsPath)),
+					path.dirname(rootFolder.uri.fsPath),
+					this.ws,
+					this.apama_project
+				));
+				return result;
+			} catch (error) {
+				// .project file doesn't exist in the root
+				// vscode.window.showErrorMessage(error);
+			}
+		}
+
+		const rootProject = await vscode.workspace.findFiles(rootPattern, ignorePattern);
 		
+		const projectsPattern: vscode.RelativePattern = new vscode.RelativePattern( this.ws , "**/.project" );
+		const projectNames = await vscode.workspace.findFiles(projectsPattern, ignorePattern);
+	
 		for (let index = 0; index < projectNames.length; index++) {
-			const project: Uri = projectNames[index];
-			let current: ApamaProject = new ApamaProject(this.logger,
+			const project: vscode.Uri = projectNames[index];
+			result.push(new ApamaProject(this.logger,
 				path.relative(this.ws.uri.fsPath, path.dirname(project.fsPath)),
 				path.dirname(project.fsPath),
 				this.ws,
 				this.apama_project
-			);
-			result.push(current);
+			));
 		}
 		return result;
 	}
 }
 
 
-export class ApamaProject extends TreeItem  implements ApamaTreeItem {
+export class ApamaProject extends vscode.TreeItem  implements ApamaTreeItem {
 	constructor(
-		public logger:OutputChannel,
+		public logger: vscode.OutputChannel,
     public readonly label: string,
 		public readonly fsDir: string,
-		public ws: WorkspaceFolder,
+		public ws: vscode.WorkspaceFolder,
 		public apama_project: ApamaRunner
     ) {
-		super(label,TreeItemCollapsibleState.Collapsed);
+		super(label, vscode.TreeItemCollapsibleState.Collapsed);
 	}
 	items: BundleItem[] = [];
   contextValue: string = 'project';	
@@ -126,13 +149,13 @@ export class ApamaProject extends TreeItem  implements ApamaTreeItem {
 	}
 }
 
-export class BundleItem extends TreeItem implements ApamaTreeItem {
-	constructor(public logger:OutputChannel,
+export class BundleItem extends vscode.TreeItem implements ApamaTreeItem {
+	constructor(public logger: vscode.OutputChannel,
 							public readonly label: string,
 							public fsDir: string,
-							public ws: WorkspaceFolder,
+							public ws: vscode.WorkspaceFolder,
 							public apama_project: ApamaRunner) {
-		super(label, TreeItemCollapsibleState.Collapsed);
+		super(label, vscode.TreeItemCollapsibleState.Collapsed);
 	}
 	items: BundleItem[] = [];
 	contextValue: string = 'bundle';

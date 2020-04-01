@@ -1,4 +1,5 @@
-import * as requestPromise from 'request-promise-native';
+import {RequestPromiseAPI} from 'request-promise-native';
+const requestPromise: RequestPromiseAPI = require('request-promise-native');
 import { DOMParser } from 'xmldom';
 import * as xpath from 'xpath';
 import { OutputChannel } from 'vscode';
