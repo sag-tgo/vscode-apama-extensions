@@ -119,7 +119,7 @@ export class CorrelatorDebugSession extends DebugSession {
 		this.logger.appendLine('Breakpoints requested');
 		// TODO: It'll probably set the breakpoints twice in a file if a new breakpoint is added while running - so we should fix that
 		if (args.source.path) {
-			const filePath = this.convertClientPathToDebugger(args.source.path);
+			const filePath = args.source.path;
 
 			// Attempt to set all of the breakpoints
 			const breakpointIds = (args.lines || [])
