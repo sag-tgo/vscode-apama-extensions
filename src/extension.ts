@@ -2,7 +2,7 @@
 
 import * as path from 'path';
 
-import { Disposable, ExtensionContext, workspace, debug, OutputChannel, window, tasks } from 'vscode';
+import * as vscode from 'vscode';
 
 import {
 	LanguageClient, LanguageClientOptions, ServerOptions,
@@ -19,28 +19,29 @@ import { ApamaCommandProvider } from './apama_util/commands';//MY CHANGES
 //
 // client activation function, this is the entrypoint for the client
 //
-export function activate(context: ExtensionContext): void {
-	let commands: Disposable[] = [];
-	const logger = window.createOutputChannel('Apama Extension');
+export function activate(context: vscode.ExtensionContext): void {
+	let commands: vscode.Disposable[] = [];
+	const logger = vscode.window.createOutputChannel('Apama Extension');
 	logger.show();
 	logger.appendLine('Started EPL Extension');
 
 	let apamaEnv:ApamaEnvironment = new ApamaEnvironment(logger);
 	const taskprov = new ApamaTaskProvider(logger,apamaEnv);
-	context.subscriptions.push(tasks.registerTaskProvider( "apama" , taskprov ));
+	context.subscriptions.push(vscode.tasks.registerTaskProvider( "apama" , taskprov ));
 
 	const provider = new ApamaDebugConfigurationProvider(logger,apamaEnv);
 
 	context.subscriptions.push(debug.registerDebugConfigurationProvider('apama', provider));
-	context.subscriptions.push(provider);
+
+  context.subscriptions.push(provider);
 
 	const commandprov = new ApamaCommandProvider(logger, apamaEnv, context);
 
 	//this needs a workspace folder which under some circumstances can be undefined. 
 	//but we can ignore in that case and things shjould still work
-	if (workspace.workspaceFolders !== undefined) 
+	if (vscode.workspace.workspaceFolders !== undefined) 
 	{
-		const projView = new ApamaProjectView(apamaEnv, logger, workspace.workspaceFolders ,context);
+		const projView = new ApamaProjectView(apamaEnv, logger, vscode.workspace.workspaceFolders, context);
 	}
 
 
@@ -83,7 +84,7 @@ export function activate(context: ExtensionContext): void {
 		};
 	
 		// Create the language client and start the client.
-		let langServer: Disposable = new LanguageClient('eplLanguageServer', 'Language Server', serverOptions, clientOptions).start();
+		let langServer: vscode.Disposable = new LanguageClient('eplLanguageServer', 'Language Server', serverOptions, clientOptions).start();
 	
 
 
