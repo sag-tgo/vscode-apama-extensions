@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	const provider = new ApamaDebugConfigurationProvider(logger,apamaEnv);
 
-	context.subscriptions.push(debug.registerDebugConfigurationProvider('apama', provider));
+	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('apama', provider));
 
   context.subscriptions.push(provider);
 
