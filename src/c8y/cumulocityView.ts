@@ -4,6 +4,7 @@ import { ApamaEnvironment } from '../apama_util/apamaenvironment';
 import {Client, BasicAuth} from '@c8y/client';
 import { RequestType } from 'vscode-languageclient';
 import requestPromise = require('request-promise-native');
+import * as fs from 'fs';
 
 
 export class cumulocityView implements vscode.TreeDataProvider<string> {
@@ -73,8 +74,18 @@ export class cumulocityView implements vscode.TreeDataProvider<string> {
 					}
 				}),
 				
-				vscode.commands.registerCommand('extension.c8y.upload_epl_app', async () => {
+				vscode.commands.registerCommand('extension.c8y.upload_epl_app', async (uri) => {
 					try {
+						let appname = uri.path;
+						const lastPathSepIndex = appname.lastIndexOf('/');
+						if (lastPathSepIndex >= 0) {
+							appname = appname.slice(lastPathSepIndex + 1);
+						}
+
+						if (appname.endsWith(".mon")) {
+							appname = appname.slice(0, -4);
+						}
+
 						let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('softwareag.c8y');
 						let url: string = config.get('url',""); // C8Y host
 						if (!url.endsWith("/")) {
@@ -87,13 +98,14 @@ export class cumulocityView implements vscode.TreeDataProvider<string> {
 								pass: config.get("password", "")
 							},
 							body: {
-								name: "thisIsATest",
-								contents: "monitor M1 { action onload() { on wait(1.0) { log \"Hello\" at INFO; }}}",
+								name: appname,
+								contents: "",
 								state: "active",
 								description: "This is a test monitor uploaded from VS Code"
 							},
 							json: true
 						}
+						options.body.contents = fs.readFileSync(uri.fsPath).toString();
 						const result = await requestPromise.post(url, options);
 						console.log(JSON.stringify(result));
 					} catch (error) {
