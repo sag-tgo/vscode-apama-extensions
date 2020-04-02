@@ -76,14 +76,25 @@ export class cumulocityView implements vscode.TreeDataProvider<string> {
 				vscode.commands.registerCommand('extension.c8y.upload_epl_app', async () => {
 					try {
 						let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('softwareag.c8y');
-						let url: string = config.get('url',"") + "service/cep/eplfiles";
+						let url: string = config.get('url',""); // C8Y host
+						if (!url.endsWith("/")) {
+							url += "/";
+						}
+						url += "service/cep/eplfiles";
 						const options = {
 							auth: {
 								user: config.get("user", ""),
 								pass: config.get("password", "")
-							}
+							},
+							body: {
+								name: "thisIsATest",
+								contents: "monitor M1 { action onload() { on wait(1.0) { log \"Hello\" at INFO; }}}",
+								state: "active",
+								description: "This is a test monitor uploaded from VS Code"
+							},
+							json: true
 						}
-						const result = await requestPromise.get(url, options);
+						const result = await requestPromise.post(url, options);
 						console.log(JSON.stringify(result));
 					} catch (error) {
 						debugger;
