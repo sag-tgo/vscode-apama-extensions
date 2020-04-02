@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { ApamaProject, ApamaProjectWorkspace, ApamaTreeItem, BundleItem } from '../apama_project/apamaProject';
 import { ApamaEnvironment } from '../apama_util/apamaenvironment';
 import {Client, BasicAuth} from '@c8y/client';
 import requestPromise = require('request-promise-native');
+import * as fs from 'fs';
 
 
 
@@ -91,23 +91,45 @@ export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
 					}
 				}),
 				
-				vscode.commands.registerCommand('extension.c8y.upload_epl_app', async () => {
+				vscode.commands.registerCommand('extension.c8y.upload_epl_app', async (uri) => {
 					try {
+						let appname = uri.path;
+						const lastPathSepIndex = appname.lastIndexOf('/');
+						if (lastPathSepIndex >= 0) {
+							appname = appname.slice(lastPathSepIndex + 1);
+						}
+
+						if (appname.endsWith(".mon")) {
+							appname = appname.slice(0, -4);
+						}
+
 						let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('softwareag.c8y');
-						let url: string = config.get('url',"") + "service/cep/eplfiles";
+						let url: string = config.get('url',""); // C8Y host
+						if (!url.endsWith("/")) {
+							url += "/";
+						}
+						url += "service/cep/eplfiles";
 						const options = {
 							auth: {
 								user: config.get("user", ""),
 								pass: config.get("password", "")
-							}
-						};
-						const result = await requestPromise.get(url, options);
-						console.log(JSON.stringify(result));
+							},
+							body: {
+								name: appname,
+								contents: "",
+								state: "active",
+								description: "Uploaded from VS Code"
+							},
+							json: true
+						}
+						options.body.contents = fs.readFileSync(uri.fsPath).toString();
+						const result = await requestPromise.post(url, options);
+						// console.log(JSON.stringify(result));
+						// TODO: show errors/warnings
 					} catch (error) {
-						debugger;
+						vscode.window.showErrorMessage("Error uploading " + uri.path +":\n" + error.error.message);
 					}
 				}),
-
 
 				//
 				// refresh projects
