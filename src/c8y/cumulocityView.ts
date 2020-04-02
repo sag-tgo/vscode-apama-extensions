@@ -45,7 +45,7 @@ export class cumulocityView implements TreeDataProvider<string> {
 			this.context.subscriptions.push.apply(this.context.subscriptions, [
 
 				//
-				// Create project 
+				// inventory
 				//
 				commands.registerCommand('extension.c8y.login', async () => {
 					let config:WorkspaceConfiguration = workspace.getConfiguration('softwareag.c8y');
@@ -53,8 +53,7 @@ export class cumulocityView implements TreeDataProvider<string> {
 					if( config ) {
 						let tenant:string = config.get('tenant',"");
 						let user:string = config.get('user',"");
-						//let userpw:string = config.get('password',"IfAtFirstYouDon'tSucceed2");
-						let password:string = "IfAtFirstYouDon'tSucceed2";
+						let password:string = config.get('password',"");
 						let baseurl:any = config.get('url',"");
 						this.logger.appendLine("Logging into c8y");
 

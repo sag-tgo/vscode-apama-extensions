@@ -71,8 +71,9 @@ function startLangServerTCP(addr: number): LanguageClient {
 	const serverOptions: ServerOptions = () => {
 	  return new Promise((resolve, reject) => {
 		const clientSocket = new net.Socket();
-		clientSocket.connect(12346, "10.60.84.57", () => {
-		  resolve({
+//		clientSocket.connect(12346, "10.60.84.57", () => {
+		clientSocket.connect(12346, "127.0.0.1", () => {
+				resolve({
 			reader: clientSocket,
 			writer: clientSocket,
 		  });
