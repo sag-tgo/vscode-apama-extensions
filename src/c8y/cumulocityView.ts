@@ -2,7 +2,8 @@ import * as vscode from 'vscode';
 import { ApamaProject, ApamaProjectWorkspace, ApamaTreeItem, BundleItem } from '../apama_project/apamaProject';
 import { ApamaEnvironment } from '../apama_util/apamaenvironment';
 import {Client, BasicAuth} from '@c8y/client';
-
+import { RequestType } from 'vscode-languageclient';
+import requestPromise = require('request-promise-native');
 
 
 export class cumulocityView implements vscode.TreeDataProvider<string> {
@@ -73,7 +74,20 @@ export class cumulocityView implements vscode.TreeDataProvider<string> {
 				}),
 				
 				vscode.commands.registerCommand('extension.c8y.upload_epl_app', async () => {
-					vscode.window.showInformationMessage("Not yet implemented!");
+					try {
+						let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('softwareag.c8y');
+						let url: string = config.get('url',"") + "service/cep/eplfiles";
+						const options = {
+							auth: {
+								user: config.get("user", ""),
+								pass: config.get("password", "")
+							}
+						}
+						const result = await requestPromise.get(url, options);
+						console.log(JSON.stringify(result));
+					} catch (error) {
+						debugger;
+					}
 				}),
 			]);
 		}
