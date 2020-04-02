@@ -172,6 +172,10 @@
       {
         "command": "extension.apama.engine_watch",
         "title": "correlator: engine watch"
+      },
+      {
+        "command": "extension.c8y.openEplApp",
+        "title": "open EPL Application"
       }
     ],
     "menus": {
@@ -220,6 +224,11 @@
         {
           "when": "view == apamaProjects && viewItem == bundle",
           "command": "extension.apamaProjects.apamaToolRemoveBundle",
+          "group": "inline"
+        },
+        {
+          "command": "extension.c8y.openEplApp",
+          "when": "view == c8y",
           "group": "inline"
         }
       ]
