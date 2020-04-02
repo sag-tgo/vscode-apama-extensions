@@ -118,15 +118,16 @@ export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
 								name: appname,
 								contents: "",
 								state: "active",
-								description: "This is a test monitor uploaded from VS Code"
+								description: "Uploaded from VS Code"
 							},
 							json: true
 						}
 						options.body.contents = fs.readFileSync(uri.fsPath).toString();
 						const result = await requestPromise.post(url, options);
-						console.log(JSON.stringify(result));
+						// console.log(JSON.stringify(result));
+						// TODO: show errors/warnings
 					} catch (error) {
-						debugger;
+						vscode.window.showErrorMessage("Error uploading " + uri.path +":\n" + error.error.message);
 					}
 				}),
 
