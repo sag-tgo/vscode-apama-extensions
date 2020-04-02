@@ -88,8 +88,8 @@
           "light": "resources/light/start.svg",
           "dark": "resources/dark/start.svg"
         }
-	  },
-	  {
+      },
+      {
         "command": "extension.c8y.upload_epl_app",
         "title": "Cumulocity: Upload as EPL App"
       },
@@ -111,6 +111,14 @@
       },
       {
         "command": "extension.apamaProjects.refresh",
+        "title": "Refresh",
+        "icon": {
+          "light": "resources/light/refresh.svg",
+          "dark": "resources/dark/refresh.svg"
+        }
+      },
+      {
+        "command": "extension.c8y.refresh",
         "title": "Refresh",
         "icon": {
           "light": "resources/light/refresh.svg",
@@ -175,11 +183,11 @@
         {
           "when": "resourceExtname == .evt",
           "command": "extension.apama.engine_send"
-		},
-		{
-			"when": "resourceExtname == .mon",
-			"command": "extension.c8y.upload_epl_app"
-		}
+        },
+        {
+          "when": "resourceExtname == .mon",
+          "command": "extension.c8y.upload_epl_app"
+        }
       ],
       "view/title": [
         {
@@ -190,6 +198,11 @@
         {
           "command": "extension.apamaProjects.refresh",
           "when": "view == apamaProjects",
+          "group": "navigation"
+        },
+        {
+          "command": "extension.c8y.refresh",
+          "when": "view == c8y",
           "group": "navigation"
         }
       ],
@@ -219,7 +232,7 @@
         },
         {
           "id": "c8y",
-          "name": "Cumulocity"
+          "name": "EPL Applications"
         }
       ]
     },

@@ -15,7 +15,7 @@ import { ApamaTaskProvider } from './apama_util/apamataskprovider';
 import { ApamaDebugConfigurationProvider } from './apama_debug/apamadebugconfig';
 import { ApamaProjectView } from './apama_project/apamaProjectView';
 import { ApamaCommandProvider } from './apama_util/commands';//MY CHANGES
-import { cumulocityView } from './c8y/cumulocityView';
+import { CumulocityView } from './c8y/cumulocityView';
 //
 // client activation function, this is the entrypoint for the client
 //
@@ -44,7 +44,7 @@ export function activate(context: vscode.ExtensionContext): void {
 		const projView = new ApamaProjectView(apamaEnv, logger, vscode.workspace.workspaceFolders, context);
 	}
 
-	const c8yView = new cumulocityView(apamaEnv, logger, context);
+	const c8yView = new CumulocityView(apamaEnv, logger, context);
 
 	//---------------------------------
 	// Language server start-up and support
