@@ -7,11 +7,30 @@ import requestPromise = require('request-promise-native');
 import * as fs from 'fs';
 
 
-export class cumulocityView implements vscode.TreeDataProvider<string> {
-	private _onDidChangeTreeData: vscode.EventEmitter<string | undefined> = new vscode.EventEmitter<string | undefined>();
-	readonly onDidChangeTreeData: vscode.Event<string | undefined> = this._onDidChangeTreeData.event;
+
+export class EPLApplication extends vscode.TreeItem {
+	//"{"eplfiles":[{"id":"713","name":"Testjbh","state":"inactive","errors":[],"warnings":[],"description":"This is a test"},{"id":"715","name":"jbh1","state":"active","errors":[],"warnings":[],"description":"jbh desc"},{"id":"719","name":"thisIsATest","state":"active","errors":[],"warnings":[],"description":"This is a test monitor uploaded from VS Code"}]}"
+	constructor(
+		public readonly id:string, 
+		public readonly label: string, 
+		public readonly active:boolean,
+		public readonly warnings:string[], 
+		public readonly errors:string[],
+		public readonly desc:string) 
+	{
+		//{"id":"713","name":"Testjbh","state":"inactive","errors":[],"warnings":[],"description":"This is a test"}
+		super(label, vscode.TreeItemCollapsibleState.Collapsed);
+	}
+	contextValue: string = 'EPLApplication';
+}
+
+
+export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
+	private _onDidChangeTreeData: vscode.EventEmitter<EPLApplication | undefined> = new vscode.EventEmitter<EPLApplication | undefined>();
+	readonly onDidChangeTreeData: vscode.Event<EPLApplication | undefined> = this._onDidChangeTreeData.event;
 
 	private treeView: vscode.TreeView<{}>;
+	private filelist:EPLApplication[] = [];
 
 	//
 	// Added facilities for multiple workspaces - this will hopefully allow 
@@ -43,7 +62,7 @@ export class cumulocityView implements vscode.TreeDataProvider<string> {
 			this.context.subscriptions.push.apply(this.context.subscriptions, [
 
 				//
-				// inventory
+				// inventory using sdk
 				//
 				vscode.commands.registerCommand('extension.c8y.login', async () => {
 					let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('softwareag.c8y');
@@ -112,6 +131,13 @@ export class cumulocityView implements vscode.TreeDataProvider<string> {
 						debugger;
 					}
 				}),
+
+				//
+				// refresh projects
+				//
+				vscode.commands.registerCommand('extension.c8y.refresh', async () => {
+					await this.refresh();
+				})
 			]);
 		}
 	}
@@ -119,7 +145,27 @@ export class cumulocityView implements vscode.TreeDataProvider<string> {
 	//
 	// Trigger refresh of the tree
 	//
-	refresh(): void {
+	async refresh(): Promise<void> {
+		this.filelist = [];
+		try {
+			let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('softwareag.c8y');
+			let url: string = config.get('url',"") + "service/cep/eplfiles";
+			const options = {
+				auth: {
+					user: config.get("user", ""),
+					pass: config.get("password", "")
+				}
+			};
+			const result = await requestPromise.get(url, options);
+			const eplfiles = JSON.parse(result);
+			//"{"eplfiles":[{"id":"713","name":"Testjbh","state":"inactive","errors":[],"warnings":[],"description":"This is a test"},{"id":"715","name":"jbh1","state":"active","errors":[],"warnings":[],"description":"jbh desc"},{"id":"719","name":"thisIsATest","state":"active","errors":[],"warnings":[],"description":"This is a test monitor uploaded from VS Code"}]}"
+			for (let element of eplfiles.eplfiles) {
+				this.filelist.push(new EPLApplication(element.id,element.name, (element.state === 'inactive'),element.warnings,element.errors,element.desc));
+			}
+
+		} catch (error) {
+			debugger;
+		}
 		this._onDidChangeTreeData.fire();
 	}
 
@@ -127,10 +173,9 @@ export class cumulocityView implements vscode.TreeDataProvider<string> {
 	// get the children of the current item (group or item)
 	// made this async so we can avoid race conditions on updates
 	//
-	async getChildren(item?: string | undefined): Promise<undefined | string[] > {
-
-		//if this is a bundle - then there are no children
-		return [];
+	async getChildren(item?: EPLApplication | undefined): Promise<undefined | EPLApplication[] > {
+		await this.refresh();
+		return this.filelist;
 	}
 
 
@@ -138,7 +183,7 @@ export class cumulocityView implements vscode.TreeDataProvider<string> {
 	//
 	// interface requirement
 	//
-	getTreeItem(element: BundleItem | ApamaProject | string): vscode.TreeItem {
+	getTreeItem(element: EPLApplication | string): vscode.TreeItem {
 
 		//No string nodes in my tree so should never happen
 		if (typeof element === "string") {
