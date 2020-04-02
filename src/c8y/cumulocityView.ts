@@ -124,6 +124,14 @@ export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
 						}
 						options.body.contents = fs.readFileSync(uri.fsPath).toString();
 						const result = await requestPromise.post(url, options);
+						if (result.state === "inactive") {
+							let message = '';
+							for (let i = 0; i < result.errors.length ; i++) {
+								const error = result.errors[i]; // line text
+								message += "\t[" + error.line + "] " + error.text + "\n";
+							}
+							vscode.window.showErrorMessage("Uploaded EPL contains errors: " + uri.path +":\n" + message);
+						}
 						// console.log(JSON.stringify(result));
 						// TODO: show errors/warnings
 					} catch (error) {
