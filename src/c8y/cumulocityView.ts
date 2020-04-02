@@ -1,8 +1,6 @@
 import * as vscode from 'vscode';
-import { ApamaProject, ApamaProjectWorkspace, ApamaTreeItem, BundleItem } from '../apama_project/apamaProject';
 import { ApamaEnvironment } from '../apama_util/apamaenvironment';
 import {Client, BasicAuth} from '@c8y/client';
-import { RequestType } from 'vscode-languageclient';
 import requestPromise = require('request-promise-native');
 import * as fs from 'fs';
 
