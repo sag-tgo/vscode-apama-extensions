@@ -44,7 +44,8 @@ export function activate(context: vscode.ExtensionContext): void {
 		const projView = new ApamaProjectView(apamaEnv, logger, vscode.workspace.workspaceFolders, context);
 	}
 
-	const c8yView = new CumulocityView(apamaEnv, logger, context);
+	//EPL Applications view is still WIP - needs more work 
+	//const c8yView = new CumulocityView(apamaEnv, logger, context);
 
 	//---------------------------------
 	// Language server start-up and support
@@ -56,7 +57,8 @@ export function activate(context: vscode.ExtensionContext): void {
 
 
 		//start with the connection to the server
-		let langServer: vscode.Disposable = startLangServerTCP(12346).start();
+		//DISABLE connection to LSP as still WIP 
+		//let langServer: vscode.Disposable = startLangServerTCP(30030).start();
 	
 
 
@@ -70,7 +72,7 @@ function startLangServerTCP(addr: number): LanguageClient {
 	const serverOptions: ServerOptions = () => {
 	  return new Promise((resolve, reject) => {
 		const clientSocket = new net.Socket();
-		clientSocket.connect(12346, "127.1.0.0", () => {
+		clientSocket.connect(addr, "127.1.0.0", () => {
 		  resolve({
 			reader: clientSocket,
 			writer: clientSocket,

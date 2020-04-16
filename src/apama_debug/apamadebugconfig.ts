@@ -41,25 +41,27 @@ export class ApamaDebugConfigurationProvider implements DebugConfigurationProvid
             return undefined;
         }
 
-        // If an empty config has been provided (because there's no existing launch.json) then we can delegate to provideDebugConfigurations by returning
-        if (Object.keys(config).length === 0) {
-            this.logger.appendLine("empty config");
-            return config;
-        }
+        // // If an empty config has been provided (because there's no existing launch.json) then we can delegate to provideDebugConfigurations by returning
+        // if (Object.keys(config).length === 0) {
+        //     this.logger.appendLine("empty config");
+        //     let configList= await this.provideDebugConfigurations(folder);
+        //     if( configList )
+        //     {
+        //         config = Object.assign(configList[0]);
+        //     }
+        // }
+    // if launch.json is missing or empty
 
-
-        config = Object.assign({
-            injectionList: getInjectionList(this.apamaEnv, folder.uri.fsPath),
-            correlator: { /* Defaulted below */ }
-        }, config);
-
-        config.correlator = Object.assign({
-            host: "localhost",
-            port: workspace.getConfiguration("softwareag.apama").get("debugport"),
-            args: ["-g"]
-        }, config.correlator);
-
-        config.correlator.port = Math.floor(config.correlator.port);
+    if (!config.type && !config.request && !config.name) {
+        config.type = "apama";
+        config.name = "Debug Apama Application";
+        config.request = "launch";
+        config.injectionList = getInjectionList(this.apamaEnv, folder.uri.fsPath);
+        config.correlator =  {};
+        config.correlator.host = "localhost";
+        config.correlator.port = workspace.getConfiguration("softwareag.apama").get("debugport");
+        config.correlator.args = ["-g"];
+    }
 
 
         if (!this._server) {

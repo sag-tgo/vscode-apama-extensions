@@ -2,7 +2,7 @@
   "publisher": "cariboujohn",
   "name": "apama-extensions",
   "displayName": "apama-extensions",
-  "description": "A language server for EPL applications",
+  "description": "An Extension for EPL applications",
   "version": "0.9.0",
   "repository": {
     "type": "git",
@@ -42,17 +42,17 @@
         "softwareag.c8y.tenant": {
           "type": "string",
           "default": "demos",
-          "description": "Url of the cumulocity instance."
+          "description": "Tenant Id: click on user at the top right of the cumulocity application."
         },
         "softwareag.c8y.user": {
           "type": "string",
           "default": "user",
-          "description": "Url of the cumulocity instance."
+          "description": "User name you log in as."
         },
         "softwareag.c8y.password": {
           "type": "string",
           "default": "pw",
-          "description": "Url of the cumulocity instance."
+          "description": "password for cumulocity."
         }
       }
     },
@@ -77,18 +77,10 @@
     "snippets": [
       {
         "language": "epl",
-        "path": "./src/snippets/epl.json"
+        "path": "./snippets.json"
       }
     ],
     "commands": [
-      {
-        "command": "extension.c8y.login",
-        "title": "Login to cumulocity",
-        "icon": {
-          "light": "resources/light/start.svg",
-          "dark": "resources/dark/start.svg"
-        }
-      },
       {
         "command": "extension.c8y.upload_epl_app",
         "title": "Cumulocity: Upload as EPL App"
@@ -203,11 +195,6 @@
           "command": "extension.apamaProjects.refresh",
           "when": "view == apamaProjects",
           "group": "navigation"
-        },
-        {
-          "command": "extension.c8y.refresh",
-          "when": "view == c8y",
-          "group": "navigation"
         }
       ],
       "view/item/context": [
@@ -225,11 +212,6 @@
           "when": "view == apamaProjects && viewItem == bundle",
           "command": "extension.apamaProjects.apamaToolRemoveBundle",
           "group": "inline"
-        },
-        {
-          "command": "extension.c8y.openEplApp",
-          "when": "view == c8y",
-          "group": "inline"
         }
       ]
     },
@@ -238,10 +220,6 @@
         {
           "id": "apamaProjects",
           "name": "Apama Projects"
-        },
-        {
-          "id": "c8y",
-          "name": "EPL Applications"
         }
       ]
     },

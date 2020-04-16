@@ -43,16 +43,12 @@ export interface CorrelatorConfig {
 
 export class CorrelatorDebugSession extends DebugSession {
 	private deployCmd: ApamaRunner;
-	private injectCmd: ApamaRunner;
-	private correlatorCmd: ApamaAsyncRunner;
 	private correlatorHttp: CorrelatorHttpInterface;
 	private manager: ApamaRunner;
-	public constructor(private logger: vscode.OutputChannel, apamaEnv: ApamaEnvironment, private config: CorrelatorConfig) {
+	public constructor(private logger: vscode.OutputChannel, private apamaEnv: ApamaEnvironment, private config: CorrelatorConfig) {
 		super();
 
 		this.manager = new ApamaRunner("engine_management", apamaEnv.getManagerCmdline(),logger);
-		this.correlatorCmd = new ApamaAsyncRunner("correlator", apamaEnv.getCorrelatorCmdline(), logger);//  (logger, apamaEnv, config);
-		this.injectCmd = new ApamaRunner("engine_inject", apamaEnv.getInjectCmdline(), logger);
 		this.deployCmd = new ApamaRunner("engine_deploy", apamaEnv.getDeployCmdline(), logger);
 		this.correlatorHttp = new CorrelatorHttpInterface(logger, config.host, config.port);
 	}
@@ -81,25 +77,40 @@ export class CorrelatorDebugSession extends DebugSession {
 		this.sendResponse(response);
 	}
 
+
+	private runCorrelator(): vscode.Task {
+		let correlator = new vscode.Task(
+		  {type: "shell", task: ""},
+		  "DebugCorrelator",
+		  "correlator",
+		  new vscode.ShellExecution(this.apamaEnv.getCorrelatorCmdline(),this.config.args.concat(['-p',this.config.port.toString()])),
+		  []
+		);
+		correlator.group = 'test';
+		return correlator;
+	  }
 	/**
 	 * Frontend requested that the application be launched
 	 */
-	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
+	protected async launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments) {
 		this.logger.appendLine("Launch requested on port " + this.config.port.toString());
-		const correlatorProcess = this.correlatorCmd.start(this.config.args.concat(['-p',this.config.port.toString()]),true,true);
-
-		correlatorProcess.stderr.setEncoding('utf8');
-		correlatorProcess.stderr.on('data', (data: string) => this.sendEvent(new OutputEvent(data, 'stderr')));
-		correlatorProcess.once('exit', (exitCode) => {
-			this.sendEvent(new OutputEvent("Correlator terminated with exit code: " + exitCode, 'console'));
-			this.sendEvent(new TerminatedEvent());
-		});
-
+		
+		let te = await vscode.tasks.executeTask(this.runCorrelator());
 		this.correlatorHttp.enableDebugging()
 			.then(async () => {
 				// Pause correlator while we wait for the configuration to finish, we want breakpoints to be set first
 				await this.correlatorHttp.pause();
-				const folder = await vscode.window.showWorkspaceFolderPick();
+
+				let folder = undefined;
+				//check for a single folder 
+				if( vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
+					folder = vscode.workspace.workspaceFolders[0];
+				}
+				else
+				{
+					folder = await vscode.window.showWorkspaceFolderPick();
+				}
+				
 				if (folder !== undefined) {
 					await this.deployCmd.run('.', ['--inject', this.config.host.toString(), this.config.port.toString()]
 						.concat(folder.uri.fsPath));
@@ -169,13 +180,27 @@ export class CorrelatorDebugSession extends DebugSession {
 			.then(() => this.waitForCorrelatorPause());
 	}
 
+
+	protected async waitUntilTaskEnds(taskName: string) {
+		return new Promise<void>(resolve => {
+			let disposable = vscode.tasks.onDidEndTask(e => {
+				if (e.execution.task.name === taskName) {
+					disposable.dispose();
+					resolve();
+				}
+			});
+		});
+	}
+
 	/**
 	 * Frontend requested that the application terminate
 	 */
-	protected disconnectRequest(response: DebugProtocol.DisconnectResponse, args: DebugProtocol.DisconnectArguments): void {
+	protected async disconnectRequest(response: DebugProtocol.DisconnectResponse, args: DebugProtocol.DisconnectArguments) {
 		this.logger.appendLine("Stop requested");
 		this.manager.run('.',['-s','debug_stop','-p',this.config.port.toString()]);
-		this.correlatorCmd.stop().then(() => this.sendResponse(response));
+		await this.waitUntilTaskEnds("DebugCorrelator");
+		//this.correlatorCmd.stop().then(() => this.sendResponse(response));
+		this.sendResponse(response);
 	}
 
 	protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
