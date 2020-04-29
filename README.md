@@ -4,13 +4,25 @@ This is a simple extention that adds syntax highlighting to EPL files. These fil
 
 For mor information on EPL and Apama please visit the [Apama Community Edition website](http://www.apamacommunity.com/)
 
-![example code](images/mainpage.PNG)
-
 ## Features
 
-WIP: supporting EPL language from Apama 10.3 +
-WIP: Initial support for debugging and launching pure EPL in a correlator. 
+* Supports EPL language from Apama 10.5.3 +
+* Support for debugging and launching pure EPL in a correlator. 
+* Supports apama_project
 
+![example code](images/mainpage.PNG)
+
+##Snippets
+![Snippets](images/1-snippets.gif)
+
+##Correlator Task
+![Snippets](images/2-run-corr.gif)
+
+##Send Event
+![Snippets](images/3-send-single-evt.gif)
+
+##Send Multiple Events
+![Snippets](images/4-send-multiple-evt.gif)
 
 ## Requirements
 
