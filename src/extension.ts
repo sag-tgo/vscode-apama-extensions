@@ -1,7 +1,7 @@
 "use_strict";
 
 import * as net from 'net';
-
+ 
 import * as vscode from 'vscode';
 
 import {
@@ -15,32 +15,33 @@ import { ApamaTaskProvider } from './apama_util/apamataskprovider';
 import { ApamaDebugConfigurationProvider } from './apama_debug/apamadebugconfig';
 import { ApamaProjectView } from './apama_project/apamaProjectView';
 import { ApamaCommandProvider } from './apama_util/commands';//MY CHANGES
-import { CumulocityView } from './c8y/cumulocityView';
+//import { CumulocityView } from './c8y/cumulocityView';
+
 //
 // client activation function, this is the entrypoint for the client
 //
 export function activate(context: vscode.ExtensionContext): void {
 	let commands: vscode.Disposable[] = [];
+
 	const logger = vscode.window.createOutputChannel('Apama Extension');
 	logger.show();
 	logger.appendLine('Started EPL Extension');
 
-	let apamaEnv:ApamaEnvironment = new ApamaEnvironment(logger);
-	const taskprov = new ApamaTaskProvider(logger,apamaEnv);
-	context.subscriptions.push(vscode.tasks.registerTaskProvider( "apama" , taskprov ));
+	let apamaEnv: ApamaEnvironment = new ApamaEnvironment(logger);
+	const taskprov = new ApamaTaskProvider(logger, apamaEnv);
+	context.subscriptions.push(vscode.tasks.registerTaskProvider("apama", taskprov));
 
-	const provider = new ApamaDebugConfigurationProvider(logger,apamaEnv);
+	const provider = new ApamaDebugConfigurationProvider(logger, apamaEnv);
 
 	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('apama', provider));
 
-  context.subscriptions.push(provider);
+	context.subscriptions.push(provider);
 
 	const commandprov = new ApamaCommandProvider(logger, apamaEnv, context);
 
 	//this needs a workspace folder which under some circumstances can be undefined. 
 	//but we can ignore in that case and things shjould still work
-	if (vscode.workspace.workspaceFolders !== undefined) 
-	{
+	if (vscode.workspace.workspaceFolders !== undefined) {
 		const projView = new ApamaProjectView(apamaEnv, logger, vscode.workspace.workspaceFolders, context);
 	}
 
@@ -51,16 +52,20 @@ export function activate(context: vscode.ExtensionContext): void {
 	// Language server start-up and support
 	//---------------------------------
 
-		// Start the command in a shell - note that the current EPL buddy doesn't repond 
-		// so this will fail until we do have a working lang-server app
-		// https://github.com/Microsoft/vscode-languageserver-node/issues/358
+	// Start the command in a shell - note that the current EPL buddy doesn't repond 
+	// so this will fail until we do have a working lang-server app
+	// https://github.com/Microsoft/vscode-languageserver-node/issues/358
 
 
-		//start with the connection to the server
-		//DISABLE connection to LSP as still WIP 
-		//let langServer: vscode.Disposable = startLangServerTCP(30030).start();
+	//If correlator version is >= 10.5.3 start with the connection to the server
+	let config = vscode.workspace.getConfiguration("softwareag.apama.langserver");
+	createLangServerTCP(apamaEnv, config, logger)
+		.then( (ls) => {
+			logger.appendLine(`Starting Language Client`);
+			context.subscriptions.push(ls.start());
+		})
+		.catch( err => logger.appendLine( err ));
 	
-
 
 	// Push the disposable to the context's subscriptions so that the 
 	// client can be deactivated on extension deactivation
@@ -68,23 +73,53 @@ export function activate(context: vscode.ExtensionContext): void {
 }
 
 
-function startLangServerTCP(addr: number): LanguageClient {
+function runLangServer(apamaEnv: ApamaEnvironment, config : vscode.WorkspaceConfiguration ): vscode.Task {
+	let correlator = new vscode.Task(
+	  {type: "shell", task: ""},
+	  "Apama Language Server",
+	  "ApamaLanguageServer",
+	  new vscode.ShellExecution(apamaEnv.getEplBuddyCmdline(),['-l',config.port.toString()]),
+	  []
+	);
+	correlator.group = 'test';
+	return correlator;
+  }
+
+//
+// This method will start the lang server - requires Apama 10.5.3+ however 
+// so this method will be gated on that version in the activate function above.
+//
+async function createLangServerTCP(apamaEnv: ApamaEnvironment, config : vscode.WorkspaceConfiguration , logger: vscode.OutputChannel): Promise<LanguageClient> {
+	logger.appendLine(`Starting Language Server on (host ${config.host} port ${config.port})`);
+	let lsType: string | undefined = config.get<string>("type");
+	if(  lsType === "local"  ) {
+		//default is to run the language server locally
+		logger.appendLine(`Executing Apama language server`);
+		let te = await vscode.tasks.executeTask(runLangServer(apamaEnv,config));
+		logger.appendLine(`Started Language Server on (host ${config.host} port ${config.port})`);
+	}
+	else if (lsType === "disabled" )
+	{
+		return Promise.reject("Apama Language Server disabled");
+	}
+	//server options is a function that returns the client connection to the 
+	//lang server
 	const serverOptions: ServerOptions = () => {
-	  return new Promise((resolve, reject) => {
-		const clientSocket = new net.Socket();
-		clientSocket.connect(addr, "127.1.0.0", () => {
-		  resolve({
-			reader: clientSocket,
-			writer: clientSocket,
-		  });
+		return new Promise((resolve, reject) => {
+			const clientSocket = new net.Socket();
+			clientSocket.connect(config.port, config.host, () => {
+				resolve({
+					reader: clientSocket,
+					writer: clientSocket,
+				});
+			});
 		});
-	  });
 	};
-	
+
 	// Options of the language client
 	let clientOptions: LanguageClientOptions = {
 		// Activate the server for epl files
-		documentSelector: [ 'epl' ],
+		documentSelector: ['epl'],
 		synchronize: {
 			// Synchronize the section 'eplLanguageServer' of the settings to the server
 			configurationSection: 'eplLanguageServer',
@@ -94,9 +129,13 @@ function startLangServerTCP(addr: number): LanguageClient {
 		}
 	};
 
-	return new LanguageClient(`tcp lang server (port ${addr})`, serverOptions, clientOptions);
+	logger.appendLine(`Returning Language Client`);
+	//now this call will use the above options and function
+	return new LanguageClient(`tcp lang server (host ${config.host} port ${config.port})`, serverOptions, clientOptions);
 }
-
 
 // this method is called when your extension is deactivated
 export function deactivate() { }
+
+
+

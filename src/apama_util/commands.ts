@@ -30,7 +30,7 @@ export class ApamaCommandProvider {
           //
           commands.registerCommand('extension.apama.engine_inject', (monFile) => {
             if (monFile !== undefined) {
-              this.injectCmd.run('.', ['-p', port.toString()].concat(monFile.fsPath))
+              this.injectCmd.run('.', ['-p', port.toString()].concat(monFile.fsPath));
             }
             // TODO?: add option to specify mon file name to inject in command palette 
           }),
@@ -41,7 +41,7 @@ export class ApamaCommandProvider {
             // From explorer/context menu 
             if (evtFile !== undefined) {
               // Specify engine_send command WITH evt file 
-              this.sendCmd.run('.', ['-p', port.toString()].concat(evtFile.fsPath))
+              this.sendCmd.run('.', ['-p', port.toString()].concat(evtFile.fsPath));
             }
             // Calling engine send from command palette
             else {

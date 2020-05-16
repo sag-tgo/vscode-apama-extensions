@@ -34,6 +34,31 @@
           "default": "15903",
           "description": "Default port for correlator debugging."
         },
+        "softwareag.apama.langserver.type": {
+          "type": "string",
+          "enum": [
+            "local",
+            "remote",
+            "disabled"
+          ],
+          "default": "local",
+          "description": "Whether vscode should start the language server locally."
+        },
+        "softwareag.apama.langserver.port": {
+          "type": "integer",
+          "default": "30030",
+          "description": "The Apama language server port."
+        },
+        "softwareag.apama.langserver.host": {
+          "type": "string",
+          "default": "127.0.0.1",
+          "description": "Default host the Apama langserver will listen for connections on."
+        },
+        "softwareag.apama.langserver.maxErrors": {
+          "type": "integer",
+          "default": "100",
+          "description": "The maximum number of diagnostics that the Apama language server will return."
+        },
         "softwareag.c8y.url": {
           "type": "string",
           "default": "https://demos.cumulocity.com/",
@@ -81,6 +106,10 @@
       }
     ],
     "commands": [
+      {
+        "command": "extension.test",
+        "title": "Test EPLBuddy split"
+      },
       {
         "command": "extension.c8y.upload_epl_app",
         "title": "Cumulocity: Upload as EPL App"

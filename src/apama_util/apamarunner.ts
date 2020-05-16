@@ -26,8 +26,6 @@ export class ApamaAsyncRunner {
   child?: ChildProcess;
 
   constructor(public name: string, public command: string, private logger: OutputChannel) {
-    this.logger = window.createOutputChannel(this.name);
-    this.logger.show();
   }
 
   //
@@ -39,6 +37,8 @@ export class ApamaAsyncRunner {
   // TODO: pipes configuration might be worth passing as an argument
   //
   public start(args: string[], withShell: boolean, defaultHandlers: boolean): ChildProcess {
+    this.logger = window.createOutputChannel(this.name);
+    //this.logger.show();
 
     //N.B. this potentially will leave the correlator running - future work required...
     if (this.child && !this.child.killed) {
