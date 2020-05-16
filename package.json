@@ -107,10 +107,6 @@
     ],
     "commands": [
       {
-        "command": "extension.test",
-        "title": "Test EPLBuddy split"
-      },
-      {
         "command": "extension.c8y.upload_epl_app",
         "title": "Cumulocity: Upload as EPL App"
       },
