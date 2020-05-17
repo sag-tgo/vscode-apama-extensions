@@ -15,12 +15,15 @@ import { ApamaTaskProvider } from './apama_util/apamataskprovider';
 import { ApamaDebugConfigurationProvider } from './apama_debug/apamadebugconfig';
 import { ApamaProjectView } from './apama_project/apamaProjectView';
 import { ApamaCommandProvider } from './apama_util/commands';//MY CHANGES
+import { ApamaRunner } from './apama_util/apamarunner';
 //import { CumulocityView } from './c8y/cumulocityView';
+
+var semver = require('semver');
 
 //
 // client activation function, this is the entrypoint for the client
 //
-export function activate(context: vscode.ExtensionContext): void {
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	let commands: vscode.Disposable[] = [];
 
 	const logger = vscode.window.createOutputChannel('Apama Extension');
@@ -58,18 +61,40 @@ export function activate(context: vscode.ExtensionContext): void {
 
 
 	//If correlator version is >= 10.5.3 start with the connection to the server
-	let config = vscode.workspace.getConfiguration("softwareag.apama.langserver");
-	createLangServerTCP(apamaEnv, config, logger)
-		.then( (ls) => {
-			logger.appendLine(`Starting Language Client`);
-			context.subscriptions.push(ls.start());
-		})
-		.catch( err => logger.appendLine( err ));
+	let corrVersion = "";
+	let versionCmd = new ApamaRunner("version", apamaEnv.getCorrelatorCmdline(), logger);
+	let version = await versionCmd.run(".",["--version"]);
+	let versionlines = version.stdout.split('\n');
+	const pat : RegExp = new RegExp(/correlator\sv(\d+\.\d+\.\d+)\.\d+\.\d+/);
+	for (let index = 0; index < versionlines.length; index++) {
+		const line = versionlines[index];
+		if ( pat.test(line) ) {
+			corrVersion = RegExp.$1;
+		}
+	}
+
+	if( semver.lt(corrVersion , '10.5.3') )
+	{
+		logger.appendLine(`Version: ${corrVersion} doesn't support the Apama Language Server - Skipping`);
+	}
+	else
+	{
+		let config = vscode.workspace.getConfiguration("softwareag.apama.langserver");
+		createLangServerTCP(apamaEnv, config, logger)
+			.then( (ls) => {
+				logger.appendLine(`Starting Language Client`);
+				context.subscriptions.push(ls.start());
+			})
+			.catch( err => logger.appendLine( err ));
+	}
+	
 	
 
 	// Push the disposable to the context's subscriptions so that the 
 	// client can be deactivated on extension deactivation
 	commands.forEach(command => context.subscriptions.push(command));
+
+	return Promise.resolve();
 }
 
 
