@@ -195,7 +195,7 @@ export class ApamaProjectView implements TreeDataProvider<string | ApamaTreeItem
 
 		//No string nodes in my tree so should never happen
 		if (typeof element === "string") {
-			this.logger.appendLine("ERROR ???? getTreeItem -- " + element.toString());
+			//this.logger.appendLine("ERROR ???? getTreeItem -- " + element.toString());
 			return new TreeItem(element, TreeItemCollapsibleState.None);
 		}
 

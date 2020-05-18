@@ -124,7 +124,7 @@ export class ApamaEnvironment {
   getCorrelatorCmdline(): string {
     this.updateCommands();
     let r = this.sourceEnv() + ' && ' + this.cmd_correlator + ' '; 
-    this.logger.appendLine('startCorrelator ' + r);
+    //this.logger.appendLine('startCorrelator ' + r);
     return r;
   }
 
@@ -132,21 +132,21 @@ export class ApamaEnvironment {
   getDeployCmdline(): string {
     this.updateCommands();
     let r = this.cmd_deploy + ' '; 
-    this.logger.appendLine('startDeploy ' + r);
+    //this.logger.appendLine('startDeploy ' + r);
     return r;
   }
 
   getInjectCmdline(): string {
     this.updateCommands();
     let r = this.sourceEnv() + ' && ' + this.cmd_inject + ' '; 
-    this.logger.appendLine('startInject ' + r);
+    //this.logger.appendLine('startInject ' + r);
     return r;
   }
 
   getSendCmdLine(): string {
     this.updateCommands();
     let r = this.sourceEnv() + ' && ' + this.cmd_send + ' '; 
-    this.logger.appendLine('startSend ' + r);
+    //this.logger.appendLine('startSend ' + r);
     return r;
 
   }
@@ -154,35 +154,35 @@ export class ApamaEnvironment {
   getDeleteCmdLine(): string {
     this.updateCommands();
     let r = this.sourceEnv() + ' && ' + this.cmd_delete + ' '; 
-    this.logger.appendLine('startDelete ' + r);
+    //this.logger.appendLine('startDelete ' + r);
     return r;
   }
 
   getApamaProjectCmdline(): string {
     this.updateCommands();
     let r = this.sourceEnv() + ' && ' + this.cmd_project + ' '; 
-    this.logger.appendLine('startProject ' + r);
+    //this.logger.appendLine('startProject ' + r);
     return r;
   }
 
   getManagerCmdline(): string {
     this.updateCommands();
     let r = this.sourceEnv() + ' && ' + this.cmd_management + ' '; 
-    this.logger.appendLine('startManager ' + r);
+    //this.logger.appendLine('startManager ' + r);
     return r;
   }
 
   getEplBuddyCmdline(): string {
     this.updateCommands();
     let r = this.sourceEnv() + ' && ' + this.cmd_eplbuddy + ' '; 
-    this.logger.appendLine('starteplBuddy ' + r);
+    //this.logger.appendLine('starteplBuddy ' + r);
     return r;
   }
 
   getEngineWatchCmdline(): string {
     this.updateCommands();
     let r = this.sourceEnv() + ' && ' + this.cmd_watch + ' '; 
-    this.logger.appendLine('startWatch ' + r);
+    //this.logger.appendLine('startWatch ' + r);
     return r;
   }
 }

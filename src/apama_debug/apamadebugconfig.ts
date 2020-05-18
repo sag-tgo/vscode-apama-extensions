@@ -17,7 +17,6 @@ export class ApamaDebugConfigurationProvider implements DebugConfigurationProvid
      *  Return an initial debug configuration
      */
     provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
-        this.logger.appendLine("provideDebugConfigurations");
         let config = workspace.getConfiguration("softwareag.apama");
         return [ {
             type: "apama",
@@ -34,7 +33,6 @@ export class ApamaDebugConfigurationProvider implements DebugConfigurationProvid
 	 * Add all missing config setting just before launch
 	 */
 	resolveDebugConfiguration(folder: WorkspaceFolder | undefined, config: DebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration> {
-        this.logger.appendLine("resolveDebugConfiguration");
         // Can't continue if there's no workspace
         if (!folder) {
             this.logger.appendLine("no folder");
@@ -65,7 +63,6 @@ export class ApamaDebugConfigurationProvider implements DebugConfigurationProvid
 
 
         if (!this._server) {
-            this.logger.appendLine("starting server");
             this._server = Net.createServer(socket => {
                 const session = new CorrelatorDebugSession(this.logger, this.apamaEnv, config.correlator);
                 session.setRunAsServer(true);
@@ -76,8 +73,6 @@ export class ApamaDebugConfigurationProvider implements DebugConfigurationProvid
         config.debugServer = (<Net.AddressInfo>this._server.address()).port;
         //config.debugServer = this._server.address();
 
-        this.logger.appendLine("config - ");
-        this.logger.appendLine( JSON.stringify(config));
 		return config;
 	}
 

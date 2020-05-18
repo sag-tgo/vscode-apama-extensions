@@ -82,7 +82,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		let config = vscode.workspace.getConfiguration("softwareag.apama.langserver");
 		createLangServerTCP(apamaEnv, config, logger)
 			.then( (ls) => {
-				logger.appendLine(`Starting Language Client`);
 				context.subscriptions.push(ls.start());
 			})
 			.catch( err => logger.appendLine( err ));
@@ -119,9 +118,7 @@ async function createLangServerTCP(apamaEnv: ApamaEnvironment, config : vscode.W
 	let lsType: string | undefined = config.get<string>("type");
 	if(  lsType === "local"  ) {
 		//default is to run the language server locally
-		logger.appendLine(`Executing Apama language server`);
 		let te = await vscode.tasks.executeTask(runLangServer(apamaEnv,config));
-		logger.appendLine(`Started Language Server on (host ${config.host} port ${config.port})`);
 	}
 	else if (lsType === "disabled" )
 	{
@@ -154,7 +151,6 @@ async function createLangServerTCP(apamaEnv: ApamaEnvironment, config : vscode.W
 		}
 	};
 
-	logger.appendLine(`Returning Language Client`);
 	//now this call will use the above options and function
 	return new LanguageClient(`tcp lang server (host ${config.host} port ${config.port})`, serverOptions, clientOptions);
 }
