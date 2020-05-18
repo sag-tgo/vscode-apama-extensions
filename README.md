@@ -16,7 +16,7 @@ For mor information on EPL and Apama please visit the [Apama Community Edition w
 
 ## Settings
 
-![Snippets](images/settings.png)
+![settings](images/settings.png)
 
 ## Snippets
 
@@ -24,19 +24,15 @@ For mor information on EPL and Apama please visit the [Apama Community Edition w
 
 ## Correlator Task, inject monitor and send event
 
-![Snippets](images/2-runcorr-inject.gif)
+![correlator](images/2-runcorr-inject.gif)
 
 ## Send Event file
 
-![Snippets](images/3-evtfile-send.gif)
+![events](images/3-evtfile-send.gif)
 
 ## Requirements
 
 There are no requirements for use of this extention currently.
-
-## Extension Settings
-
-No settings currently.
 
 ## Known Issues
 
