@@ -7,22 +7,23 @@ For mor information on EPL and Apama please visit the [Apama Community Edition w
 ## Features
 
 * Supports EPL language from Apama 10.5.3 +
-* Support for debugging and launching pure EPL in a correlator. 
+* Support for debugging and launching pure EPL in a correlator.
 * Supports apama_project
+* Gives diagnostics from Apama v10.5.3+
 
 ![example code](images/mainpage.PNG)
 
-##Snippets
+## Snippets
+
 ![Snippets](images/1-snippets.gif)
 
-##Correlator Task
-![Snippets](images/2-run-corr.gif)
+## Correlator Task, inject monitor and send event
 
-##Send Event
-![Snippets](images/3-send-single-evt.gif)
+![Snippets](images/2-runcorr-inject.gif)
 
-##Send Multiple Events
-![Snippets](images/4-send-multiple-evt.gif)
+## Send Event file
+
+![Snippets](images/3-evtfile-send.gif)
 
 ## Requirements
 
