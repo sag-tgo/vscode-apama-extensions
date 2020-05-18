@@ -6,9 +6,10 @@ For mor information on EPL and Apama please visit the [Apama Community Edition w
 
 ## Features
 
-* Supports EPL language from Apama 10.5.3 +
+* Enables features for correct versions of Apama.
+* Supports EPL language from Apama 10.5.3+
 * Support for debugging and launching pure EPL in a correlator.
-* Supports apama_project
+* Supports apama_project.
 * Gives diagnostics from Apama v10.5.3+
 
 ![example code](images/mainpage.PNG)
@@ -44,6 +45,13 @@ Users are welcome to make pull requests with fixes and enhancements but I reserv
 The syntax highlighting is being adapted from a Javascript syntax file and is being cleaned up and enhanced iteratively. I will eventually have a complete JSON based syntax file for EPL at which point I will probably publish it separately for others to use in the various editors that use the Texmate format. (N.B vscode does have some quirks which will need translating)
 
 ## Release Notes
+
+## v1.0
+
+* Finished syntax highlighting
+* Documentation
+* Apama EPL diagnostics
+* Apama project integration
 
 v0.7 - Better syntax highlighting, Snippets, Apama EPL debugging 
 v0.1 - initial release, basic highlighting support and placeholder for command(s)
