@@ -14,6 +14,10 @@ For mor information on EPL and Apama please visit the [Apama Community Edition w
 
 ![example code](images/mainpage.PNG)
 
+## Settings
+
+![Snippets](images/settings.png)
+
 ## Snippets
 
 ![Snippets](images/1-snippets.gif)
