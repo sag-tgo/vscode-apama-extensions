@@ -28,9 +28,16 @@ export class ApamaCommandProvider {
           //
           // engine_inject command
           //
-          commands.registerCommand('extension.apama.engine_inject', (monFile) => {
+          commands.registerCommand('extension.apama.engine_inject', async (monFile) => {
             if (monFile !== undefined) {
-              this.injectCmd.run('.', ['-p', port.toString()].concat(monFile.fsPath));
+              // Display prompt to receive port
+              const userInput = await window.showInputBox({
+                value: port.toString(),
+                placeHolder: "What port is the target correlator running on"
+              });
+              if( userInput ) {
+                this.injectCmd.run('.', ['-p', userInput.toString()].concat(monFile.fsPath));
+              }              
             }
             // TODO?: add option to specify mon file name to inject in command palette 
           }),
@@ -38,32 +45,40 @@ export class ApamaCommandProvider {
           // engine_send command
           //
           commands.registerCommand('extension.apama.engine_send', async (evtFile?) => {
+            // Display prompt to receive port
+            const portInput = await window.showInputBox({
+              value: port.toString(),
+              placeHolder: "What port is the target correlator running on"
+            });
+
+            if( portInput ){
             // From explorer/context menu 
-            if (evtFile !== undefined) {
-              // Specify engine_send command WITH evt file 
-              this.sendCmd.run('.', ['-p', port.toString()].concat(evtFile.fsPath));
-            }
-            // Calling engine send from command palette
-            else {
-              // Display prompt to receive user input
-              const userInput = await window.showInputBox({
-                value: "\"send_channel\", event_type(event_fields)",
-                placeHolder: "Specify event to send"
-              });
-              if (userInput !== undefined) {
-                // Specify engine_send command with NO evt files (but specify port) 
-                const childProcess = spawn(this.apamaEnv.getSendCmdLine() + ' -p ' + port.toString(), {
-                  shell: true,
-                  stdio: ['pipe', 'pipe', 'pipe']
+              if (evtFile !== undefined) {
+                // Specify engine_send command WITH evt file 
+                this.sendCmd.run('.', ['-p', portInput.toString()].concat(evtFile.fsPath));
+              }
+              // Calling engine send from command palette
+              else {
+                // Display prompt to receive user input
+                const userInput = await window.showInputBox({
+                  value: "\"send_channel\", event_type(event_fields)",
+                  placeHolder: "Specify event to send"
                 });
-                // When no evt files are specified in engine_send command 
-                // the correlator reads user-specified events from stdin 
-                // (see 'Sending events to correlatyeah ors' in 'Deploying and Managing Apama Applications' p.169).
-                //  => write userInput to stdin of child process:
-                await this.streamWrite(childProcess.stdin, userInput + "\n");
-                await this.streamEnd(childProcess.stdin);
-                await this.onExit(childProcess);
-                this.logger.appendLine('engine_send ' + userInput);
+                if (userInput !== undefined) {
+                  // Specify engine_send command with NO evt files (but specify port) 
+                  const childProcess = spawn(this.apamaEnv.getSendCmdLine() + ' -p ' + userInput.toString(), {
+                    shell: true,
+                    stdio: ['pipe', 'pipe', 'pipe']
+                  });
+                  // When no evt files are specified in engine_send command 
+                  // the correlator reads user-specified events from stdin 
+                  // (see 'Sending events to correlatyeah ors' in 'Deploying and Managing Apama Applications' p.169).
+                  //  => write userInput to stdin of child process:
+                  await this.streamWrite(childProcess.stdin, userInput + "\n");
+                  await this.streamEnd(childProcess.stdin);
+                  await this.onExit(childProcess);
+                  this.logger.appendLine('engine_send ' + userInput);
+                }
               }
             }
           }),
@@ -71,26 +86,20 @@ export class ApamaCommandProvider {
           // engine_delete command
           //
           commands.registerCommand('extension.apama.engine_delete', async () => {
-            const userInput = await window.showInputBox({
-              value: " [ options ] [ name1 [ name2 ... ] ]",
-              placeHolder: "Specify the names of zero or more EPL, JMon, monitors and/or event types to delete from correlator."
+            // Display prompt to receive port
+            const portInput = await window.showInputBox({
+              value: port.toString(),
+              placeHolder: "What port is the target correlator running on"
             });
-            if (userInput !== undefined) {
-              this.deleteCmd.run('.', ['-p', port.toString()].concat(userInput));
-            }
-          }),
-          //
-          // engine_watch command
-          //
-          commands.registerCommand('extension.apama.engine_watch', async () => {
-            // receive user input
-            const userInput = await window.showInputBox({
-              value: " -p " + port.toString() + " ",
-              placeHolder: "Specify engine_watch options"
-            });
-            if (userInput !== undefined) {
-              const options = userInput.split(' ');
-              this.engineWatchCmd.start(options, true, true);
+
+            if( portInput ){
+              const userInput = await window.showInputBox({
+                value: " [ options ] [ name1 [ name2 ... ] ]",
+                placeHolder: "Specify the names of zero or more EPL, JMon, monitors and/or event types to delete from correlator."
+              });
+              if (userInput !== undefined) {
+                this.deleteCmd.run('.', ['-p', port.toString()].concat(userInput));
+              }
             }
           })
         ]

@@ -16,28 +16,6 @@ export class ApamaTaskProvider implements TaskProvider {
 
   }
 
-  provideTasks(): ProviderResult<Task[]> {
-    return [
-        this.runCorrelator(),
-        this.runEngineWatch()
-    ];
-  }
-
-
-  private runCorrelator(): Task {
-
-    //default options for running
-    let correlator = new Task(
-      {"type":"apama","task":"correlator","port":"15903","cmdline":this.apamaEnv.getCorrelatorCmdline()},
-      "correlator",
-      "apama",
-      new ShellExecution(this.apamaEnv.getCorrelatorCmdline()),
-      []
-    );
-    correlator.group = 'correlator';
-    return correlator;
-  }
-
   resolveTask(_task: Task, token?: CancellationToken | undefined): ProviderResult<Task> {
     this.logger.appendLine("resolveTask called");
     //
@@ -59,6 +37,44 @@ export class ApamaTaskProvider implements TaskProvider {
       return finalTask;
     }
     return undefined;
+  }
+
+
+  provideTasks(): ProviderResult<Task[]> {
+    return [
+        this.runCorrelator(),
+        this.runEngineWatch(),
+        this.runReceive()
+    ];
+  }
+
+
+  private runCorrelator(): Task {
+
+    //default options for running
+    let correlator = new Task(
+      {"type":"apama","task":"correlator","port":"15903","cmdline":this.apamaEnv.getCorrelatorCmdline()},
+      "correlator",
+      "apama",
+      new ShellExecution(this.apamaEnv.getCorrelatorCmdline()),
+      []
+    );
+    correlator.group = 'correlator';
+    return correlator;
+  }
+
+  private runReceive(): Task {
+
+    //default options for running
+    let correlator = new Task(
+      {"type":"apama","task":"engine_receive","port":"15903","cmdline":this.apamaEnv.getEngineReceiveCmdline()},
+      "engine_receive",
+      "apama",
+      new ShellExecution(this.apamaEnv.getEngineReceiveCmdline()),
+      []
+    );
+    correlator.group = 'correlator';
+    return correlator;
   }
 
    runEngineWatch(): Task {

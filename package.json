@@ -228,10 +228,6 @@
         {
           "when": "resourceExtname == .evt",
           "command": "extension.apama.engine_send"
-        },
-        {
-          "when": "resourceExtname == .mon",
-          "command": "extension.c8y.upload_epl_app"
         }
       ],
       "view/title": [

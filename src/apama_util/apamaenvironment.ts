@@ -25,6 +25,10 @@ const default_linux_delete:string = 'engine_delete';
 const default_windows_delete: string = 'engine_delete.exe';
 const default_linux_watch: string = 'engine_watch'; 
 const default_windows_watch: string = 'engine_watch.exe';
+const default_linux_receive: string = 'engine_receive'; 
+const default_windows_receive: string = 'engine_receive.exe';
+const default_linux_inspect: string = 'engine_inspect'; 
+const default_windows_inspect: string = 'engine_inspect.exe';
 const default_linux_source: string = '. ';
 const default_windows_source: string = '';
 
@@ -49,6 +53,8 @@ export class ApamaEnvironment {
   private cmd_send: string;
   private cmd_delete: string;
   private cmd_watch: string;
+  private cmd_receive: string;
+  private cmd_inspect: string;
 
   constructor( private logger:OutputChannel ) { 
     this.workspaceConfig = workspace.getConfiguration(confignode);
@@ -68,6 +74,8 @@ export class ApamaEnvironment {
       this.cmd_send = '';
       this.cmd_delete = '';
       this.cmd_watch = '';
+      this.cmd_receive = '';
+      this.cmd_inspect = '';
       this.updateCommands();
   }
 
@@ -98,6 +106,8 @@ export class ApamaEnvironment {
       this.cmd_send = join(this.apamaHome, 'bin', default_linux_send);
       this.cmd_delete = join(this.apamaHome, 'bin', default_linux_delete);
       this.cmd_watch = join(this.apamaHome, 'bin', default_linux_watch);
+      this.cmd_receive = join(this.apamaHome, 'bin', default_linux_receive);
+      this.cmd_inspect = join(this.apamaHome, 'bin', default_linux_inspect);
     }
     else {
       this.cmd_source = default_windows_source;
@@ -111,6 +121,8 @@ export class ApamaEnvironment {
       this.cmd_send = join(this.apamaHome, 'bin', default_windows_send);
       this.cmd_delete = join(this.apamaHome, 'bin', default_windows_delete);
       this.cmd_watch = join(this.apamaHome, 'bin', default_windows_watch);
+      this.cmd_receive = join(this.apamaHome, 'bin', default_windows_receive);
+      this.cmd_inspect = join(this.apamaHome, 'bin', default_windows_inspect);
     }
 
 
@@ -185,4 +197,17 @@ export class ApamaEnvironment {
     //this.logger.appendLine('startWatch ' + r);
     return r;
   }
+
+  getEngineReceiveCmdline(): string {
+    this.updateCommands();
+    let r = this.sourceEnv() + ' && ' + this.cmd_receive + ' '; 
+    return r;
+  }
+
+  getEngineInspectCmdline(): string {
+    this.updateCommands();
+    let r = this.sourceEnv() + ' && ' + this.cmd_inspect + ' '; 
+    return r;
+  }
+
 }

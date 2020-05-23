@@ -32,7 +32,11 @@ For mor information on EPL and Apama please visit the [Apama Community Edition w
 
 ## Create Project
 
-![events](images/4-create-project.gif)
+![project support](images/4-create-project.gif)
+
+## Create Tasks
+
+![tasks](images/5-tasks-create.gif)
 
 ## Requirements
 
@@ -57,5 +61,5 @@ The syntax highlighting is being adapted from a Javascript syntax file and is be
 * Apama EPL diagnostics
 * Apama project integration
 
-v0.7 - Better syntax highlighting, Snippets, Apama EPL debugging 
+v0.7 - Better syntax highlighting, Snippets, Apama EPL debugging
 v0.1 - initial release, basic highlighting support and placeholder for command(s)
