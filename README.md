@@ -30,6 +30,10 @@ For mor information on EPL and Apama please visit the [Apama Community Edition w
 
 ![events](images/3-evtfile-send.gif)
 
+## Create Project
+
+![events](images/4-create-project.gif)
+
 ## Requirements
 
 There are no requirements for use of this extention currently.

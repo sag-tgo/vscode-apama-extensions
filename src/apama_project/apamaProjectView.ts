@@ -148,7 +148,7 @@ export class ApamaProjectView implements TreeDataProvider<string | ApamaTreeItem
 	// Trigger refresh of the tree
 	//
 	refresh(): void {
-		this._onDidChangeTreeData.fire();
+		this._onDidChangeTreeData.fire(undefined);
 	}
 
 	//

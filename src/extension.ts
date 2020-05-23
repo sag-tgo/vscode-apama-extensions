@@ -1,12 +1,12 @@
 "use_strict";
 
 import * as net from 'net';
- 
-import * as vscode from 'vscode';
+
+import {ExtensionContext, Disposable, window, tasks, debug, workspace, WorkspaceConfiguration, Task, ShellExecution, OutputChannel} from 'vscode';
 
 import {
 	LanguageClient, LanguageClientOptions, ServerOptions,
-	TransportKind, ForkOptions, MessageTransports
+	TransportKind, ForkOptions, MessageTransports, WorkspaceFolder
 } from 'vscode-languageclient';
 
 
@@ -23,20 +23,20 @@ var semver = require('semver');
 //
 // client activation function, this is the entrypoint for the client
 //
-export async function activate(context: vscode.ExtensionContext): Promise<void> {
-	let commands: vscode.Disposable[] = [];
+export async function activate(context: ExtensionContext): Promise<void> {
+	let commands: Disposable[] = [];
 
-	const logger = vscode.window.createOutputChannel('Apama Extension');
+	const logger = window.createOutputChannel('Apama Extension');
 	logger.show();
 	logger.appendLine('Started EPL Extension');
 
 	let apamaEnv: ApamaEnvironment = new ApamaEnvironment(logger);
 	const taskprov = new ApamaTaskProvider(logger, apamaEnv);
-	context.subscriptions.push(vscode.tasks.registerTaskProvider("apama", taskprov));
+	context.subscriptions.push(tasks.registerTaskProvider("apama", taskprov));
 
 	const provider = new ApamaDebugConfigurationProvider(logger, apamaEnv);
 
-	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('apama', provider));
+	context.subscriptions.push(debug.registerDebugConfigurationProvider('apama', provider));
 
 	context.subscriptions.push(provider);
 
@@ -44,8 +44,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 	//this needs a workspace folder which under some circumstances can be undefined. 
 	//but we can ignore in that case and things shjould still work
-	if (vscode.workspace.workspaceFolders !== undefined) {
-		const projView = new ApamaProjectView(apamaEnv, logger, vscode.workspace.workspaceFolders, context);
+	if (workspace.workspaceFolders !== undefined) {
+		const myClonedArray = [...workspace.workspaceFolders]; 
+		const projView = new ApamaProjectView(apamaEnv, logger, myClonedArray, context);
 	}
 
 	//EPL Applications view is still WIP - needs more work 
@@ -79,12 +80,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	}
 	else
 	{
-		let config = vscode.workspace.getConfiguration("softwareag.apama.langserver");
+		let config = workspace.getConfiguration("softwareag.apama.langserver");
 		createLangServerTCP(apamaEnv, config, logger)
 			.then( (ls) => {
 				context.subscriptions.push(ls.start());
 			})
-			.catch( err => logger.appendLine( err ));
+			.catch( err => logger.appendLine( err )); 
 	}
 	
 	
@@ -97,12 +98,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 }
 
 
-function runLangServer(apamaEnv: ApamaEnvironment, config : vscode.WorkspaceConfiguration ): vscode.Task {
-	let correlator = new vscode.Task(
+function runLangServer(apamaEnv: ApamaEnvironment, config : WorkspaceConfiguration ): Task {
+	let correlator = new Task(
 	  {type: "shell", task: ""},
 	  "Apama Language Server",
 	  "ApamaLanguageServer",
-	  new vscode.ShellExecution(apamaEnv.getEplBuddyCmdline(),['-l',config.port.toString()]),
+	  new ShellExecution(apamaEnv.getEplBuddyCmdline(),['-l',config.port.toString()]),
 	  []
 	);
 	correlator.group = 'test';
@@ -113,12 +114,12 @@ function runLangServer(apamaEnv: ApamaEnvironment, config : vscode.WorkspaceConf
 // This method will start the lang server - requires Apama 10.5.3+ however 
 // so this method will be gated on that version in the activate function above.
 //
-async function createLangServerTCP(apamaEnv: ApamaEnvironment, config : vscode.WorkspaceConfiguration , logger: vscode.OutputChannel): Promise<LanguageClient> {
+async function createLangServerTCP(apamaEnv: ApamaEnvironment, config : WorkspaceConfiguration , logger: OutputChannel): Promise<LanguageClient> {
 	logger.appendLine(`Starting Language Server on (host ${config.host} port ${config.port})`);
 	let lsType: string | undefined = config.get<string>("type");
 	if(  lsType === "local"  ) {
 		//default is to run the language server locally
-		let te = await vscode.tasks.executeTask(runLangServer(apamaEnv,config));
+		let te = await tasks.executeTask(runLangServer(apamaEnv,config));
 	}
 	else if (lsType === "disabled" )
 	{

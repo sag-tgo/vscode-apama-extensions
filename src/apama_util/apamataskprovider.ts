@@ -2,6 +2,14 @@ import { TaskProvider, CancellationToken, ProviderResult, Task, ProcessExecution
 import { ApamaEnvironment } from './apamaenvironment';
 import { window, workspace } from 'vscode';
 
+interface ApamaTaskDefinition extends TaskDefinition {
+  task: string;
+  port: number;
+  project: string;
+  cmdline: string;
+}
+
+
 export class ApamaTaskProvider implements TaskProvider {
 
   constructor(private logger: OutputChannel, private apamaEnv: ApamaEnvironment) {
@@ -15,33 +23,55 @@ export class ApamaTaskProvider implements TaskProvider {
     ];
   }
 
+
   private runCorrelator(): Task {
+
+    //default options for running
     let correlator = new Task(
-      {type: "shell", task: ""},
-      "Run Correlator",
+      {"type":"apama","task":"correlator","port":"15903","cmdline":this.apamaEnv.getCorrelatorCmdline()},
       "correlator",
+      "apama",
       new ShellExecution(this.apamaEnv.getCorrelatorCmdline()),
       []
     );
-    correlator.group = 'test';
+    correlator.group = 'correlator';
     return correlator;
   }
 
-  resolveTask(task: Task, token?: CancellationToken | undefined): ProviderResult<Task> {
-    throw new Error("Method not implemented.");
+  resolveTask(_task: Task, token?: CancellationToken | undefined): ProviderResult<Task> {
+    this.logger.appendLine("resolveTask called");
+    //
+    // The actual task will start on the correct port
+    // it will change the name to add the port as a suffix
+    //
+    const port = _task.definition.port;
+    const task = _task.definition.task;
+    const cmdline = _task.definition.cmdline;
+    if(port) {
+      this.logger.appendLine("Running on port " + port);
+      let finalTask = new Task(
+        _task.definition,
+        task +"-"+port,
+        "apama",
+        new ShellExecution(cmdline+ [" -p",port].join(' ')),
+        []
+      );
+      return finalTask;
+    }
+    return undefined;
   }
 
    runEngineWatch(): Task {
      //TODO: get user defined options?
      //let options = windows.showInputBox(...etc...);
     let engine_watch = new Task(
-      {type: "shell", task: ""},
+      {"type":"apama","task":"engine_watch","port":"15903","cmdline":this.apamaEnv.getEngineWatchCmdline()},
       "engine_watch",
-      "correlator",
+      "apama",
       new ShellExecution(this.apamaEnv.getEngineWatchCmdline()/* + options */),
       []
     );
-    engine_watch.group = 'test';
+    engine_watch.group = 'tools';
     return engine_watch;
   }
 

@@ -1,7 +1,7 @@
+const axios = require('axios').default;
 import * as vscode from 'vscode';
 import { ApamaEnvironment } from '../apama_util/apamaenvironment';
 import {Client, BasicAuth} from '@c8y/client';
-import requestPromise = require('request-promise-native');
 import * as fs from 'fs';
 
 
@@ -122,9 +122,9 @@ export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
 								description: "Uploaded from VS Code"
 							},
 							json: true
-						}
+						};
 						options.body.contents = fs.readFileSync(uri.fsPath).toString();
-						const result = await requestPromise.post(url, options);
+						const result = await axios.post(url, options);
 						// console.log(JSON.stringify(result));
 						// TODO: show errors/warnings
 					} catch (error) {
@@ -145,7 +145,7 @@ export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
 									edit.insert(new vscode.Position(0, 0), element.contents);
 								});
 						});
-					})
+					});
 				}),
 
 
@@ -173,7 +173,7 @@ export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
 					pass: config.get("password", "")
 				}
 			};
-			const result = await requestPromise.get(url, options);
+			const result = await axios.get(url, options);
 			const eplfiles = JSON.parse(result);
 			//"{"eplfiles":[{"id":"713","name":"Testjbh","state":"inactive","errors":[],"warnings":[],"description":"This is a test"},{"id":"715","name":"jbh1","state":"active","errors":[],"warnings":[],"description":"jbh desc"},{"id":"719","name":"thisIsATest","state":"active","errors":[],"warnings":[],"description":"This is a test monitor uploaded from VS Code"}]}"
 			for (let element of eplfiles.eplfiles) {
@@ -183,7 +183,7 @@ export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
 		} catch (error) {
 			debugger;
 		}
-		this._onDidChangeTreeData.fire();
+		this._onDidChangeTreeData.fire(undefined);
 	}
 
 	//

@@ -1,4 +1,4 @@
-import * as requestPromise from 'request-promise-native';
+const axios = require('axios').default;
 import { DOMParser } from 'xmldom';
 import * as xpath from 'xpath';
 import { OutputChannel } from 'vscode';
@@ -66,19 +66,19 @@ export class CorrelatorHttpInterface {
             '<prop name="breakonce">true</prop>' +
         '</map>';
 
-        return requestPromise.put(`${this.url}/correlator/debug/breakpoint/location`, { body })
-            .then(response => new DOMParser().parseFromString(response, 'text/xml'))
-            .then(dom => xpath.select1('string(/map[@name="apama-response"]/list[@name="ids"]/prop[@name="id"]//text())', dom));
+        return axios.put(`${this.url}/correlator/debug/breakpoint/location`, { body })
+            .then((response: string) => new DOMParser().parseFromString(response, 'text/xml'))
+            .then((dom: any) => xpath.select1('string(/map[@name="apama-response"]/list[@name="ids"]/prop[@name="id"]//text())', dom));
     }
 
     public async getAllSetBreakpoints(): Promise<CorrelatorBreakpoint[]> {
-        return requestPromise.get(`${this.url}/correlator/debug/breakpoint`)
-            .then(response => new DOMParser().parseFromString(response, 'text/xml'))
-            .then(dom => xpath.select('/map[@name="apama-response"]/list[@name="breakpoints"]/map[@name="filebreakpoint"]', dom))
+        return axios.get(`${this.url}/correlator/debug/breakpoint`)
+            .then((response: string) => new DOMParser().parseFromString(response, 'text/xml'))
+            .then((dom: any) => xpath.select('/map[@name="apama-response"]/list[@name="breakpoints"]/map[@name="filebreakpoint"]', dom))
             // Have to convert the found breakpointNodes back to a string and then back to dom because this xpath implementation only finds from root node
-            .then(breakpointNodes => breakpointNodes.map(breakpointNode => breakpointNode.toString()))
-            .then(bpStrings => bpStrings.map(bpString => new DOMParser().parseFromString(bpString, 'text/xml')))
-            .then(breakpointDoms => breakpointDoms.map((breakpointDom) => ({
+            .then((breakpointNodes: any[]) => breakpointNodes.map((breakpointNode: { toString: () => any; }) => breakpointNode.toString()))
+            .then((bpStrings: any[]) => bpStrings.map((bpString: string) => new DOMParser().parseFromString(bpString, 'text/xml')))
+            .then((breakpointDoms: any[]) => breakpointDoms.map((breakpointDom: any) => ({
                     filename: xpath.select1('string(/map/prop[@name="filename"])', breakpointDom),
                     filehash: xpath.select1('string(/map/prop[@name="filehash"])', breakpointDom),
                     action: xpath.select1('string(/map/prop[@name="action"])', breakpointDom),
@@ -92,37 +92,37 @@ export class CorrelatorHttpInterface {
 
     public async enableDebugging(): Promise<void> {
         const body = '<map name="apama-request"></map>';
-        return requestPromise.put(`${this.url}/correlator/debug/state`, { body });
+        return axios.put(`${this.url}/correlator/debug/state`, { body });
     }
 
     public async pause(): Promise<void> {
         const body = '<map name="apama-request"></map>';
-        return requestPromise.put(`${this.url}/correlator/debug/progress/stop`, { body });
+        return axios.put(`${this.url}/correlator/debug/progress/stop`, { body });
     }
 
     public async resume(): Promise<void> {
         const body = '<map name="apama-request"></map>';
-        return requestPromise.put(`${this.url}/correlator/debug/progress/run`, { body });
+        return axios.put(`${this.url}/correlator/debug/progress/run`, { body });
     }
 
     public async stepIn(): Promise<void> {
         const body = '<map name="apama-request"></map>';
-        return requestPromise.put(`${this.url}/correlator/debug/progress/step`, { body });
+        return axios.put(`${this.url}/correlator/debug/progress/step`, { body });
     }
 
     public async stepOver(): Promise<void> {
         const body = '<map name="apama-request"></map>';
-        return requestPromise.put(`${this.url}/correlator/debug/progress/stepover`, { body });
+        return axios.put(`${this.url}/correlator/debug/progress/stepover`, { body });
     }
 
     public async stepOut(): Promise<void> {
         const body = '<map name="apama-request"></map>';
-        return requestPromise.put(`${this.url}/correlator/debug/progress/stepout`, { body });
+        return axios.put(`${this.url}/correlator/debug/progress/stepout`, { body });
     }
 
     public async awaitPause(): Promise<CorrelatorPaused> {
-        return requestPromise.get(`${this.url}/correlator/debug/progress/wait`, { timeout: 15000 }) // Timeout has to be smaller than apama's timeout else you get a message in the logs
-            .catch(e => {
+        return axios.get(`${this.url}/correlator/debug/progress/wait`, { timeout: 15000 }) // Timeout has to be smaller than apama's timeout else you get a message in the logs
+            .catch((e: { error: { code: string; connect: any; }; }) => {
                 // If the await timed out (but not during connection) then just recreate it
                 if ((e.error.code === 'ETIMEDOUT' || e.error.code === 'ESOCKETTIMEDOUT') && !e.error.connect) {
                     return this.awaitPause();
@@ -130,8 +130,8 @@ export class CorrelatorHttpInterface {
                     throw e;
                 }
             })
-            .then(response => new DOMParser().parseFromString(response, 'text/xml'))
-            .then(dom => ({
+            .then((response: string) => new DOMParser().parseFromString(response, 'text/xml'))
+            .then((dom: any) => ({
                 context: xpath.select1('string(/map[@name="apama-response"]/map[@name="contextprogress"]/prop[@name="context"]//text())', dom),
                 contextid: parseInt(xpath.select1('string(/map[@name="apama-response"]/map[@name="contextprogress"]/prop[@name="contextid"]//text())', dom)),
                 paused: xpath.select1('string(/map[@name="apama-response"]/map[@name="contextprogress"]/prop[@name="paused"]//text())', dom) === 'true',
@@ -148,13 +148,13 @@ export class CorrelatorHttpInterface {
     }
 
     public async getContextStatuses(): Promise<(CorrelatorContextState | CorrelatorPaused)[]> {
-        return requestPromise.get(`${this.url}/correlator/debug/progress`)
-            .then(response => new DOMParser().parseFromString(response, 'text/xml'))
-            .then(dom => xpath.select('/map[@name="apama-response"]/list[@name="progress"]/map[@name="contextprogress"]', dom))
+        return axios.get(`${this.url}/correlator/debug/progress`)
+            .then((response: string) => new DOMParser().parseFromString(response, 'text/xml'))
+            .then((dom: any) => xpath.select('/map[@name="apama-response"]/list[@name="progress"]/map[@name="contextprogress"]', dom))
             // Have to convert back to a string and then back to dom because this xpath implementation only finds from root node
-            .then(contextStatusNodes => contextStatusNodes.map(contextStatusNode => contextStatusNode.toString()))
-            .then(contextStatusStrings => contextStatusStrings.map(contextStatusString => new DOMParser().parseFromString(contextStatusString, 'text/xml')))
-            .then(doms => doms.map(dom => {
+            .then((contextStatusNodes: any[]) => contextStatusNodes.map((contextStatusNode: { toString: () => any; }) => contextStatusNode.toString()))
+            .then((contextStatusStrings: any[]) => contextStatusStrings.map((contextStatusString: string) => new DOMParser().parseFromString(contextStatusString, 'text/xml')))
+            .then((doms: any[]) => doms.map((dom: any) => {
                 const paused = xpath.select1('string(/map/prop[@name="paused"]//text())', dom) === 'true';
                 if (paused) {
                     return {
@@ -182,9 +182,9 @@ export class CorrelatorHttpInterface {
     }
 
     public async getStackTrace(contextid: number): Promise<CorrelatorStackTrace> {
-        return requestPromise.get(`${this.url}/correlator/debug/progress/stack/id:${contextid}`)
-            .then(response => new DOMParser().parseFromString(response, 'text/xml'))
-            .then(dom => ({
+        return axios.get(`${this.url}/correlator/debug/progress/stack/id:${contextid}`)
+            .then((response: string) => new DOMParser().parseFromString(response, 'text/xml'))
+            .then((dom: any) => ({
                 contextid: parseInt(xpath.select1('string(/map[@name="apama-response"]/list[@name="stack"]/prop[@name="contextid"]//text())', dom)),
                 monitor: xpath.select1('string(/map[@name="apama-response"]/list[@name="stack"]/prop[@name="monitor"]//text())', dom),
                 stackframes: xpath.select('/map[@name="apama-response"]/list[@name="stack"]/map[@name="stackframe"]', dom)
@@ -203,13 +203,13 @@ export class CorrelatorHttpInterface {
     }
 
     public async getLocalVariables(contextid: number, frameidx: number): Promise<CorrelatorVariable[]> {
-        return requestPromise.get(`${this.url}/correlator/debug/progress/locals/id:${contextid};${frameidx}`)
-            .then(response => new DOMParser().parseFromString(response, 'text/xml'))
-            .then(dom => xpath.select('/map[@name="apama-response"]/list[@name="locals"]/map[@name="variable"]', dom))
+        return axios.get(`${this.url}/correlator/debug/progress/locals/id:${contextid};${frameidx}`)
+            .then((response: string) => new DOMParser().parseFromString(response, 'text/xml'))
+            .then((dom: any) => xpath.select('/map[@name="apama-response"]/list[@name="locals"]/map[@name="variable"]', dom))
             // Have to convert the found nodes back to a string and then back to dom because this xpath implementation only finds from root node
-            .then(nodes => nodes.map(node => node.toString()))
-            .then(nodeStrings => nodeStrings.map(nodeString => new DOMParser().parseFromString(nodeString, 'text/xml')))
-            .then(doms => doms.map((dom) => ({
+            .then((nodes: any[]) => nodes.map((node: { toString: () => any; }) => node.toString()))
+            .then((nodeStrings: any[]) => nodeStrings.map((nodeString: string) => new DOMParser().parseFromString(nodeString, 'text/xml')))
+            .then((doms: any[]) => doms.map((dom: any) => ({
                     name: xpath.select1('string(/map/prop[@name="name"]//text())', dom),
                     type: xpath.select1('string(/map/prop[@name="type"]//text())', dom),
                     value: xpath.select1('string(/map/prop[@name="value"]//text())', dom)
@@ -218,13 +218,13 @@ export class CorrelatorHttpInterface {
     }
 
     public async getMonitorVariables(contextid: number, instance: number): Promise<CorrelatorVariable[]> {
-        return requestPromise.get(`${this.url}/correlator/contexts/id:${contextid}/${instance}`)
-            .then(response => new DOMParser().parseFromString(response, 'text/xml'))
-            .then(dom => xpath.select('/map[@name="apama-response"]/list[@name="mthread"]/map[@name="variable"]', dom))
+        return axios.get(`${this.url}/correlator/contexts/id:${contextid}/${instance}`)
+            .then((response: string) => new DOMParser().parseFromString(response, 'text/xml'))
+            .then((dom: any) => xpath.select('/map[@name="apama-response"]/list[@name="mthread"]/map[@name="variable"]', dom))
             // Have to convert the found nodes back to a string and then back to dom because this xpath implementation only finds from root node
-            .then(nodes => nodes.map(node => node.toString()))
-            .then(nodeStrings => nodeStrings.map(nodeString => new DOMParser().parseFromString(nodeString, 'text/xml')))
-            .then(doms => Promise.all(doms.map((dom) => {
+            .then((nodes: any[]) => nodes.map((node: { toString: () => any; }) => node.toString()))
+            .then((nodeStrings: any[]) => nodeStrings.map((nodeString: string) => new DOMParser().parseFromString(nodeString, 'text/xml')))
+            .then((doms: { map: (arg0: (dom: any) => Promise<{ name: any; type: any; value: string; }>) => readonly [unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown]; }) => Promise.all(doms.map((dom: any) => {
                 const name = xpath.select1('string(/map/prop[@name="name"]//text())', dom);
                 return this.getMonitorVariableValue(contextid, instance, name)
                     .then(value => ({
@@ -237,17 +237,17 @@ export class CorrelatorHttpInterface {
     }
 
     public async getMonitorVariableValue(contextid: number, instance: number, variableName: string): Promise<string> {
-        return requestPromise.get(`${this.url}/correlator/contexts/id:${contextid}/${instance}/${variableName}`)
-            .then(response => new DOMParser().parseFromString(response, 'text/xml'))
-            .then(dom => xpath.select1('string(/map[@name="apama-response"]/prop[@name="value"]//text())', dom));
+        return axios.get(`${this.url}/correlator/contexts/id:${contextid}/${instance}/${variableName}`)
+            .then((response: string) => new DOMParser().parseFromString(response, 'text/xml'))
+            .then((dom: any) => xpath.select1('string(/map[@name="apama-response"]/prop[@name="value"]//text())', dom));
     }
 
     public async setBreakOnErrors(breakOnErrors: boolean): Promise<void> {
         const body = '<map name="apama-request"></map>';
         if (breakOnErrors) {
-            return requestPromise.put(`${this.url}/correlator/debug/breakpoint/errors`, { body });
+            return axios.put(`${this.url}/correlator/debug/breakpoint/errors`, { body });
         } else {
-            return requestPromise.delete(`${this.url}/correlator/debug/breakpoint/errors`, { body });
+            return axios.delete(`${this.url}/correlator/debug/breakpoint/errors`, { body });
         }
     }
 }

@@ -81,6 +81,30 @@
         }
       }
     },
+    "taskDefinitions": [
+      {
+        "type": "apama",
+        "required":[ "port" ],
+        "properties": {
+          "port":{
+            "type":"integer",
+            "description": "Correlator port number"
+          },
+          "task":{
+            "type":"string",
+            "description": "task name"
+          },
+          "cmdline":{
+            "type":"string",
+            "description": "platform dependent cmdline - set automatically"
+          },
+          "project":{
+            "type":"string",
+            "description": "deployed project to run"
+          }
+        }
+      }
+    ],
     "languages": [
       {
         "id": "epl",
@@ -296,23 +320,21 @@
     "ts-loader": "^6.2.2",
     "tslint": "^5.20.1",
     "typescript": "^3.9.3",
-    "vscode": "^1.1.37",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
     "@c8y/client": "^1005.12.0",
+    "@types/axios": "^0.14.0",
     "@types/glob": "^7.1.1",
     "@types/js-yaml": "^3.12.4",
-    "@types/request": "^2.48.5",
-    "@types/request-promise-native": "^1.0.17",
     "@types/shelljs": "^0.8.8",
     "@types/vscode": "^1.45.1",
     "@types/xmldom": "^0.1.29",
+    "axios": "^0.19.2",
     "glob": "^7.1.6",
     "js-yaml": "^3.14.0",
     "jsonschema": "^1.2.6",
-    "request-promise-native": "^1.0.8",
     "semver": "^7.3.2",
     "shelljs": "^0.8.4",
     "vscode-debugadapter": "^1.40.0",
