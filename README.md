@@ -32,7 +32,7 @@ For mor information on EPL and Apama please visit the [Apama Community Edition w
 
 ## Create Project
 
-![project support](images/4-create-project.gif)
+![project support](images/4-project-create.gif)
 
 ## Create Tasks
 
