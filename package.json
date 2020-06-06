@@ -89,22 +89,24 @@
     "taskDefinitions": [
       {
         "type": "apama",
-        "required":[ "port" ],
+        "required": [
+          "port"
+        ],
         "properties": {
-          "port":{
-            "type":"integer",
+          "port": {
+            "type": "integer",
             "description": "Correlator port number"
           },
-          "task":{
-            "type":"string",
+          "task": {
+            "type": "string",
             "description": "task name"
           },
-          "cmdline":{
-            "type":"string",
+          "cmdline": {
+            "type": "string",
             "description": "platform dependent cmdline - set automatically"
           },
-          "project":{
-            "type":"string",
+          "project": {
+            "type": "string",
             "description": "deployed project to run"
           }
         }
@@ -317,7 +319,6 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install",
     "test": "npm run compile && node ./node_modules/vscode/bin/test"
   },
   "devDependencies": {
