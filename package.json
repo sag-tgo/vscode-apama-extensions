@@ -31,8 +31,13 @@
         },
         "softwareag.apama.debugport": {
           "type": "integer",
-          "default": "15903",
+          "default": "15904",
           "description": "Default port for correlator debugging."
+        },
+        "softwareag.apama.debughost": {
+          "type": "string",
+          "default": "127.0.0.1",
+          "description": "Default host for correlator debugging."
         },
         "softwareag.apama.langserver.type": {
           "type": "string",
@@ -286,7 +291,12 @@
                   "port": {
                     "type": "number",
                     "description": "The port on which to run the correlator",
-                    "default": 15903
+                    "default": 15904
+                  },
+                  "host": {
+                    "type": "string",
+                    "description": "the host on which the debug correlator will run",
+                    "default": "127.0.0.1"
                   },
                   "args": {
                     "type": "array",

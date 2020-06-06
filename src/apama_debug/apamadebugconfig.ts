@@ -24,6 +24,7 @@ export class ApamaDebugConfigurationProvider implements DebugConfigurationProvid
             request: "launch",
             correlator: {
                 port: config.get("debugport"),
+                host: config.get("debughost"),
                 args: ["-g"]
             }
         }];
@@ -56,7 +57,7 @@ export class ApamaDebugConfigurationProvider implements DebugConfigurationProvid
         config.request = "launch";
         config.injectionList = getInjectionList(this.apamaEnv, folder.uri.fsPath);
         config.correlator =  {};
-        config.correlator.host = "localhost";
+        config.correlator.host = "127.0.0.1";
         config.correlator.port = workspace.getConfiguration("softwareag.apama").get("debugport");
         config.correlator.args = ["-g"];
     }
