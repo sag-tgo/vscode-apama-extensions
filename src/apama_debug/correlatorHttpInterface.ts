@@ -65,7 +65,7 @@ export class CorrelatorHttpInterface {
         const body = '<map name="apama-request">' +
             `<prop name="filename">${filepath}</prop>` +
             `<prop name="line">${line}</prop>` +
-            '<prop name="breakonce">true</prop>' +
+            '<prop name="breakonce">false</prop>' +
         '</map>';
 
         const url = `${this.url}/correlator/debug/breakpoint/location`;
