@@ -1,22 +1,19 @@
 import {
 	DebugSession,
 	InitializedEvent,
-	OutputEvent,
-	TerminatedEvent,
-	Breakpoint,
 	StoppedEvent,
 	Thread,
 	StackFrame,
 	Source,
 	Scope,
-	Variable
+	Variable,
 } from 'vscode-debugadapter';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { CorrelatorHttpInterface, CorrelatorBreakpoint, CorrelatorPaused } from './correlatorHttpInterface';
 import { basename } from 'path';
 import * as vscode from 'vscode';
 import { ApamaEnvironment } from '../apama_util/apamaenvironment';
-import { ApamaAsyncRunner, ApamaRunner } from '../apama_util/apamarunner';
+import { ApamaRunner } from '../apama_util/apamarunner';
 
 const MAX_STACK_SIZE = 1000;
 
@@ -46,6 +43,7 @@ export class CorrelatorDebugSession extends DebugSession {
 	private injectCmd: ApamaRunner;
 	private correlatorHttp: CorrelatorHttpInterface;
 	private manager: ApamaRunner;
+	private correlatorBreakPoints: {[key:string]:string};
 	public constructor(private logger: vscode.OutputChannel, private apamaEnv: ApamaEnvironment, private config: CorrelatorConfig) {
 		super();
 
@@ -54,6 +52,7 @@ export class CorrelatorDebugSession extends DebugSession {
 		this.injectCmd = new ApamaRunner("engine_inject", apamaEnv.getInjectCmdline(), logger);
 		console.log("Correlator interface host: " + config.host.toString() + " port " + config.port.toString());
 		this.correlatorHttp = new CorrelatorHttpInterface(logger, config.host, config.port);
+		this.correlatorBreakPoints = {} as {[key:string] : string };
 	}
 
 	/**
@@ -83,11 +82,11 @@ export class CorrelatorDebugSession extends DebugSession {
 
 	private runCorrelator(extraargs:string[]): vscode.Task {
 		let localargs : string[] = this.config.args.concat(['-p',this.config.port.toString()]);
-		console.log(extraargs);
+		/////console.log(extraargs);
 		if( extraargs ) {
 			localargs = localargs.concat(extraargs);
 		}
-		console.log(localargs);
+		//console.log(localargs);
 		let correlator = new vscode.Task(
 		  {type: "shell", task: ""},
 		  "DebugCorrelator",
@@ -192,7 +191,7 @@ export class CorrelatorDebugSession extends DebugSession {
 				await vscode.tasks.executeTask(this.runCorrelator([]));	
 				await this.correlatorHttp.enableDebugging();
 				if (folder.uri.fsPath) {
-					console.log("Debug File(s) : " + folder.uri.fsPath );
+					//console.log("Debug File(s) : " + folder.uri.fsPath );
 					await this.deployCmd.run('.', ['--inject', this.config.host.toString(), this.config.port.toString()]
 						.concat(folder.uri.fsPath));
 					this.sendEvent(new InitializedEvent()); // We're ready to start recieving breakpoints
@@ -202,66 +201,104 @@ export class CorrelatorDebugSession extends DebugSession {
 
 			// Pause correlator while we wait for the configuration to finish, we want breakpoints to be set first
 			await this.correlatorHttp.pause();
-	
 
+			
+			console.log('Enable change handler: ', vscode.debug.breakpoints.length);
+			//now we can add a handler for changes in BP 
+			vscode.debug.onDidChangeBreakpoints(async e => {
+				console.log(`onDidChangeBreakpoints: a: ${e.added.length} r: ${e.removed.length} c: ${e.changed.length}`);
+				
+				if (e.added.length > 0) { 
+					console.log('Enable breakpoints: ', e.added.length);
+					for (let bp of e.added) {
+						if(bp instanceof vscode.SourceBreakpoint){
+							let bpLine = bp.location.range.start.line + 1;
+							this.correlatorBreakPoints[bp.location.uri.fsPath +':'+ bpLine.toString()] = '-1';
+							//console.log("REQUESTING " + bp.location.uri.fsPath +':'+ bpLine.toString() );
+							let id:string = await this.correlatorHttp.setBreakpoint(bp.location.uri.fsPath, bpLine );
+							this.correlatorBreakPoints[bp.location.uri.fsPath +':'+ bpLine.toString()] = id;
+							//console.log("REQUESTED " + bp.location.uri.fsPath +':'+ bpLine.toString() + '==id==' + id );
+						}
+					}
+				}
+
+				if (e.removed.length > 0) { 
+					for (let bp of e.removed) {
+						if(bp instanceof vscode.SourceBreakpoint){
+							let bpLine = bp.location.range.start.line + 1;
+							//console.log("REMOVING " + bp.location.uri.fsPath +':'+ bpLine.toString() );
+							await this.correlatorHttp.deleteBreakpoint(this.correlatorBreakPoints[bp.location.uri.fsPath +':'+ bpLine.toString()]);
+							//console.log("REMOVED " + bp.location.uri.fsPath +':'+ bpLine.toString() + '==id==' + this.correlatorBreakPoints[bp.location.uri.fsPath +':'+ bpLine.toString()] );
+							delete this.correlatorBreakPoints[bp.location.uri.fsPath +':'+ bpLine.toString()];
+						}
+					}
+				}
+				//if (e.changed.length) { console.log('changed: ', JSON.stringify(e.changed)); }
+				
+				//console.log('breakpoints after event: ', vscode.debug.breakpoints.length);
+
+			});
+	
 		}
 
 	}
 
 	/**
 	 * Frontend requested that breakpoints be set
+	 * http://brickhousecodecamp.org/docs/vscode/code.visualstudio.com/docs/extensionAPI/api-debugging.html#_the-debug-adapter-protocol-in-a-nutshell
+	 * 
+	 * N.B. this request is repeated for each file with breakpoints 
+	 * 
+	 * we will clear and revalidate breakpoints for a file when this is called because otherwise we get into 
+	 * having to persist and maintain the lists - the correlator already does this so no need for us to do it.
 	 */
 	protected async setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): Promise<void> {
-		// TODO: It'll probably set the breakpoints twice in a file if a new breakpoint is added while running - so we should fix that
-		if (args.source.path) {
+		if (args.source.path) 
+		{
 			const filePath = args.source.path;
 
-			// Attempt to set all of the breakpoints
-			console.log('Requesting breakpoints');
+			let bpsToCheck: Number[] = [];
 
-			const breakpointIds : {[key: string]:string}  = {} as {[key: string]:string} ;
-			console.log('for');
-			console.log(args);
+			//Get the line numbers of the current request
 			for ( let lineNumber  of args.lines || [] ){
-				try {
-					breakpointIds[lineNumber.toString()] = await this.correlatorHttp.setBreakpoint(filePath, lineNumber);
-				}
-				catch(e) {
-					console.log('Error: ' +  e.response.statusText);
-				}
+				let currentKey: string = filePath +':'+ lineNumber.toString();
+				console.log("Checking:" + currentKey );
+				bpsToCheck.push(lineNumber);
 			}
-			console.log('Requested breakpoints');
-			console.log(breakpointIds);
-			console.log('Check Breakpoints');
-			let setBreakPoints = await this.correlatorHttp.getAllSetBreakpoints();
-			console.log(setBreakPoints);
-			console.log('Requested breakpoints 2');
-			let setBreakpointsById = setBreakPoints.reduce(
+
+			// Pull out all curren tbreakpoints in the correlator
+			let currentCorrelatorBreakpoints = await this.correlatorHttp.getAllSetBreakpoints();
+			let currentCorrelatorBreakpointsById = currentCorrelatorBreakpoints.reduce(
 				(acc, breakpoint) => 
 				{
 				acc[breakpoint.id] = breakpoint;
 				return acc;
 				} , {} as { [key: string]: CorrelatorBreakpoint });
 
-			// Ask the correlator which breakpoints have been set
+
 			// Compare the attempted and the actually set to determine whether they've actually been set (and on which line)
-			let bps : Breakpoint[] = [];
-			for (const key in breakpointIds) {
-				if (breakpointIds.hasOwnProperty(key)) {
-					if (setBreakpointsById[key]) {
-						// Successful breakpoint
-						bps.push(new Breakpoint(true, setBreakpointsById[key].line));					
-					} else {
-						// Breakpoint failed to be set
-						bps.push(new Breakpoint(false));
-					}
+			//I am verifying breakpoints that have actually been set in the correlator only - so I iterate through the real ones
+			//just making sure we respond to the ones to check specifically (others will have existing state)
+			let bps : DebugProtocol.Breakpoint[] = [];
+			for ( let id in currentCorrelatorBreakpointsById) {
+				let bp = currentCorrelatorBreakpointsById[id];
+				//For this source file only!
+				if ( bp.filename === filePath ) {
+
+					if( bpsToCheck.includes(bp.line) ) {
+						let index = bpsToCheck.findIndex((element) => element === bp.line);
+						delete bpsToCheck[index];
+						console.log('CONFIRMED:'+ bp.filename + '==id==' + 	this.correlatorBreakPoints[bp.filename +':'+ bp.line.toString()]);
+						let src:DebugProtocol.Source = {name:bp.id,path:bp.filename};
+						bps.push({id:+bp.id,verified:true,source:src});					
+					} 
 				}
 			}
+
 			response.body = {
 				breakpoints: bps
 			};
 
-			console.log(response);
 			// Send the response with the list of breakpoints
 			this.sendResponse(response);
 				

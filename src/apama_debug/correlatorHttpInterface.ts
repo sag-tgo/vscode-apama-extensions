@@ -3,6 +3,8 @@ import { DOMParser } from 'xmldom';
 import * as xpath from 'xpath';
 import { OutputChannel } from 'vscode';
 import { Response } from 'vscode-debugadapter';
+import { debug } from 'console';
+import { print } from 'util';
 
 export interface CorrelatorBreakpoint {
     filename: string;
@@ -71,10 +73,7 @@ export class CorrelatorHttpInterface {
         const url = `${this.url}/correlator/debug/breakpoint/location`;
         try {
             let response = await axios.put(url , body);
-            console.log("setpb");
-            console.log(response);
             let dom = new DOMParser().parseFromString(response.data, 'text/xml');
-            console.log(dom);
             return xpath.select1('string(/map[@name="apama-response"]/list[@name="ids"]/prop[@name="id"]//text())', dom);
         }
         catch (e) {
@@ -83,11 +82,25 @@ export class CorrelatorHttpInterface {
         }
     }
 
+    public async deleteBreakpoint(id: string): Promise<void> {
+        console.log("deleteBreakpoint");
+        const url = `${this.url}/correlator/debug/breakpoint/location/${id}`;
+        try {
+            let response = await axios.delete(url);
+            //console.log("DELETE RESPONSE = ");
+            //console.log(response);
+            return;
+        }
+        catch (e) {
+            console.log(e);
+        }
+    }
+
     public async getAllSetBreakpoints(): Promise<CorrelatorBreakpoint[]> {
         console.log("getAllSetBreakpoints");
         try {
             let response =  await axios.get(`${this.url}/correlator/debug/breakpoint`);
-            console.log("resp"+response);
+            //console.log("resp"+response);
             let dom = new DOMParser().parseFromString(response.data, 'text/xml');
             let breakpointNodes = xpath.select('/map[@name="apama-response"]/list[@name="breakpoints"]/map[@name="filebreakpoint"]', dom);
     
@@ -116,7 +129,7 @@ export class CorrelatorHttpInterface {
         console.log("enableDebugging");
         const body = '<map name="apama-request"></map>';
         let response:any = await axios.put(`${this.url}/correlator/debug/state`, body);
-        console.log(response);
+        //console.log(response);
         return response.data;
     }
 
@@ -124,7 +137,7 @@ export class CorrelatorHttpInterface {
         console.log("pause");
         const body = '<map name="apama-request"></map>';
         let response:any = await axios.put(`${this.url}/correlator/debug/progress/stop`, body );
-        console.log(response);
+        //console.log(response);
         return response.data;
     }
 
@@ -132,7 +145,7 @@ export class CorrelatorHttpInterface {
         console.log("resume");
         const body = '<map name="apama-request"></map>';
         let response:any = await axios.put(`${this.url}/correlator/debug/progress/run`, body );
-        console.log(response);
+        //console.log(response);
         return response.data;
     }
 
@@ -140,7 +153,7 @@ export class CorrelatorHttpInterface {
         console.log("stepIn");
         const body = '<map name="apama-request"></map>';
         let response:any = await axios.put(`${this.url}/correlator/debug/progress/step`, body);
-        console.log(response);
+        //console.log(response);
         return response.data;
     }
 
@@ -148,7 +161,7 @@ export class CorrelatorHttpInterface {
         console.log("stepOver");
         const body = '<map name="apama-request"></map>';
         let response:any = await axios.put(`${this.url}/correlator/debug/progress/stepover`, body);
-        console.log(response);
+        //console.log(response);
         return response.data;
     }
 
@@ -156,7 +169,7 @@ export class CorrelatorHttpInterface {
         console.log("stepOut");
         const body = '<map name="apama-request"></map>';
         let response:any = await axios.put(`${this.url}/correlator/debug/progress/stepout`, body);
-        console.log(response);
+        //console.log(response);
         return response.data;
     }
 
@@ -166,7 +179,7 @@ export class CorrelatorHttpInterface {
         try {
             let response:any = await axios.get(`${this.url}/correlator/debug/progress/wait`, { timeout: 15000 });
             console.log("await pause returned");
-            console.log(response);
+            //console.log(response);
             let dom = new DOMParser().parseFromString(response.data, 'text/xml');
             let retVal = {
                 context: xpath.select1('string(/map[@name="apama-response"]/map[@name="contextprogress"]/prop[@name="context"]//text())', dom),
@@ -182,7 +195,7 @@ export class CorrelatorHttpInterface {
                 reason: xpath.select1('string(/map[@name="apama-response"]/map[@name="contextprogress"]/prop[@name="reason"]//text())', dom),
                 line: parseInt(xpath.select1('string(/map[@name="apama-response"]/map[@name="contextprogress"]/prop[@name="line"]//text())', dom))
             };
-            console.log(retVal);
+            //console.log(retVal);
             return retVal;
         }
         catch(e ) {
@@ -233,7 +246,7 @@ export class CorrelatorHttpInterface {
                 }
             });
 
-            console.log(retVal);
+            //console.log(retVal);
             return retVal;
 
     }
@@ -258,7 +271,7 @@ export class CorrelatorHttpInterface {
                         filehash: xpath.select1('string(/map/prop[@name="filehash"]//text())', dom)
                     }))
             };
-        console.log(retVal);
+        //console.log(retVal);
         return retVal;
     }
 
@@ -275,7 +288,7 @@ export class CorrelatorHttpInterface {
                     value: xpath.select1('string(/map/prop[@name="value"]//text())', dom)
                 })
             );
-        console.log(retVal);
+        //console.log(retVal);
         return retVal;
     }
 
@@ -297,7 +310,7 @@ export class CorrelatorHttpInterface {
                 });            
         }
 
-        console.log(retVal);
+        //console.log(retVal);
         return retVal; 
     }
 
@@ -306,7 +319,7 @@ export class CorrelatorHttpInterface {
         let response = await axios.get(`${this.url}/correlator/contexts/id:${contextid}/${instance}/${variableName}`);
         let dom = new DOMParser().parseFromString(response.data, 'text/xml');
         let retVal = xpath.select1('string(/map[@name="apama-response"]/prop[@name="value"]//text())', dom);
-        console.log(retVal);
+        //console.log(retVal);
         return retVal;
     }
 
