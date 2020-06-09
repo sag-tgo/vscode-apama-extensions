@@ -1,6 +1,5 @@
 import { WorkspaceFolder, DebugConfiguration, ProviderResult, CancellationToken, DebugConfigurationProvider, workspace, OutputChannel } from 'vscode';
 import * as Net from 'net';
-import { platform } from 'os';
 import { execFileSync } from 'child_process';
 import { CorrelatorDebugSession, normalizeCorrelatorFilePath } from './correlatorDebugSession';
 import { ApamaEnvironment } from '../apama_util/apamaenvironment';

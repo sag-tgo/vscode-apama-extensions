@@ -5,8 +5,7 @@ import * as net from 'net';
 import {ExtensionContext, Disposable, window, tasks, debug, workspace, WorkspaceConfiguration, Task, ShellExecution, OutputChannel} from 'vscode';
 
 import {
-	LanguageClient, LanguageClientOptions, ServerOptions,
-	TransportKind, ForkOptions, MessageTransports, WorkspaceFolder
+	LanguageClient, LanguageClientOptions, ServerOptions
 } from 'vscode-languageclient';
 
 

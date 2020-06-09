@@ -2,9 +2,6 @@ const axios = require('axios').default;
 import { DOMParser } from 'xmldom';
 import * as xpath from 'xpath';
 import { OutputChannel } from 'vscode';
-import { Response } from 'vscode-debugadapter';
-import { debug } from 'console';
-import { print } from 'util';
 
 export interface CorrelatorBreakpoint {
     filename: string;
