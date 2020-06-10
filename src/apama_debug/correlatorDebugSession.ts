@@ -53,6 +53,7 @@ export class CorrelatorDebugSession extends DebugSession {
 		console.log("Correlator interface host: " + config.host.toString() + " port " + config.port.toString());
 		this.correlatorHttp = new CorrelatorHttpInterface(logger, config.host, config.port);
 		this.correlatorBreakPoints = {} as {[key:string] : string };
+		
 	}
 
 	/**
@@ -82,7 +83,7 @@ export class CorrelatorDebugSession extends DebugSession {
 
 	private runCorrelator(extraargs:string[]): vscode.Task {
 		let localargs : string[] = this.config.args.concat(['-p',this.config.port.toString()]);
-		/////console.log(extraargs);
+		//console.log(extraargs);
 		if( extraargs ) {
 			localargs = localargs.concat(extraargs);
 		}
@@ -201,15 +202,13 @@ export class CorrelatorDebugSession extends DebugSession {
 
 			// Pause correlator while we wait for the configuration to finish, we want breakpoints to be set first
 			await this.correlatorHttp.pause();
-
-			
 			console.log('Enable change handler: ', vscode.debug.breakpoints.length);
 			//now we can add a handler for changes in BP 
 			vscode.debug.onDidChangeBreakpoints(async e => {
-				console.log(`onDidChangeBreakpoints: a: ${e.added.length} r: ${e.removed.length} c: ${e.changed.length}`);
+				//console.log(`onDidChangeBreakpoints: a: ${e.added.length} r: ${e.removed.length} c: ${e.changed.length}`);
 				
 				if (e.added.length > 0) { 
-					console.log('Enable breakpoints: ', e.added.length);
+					//console.log('Enable breakpoints: ', e.added.length);
 					for (let bp of e.added) {
 						if(bp instanceof vscode.SourceBreakpoint){
 							let bpLine = bp.location.range.start.line + 1;
@@ -217,7 +216,7 @@ export class CorrelatorDebugSession extends DebugSession {
 							//console.log("REQUESTING " + bp.location.uri.fsPath +':'+ bpLine.toString() );
 							let id:string = await this.correlatorHttp.setBreakpoint(bp.location.uri.fsPath, bpLine );
 							this.correlatorBreakPoints[bp.location.uri.fsPath +':'+ bpLine.toString()] = id;
-							//console.log("REQUESTED " + bp.location.uri.fsPath +':'+ bpLine.toString() + '==id==' + id );
+							console.log("ADDED " + bp.location.uri.fsPath +':'+ bpLine.toString() + '==id==' + id );
 						}
 					}
 				}
@@ -228,17 +227,12 @@ export class CorrelatorDebugSession extends DebugSession {
 							let bpLine = bp.location.range.start.line + 1;
 							//console.log("REMOVING " + bp.location.uri.fsPath +':'+ bpLine.toString() );
 							await this.correlatorHttp.deleteBreakpoint(this.correlatorBreakPoints[bp.location.uri.fsPath +':'+ bpLine.toString()]);
-							//console.log("REMOVED " + bp.location.uri.fsPath +':'+ bpLine.toString() + '==id==' + this.correlatorBreakPoints[bp.location.uri.fsPath +':'+ bpLine.toString()] );
+							console.log("REMOVED " + bp.location.uri.fsPath +':'+ bpLine.toString() + '==id==' + this.correlatorBreakPoints[bp.location.uri.fsPath +':'+ bpLine.toString()] );
 							delete this.correlatorBreakPoints[bp.location.uri.fsPath +':'+ bpLine.toString()];
 						}
 					}
 				}
-				//if (e.changed.length) { console.log('changed: ', JSON.stringify(e.changed)); }
-				
-				//console.log('breakpoints after event: ', vscode.debug.breakpoints.length);
-
 			});
-	
 		}
 
 	}
@@ -260,21 +254,38 @@ export class CorrelatorDebugSession extends DebugSession {
 			let bpsToCheck: Number[] = [];
 
 			//Get the line numbers of the current request
+			//when restarting the change handler is not invoked as
+			//the break points persist in the debuf=g session (we reuse it) 
+			//so we need to re-add them -**but only if they are not already there**
 			for ( let lineNumber  of args.lines || [] ){
 				let currentKey: string = filePath +':'+ lineNumber.toString();
-				console.log("Checking:" + currentKey );
+				//console.log("Checking:" + currentKey );
 				bpsToCheck.push(lineNumber);
 			}
 
 			// Pull out all curren tbreakpoints in the correlator
 			let currentCorrelatorBreakpoints = await this.correlatorHttp.getAllSetBreakpoints();
+
+			//normally this will be incremental but upon restart we need to check 
+			if( args.lines && args.lines.length > 0 && Object.keys(currentCorrelatorBreakpoints).length === 0 ) {
+				//iterate through them and add them to the correlator
+				for ( let lineNumber  of args.lines || [] ){
+					let currentKey: string = filePath +':'+ lineNumber.toString();
+					let id:string = await this.correlatorHttp.setBreakpoint(filePath, lineNumber );
+					this.correlatorBreakPoints[filePath +':'+ lineNumber.toString()] = id;
+					console.log("ADDED " + currentKey + '==id==' + id );
+				}
+				
+				//try again
+				currentCorrelatorBreakpoints = await this.correlatorHttp.getAllSetBreakpoints();
+			}
+
 			let currentCorrelatorBreakpointsById = currentCorrelatorBreakpoints.reduce(
 				(acc, breakpoint) => 
 				{
 				acc[breakpoint.id] = breakpoint;
 				return acc;
 				} , {} as { [key: string]: CorrelatorBreakpoint });
-
 
 			// Compare the attempted and the actually set to determine whether they've actually been set (and on which line)
 			//I am verifying breakpoints that have actually been set in the correlator only - so I iterate through the real ones
@@ -320,8 +331,11 @@ export class CorrelatorDebugSession extends DebugSession {
 
 
 	protected async waitUntilTaskEnds(taskName: string) {
+		await this.correlatorHttp.resume();
+		await this.correlatorHttp.disableDebugging();
 		return new Promise<void>(resolve => {
 			let disposable = vscode.tasks.onDidEndTask(e => {
+				//console.log("TASK " + e.execution.task.name + " ended");
 				if (e.execution.task.name === taskName) {
 					disposable.dispose();
 					resolve();
@@ -334,15 +348,22 @@ export class CorrelatorDebugSession extends DebugSession {
 	 * Frontend requested that the application terminate
 	 */
 	protected async disconnectRequest(response: DebugProtocol.DisconnectResponse, args: DebugProtocol.DisconnectArguments) {
-		console.log("Stop requested to port " + this.config.port.toString());
-		this.manager.run('.',['-s','debug_stop','-p',this.config.port.toString()]);
-		await this.waitUntilTaskEnds("DebugCorrelator");
-		//this.correlatorCmd.stop().then(() => this.sendResponse(response));
+		try 
+		{
+			console.log("Stop requested to port " + this.config.port.toString());
+			this.manager.run('.',['-s','debug_stop','-p',this.config.port.toString()]);
+			await this.waitUntilTaskEnds("DebugCorrelator");
+			//console.log("STOPPED " + this.config.port.toString());
+		}
+		catch (e) 
+		{
+			//ignore
+		}
 		this.sendResponse(response);
 	}
 
 	protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
-		console.log("Threads requested");
+		//console.log("Threads requested");
 		this.correlatorHttp.getContextStatuses()
 			.then(contextStatuses => contextStatuses.map(status => new Thread(status.contextid, status.context)))
 			.then(threads => {
@@ -357,7 +378,7 @@ export class CorrelatorDebugSession extends DebugSession {
 	 * Frontend requested stacktrace
 	 */
 	protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments): void {
-		console.log("Stacktrace requested");
+		//console.log("Stacktrace requested");
 		this.correlatorHttp.getStackTrace(args.threadId)
 			.then(correlatorStackFrames => correlatorStackFrames.stackframes.map((stackframe, i) => new StackFrame(this.createFrameId(correlatorStackFrames.contextid, i), stackframe.action, this.createSource(stackframe.filename), stackframe.lineno)))
 			.then(stackFrames => {
@@ -369,7 +390,7 @@ export class CorrelatorDebugSession extends DebugSession {
 	}
 
 	protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments): void {
-		console.log("Scopes requested");
+		//console.log("Scopes requested");
 		response.body = {
 			scopes: [
 				new Scope("Local", this.createVariablesRef(args.frameId, 'local')),
@@ -380,7 +401,7 @@ export class CorrelatorDebugSession extends DebugSession {
 	}
 
 	protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments): void {
-		console.log("Variables requested");
+		//console.log("Variables requested");
 		const { contextid, frameidx, type } = this.parseVariablesRef(args.variablesReference);
 
 		this.getVariablesForType(type, contextid, frameidx)
@@ -406,35 +427,35 @@ export class CorrelatorDebugSession extends DebugSession {
 	}
 
 	protected continueRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments): void {
-		console.log("Continue requested");
+		//console.log("Continue requested");
 		this.correlatorHttp.resume()
 			.then(() => this.sendResponse(response))
 			.then(() => this.waitForCorrelatorPause());
 	}
 
 	protected nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
-		console.log("Next requested");
+		//console.log("Next requested");
 		this.correlatorHttp.stepOver()
 			.then(() => this.sendResponse(response))
 			.then(() => this.waitForCorrelatorPause());
 	}
 
 	protected stepInRequest(response: DebugProtocol.StepInResponse, args: DebugProtocol.StepInArguments): void {
-		console.log("Step In requested");
+		//console.log("Step In requested");
 		this.correlatorHttp.stepIn()
 			.then(() => this.sendResponse(response))
 			.then(() => this.waitForCorrelatorPause());
 	}
 
 	protected stepOutRequest(response: DebugProtocol.StepOutResponse, args: DebugProtocol.StepOutArguments): void {
-		console.log("Step Out requested");
+		//console.log("Step Out requested");
 		this.correlatorHttp.stepOut()
 			.then(() => this.sendResponse(response))
 			.then(() => this.waitForCorrelatorPause());
 	}
 
 	protected setExceptionBreakPointsRequest(response: DebugProtocol.SetExceptionBreakpointsResponse, args: DebugProtocol.SetExceptionBreakpointsArguments): void {
-		console.log("Exception breakpoint requested");
+		//console.log("Exception breakpoint requested");
 		const breakOnUncaught = args.filters.indexOf('uncaught') !== -1;
 		this.correlatorHttp.setBreakOnErrors(breakOnUncaught)
 			.then(() => this.sendResponse(response));

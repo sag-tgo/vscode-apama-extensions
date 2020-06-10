@@ -60,7 +60,7 @@ export class CorrelatorHttpInterface {
 
     /** Sets a breakpoint and returns the id of the breakpoint. Throws an exception on error or failure. */
     public async setBreakpoint(filepath: string, line: number): Promise<string> {
-        console.log("setBreakpoint");
+        //console.log("setBreakpoint");
         const body = '<map name="apama-request">' +
             `<prop name="filename">${filepath}</prop>` +
             `<prop name="line">${line}</prop>` +
@@ -74,13 +74,13 @@ export class CorrelatorHttpInterface {
             return xpath.select1('string(/map[@name="apama-response"]/list[@name="ids"]/prop[@name="id"]//text())', dom);
         }
         catch (e) {
-            console.log(e);
+            //console.log(e);
             throw e;
         }
     }
 
     public async deleteBreakpoint(id: string): Promise<void> {
-        console.log("deleteBreakpoint");
+        //console.log("deleteBreakpoint");
         const url = `${this.url}/correlator/debug/breakpoint/location/${id}`;
         try {
             let response = await axios.delete(url);
@@ -89,15 +89,15 @@ export class CorrelatorHttpInterface {
             return;
         }
         catch (e) {
-            console.log(e);
+            //console.log(e);
         }
     }
 
     public async getAllSetBreakpoints(): Promise<CorrelatorBreakpoint[]> {
-        console.log("getAllSetBreakpoints");
+        //console.log("getAllSetBreakpoints");
         try {
             let response =  await axios.get(`${this.url}/correlator/debug/breakpoint`);
-            //console.log("resp"+response);
+            ////console.log("resp"+response);
             let dom = new DOMParser().parseFromString(response.data, 'text/xml');
             let breakpointNodes = xpath.select('/map[@name="apama-response"]/list[@name="breakpoints"]/map[@name="filebreakpoint"]', dom);
     
@@ -113,11 +113,11 @@ export class CorrelatorHttpInterface {
                         line: parseInt(xpath.select1('string(/map/prop[@name="line"])', breakpointDom)),
                         id: xpath.select1('string(/map/prop[@name="id"])', breakpointDom),
                         breakonce: xpath.select1('string(/map/prop[@name="breakonce"])', breakpointDom) === 'true'}));
-            console.log(corrbps); 
+            //console.log(corrbps); 
             return corrbps;
         }
         catch (e) {
-            console.log(e);
+            //console.log(e);
             throw e;
         }
     }
@@ -126,8 +126,15 @@ export class CorrelatorHttpInterface {
         console.log("enableDebugging");
         const body = '<map name="apama-request"></map>';
         let response:any = await axios.put(`${this.url}/correlator/debug/state`, body);
-        //console.log(response);
+        ////console.log(response);
         return response.data;
+    }
+
+    public async disableDebugging(): Promise<void> {
+        console.log("disableDebugging");
+        let response:any = await axios.delete(`${this.url}/correlator/debug/state`);
+        //console.log(response);
+        return;
     }
 
     public async pause(): Promise<void> {

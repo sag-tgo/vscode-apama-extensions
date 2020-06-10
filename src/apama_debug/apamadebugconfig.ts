@@ -63,11 +63,15 @@ export class ApamaDebugConfigurationProvider implements DebugConfigurationProvid
 
 
         if (!this._server) {
+            console.log("starting listening server");
             this._server = Net.createServer(socket => {
-                const session = new CorrelatorDebugSession(this.logger, this.apamaEnv, config.correlator);
+                let session = new CorrelatorDebugSession(this.logger, this.apamaEnv, config.correlator);
                 session.setRunAsServer(true);
                 session.start(<NodeJS.ReadableStream>socket, socket);
             }).listen(0);
+        }
+        else {
+            console.log("Reusing previous instance")
         }
 
         config.debugServer = (<Net.AddressInfo>this._server.address()).port;
@@ -78,7 +82,7 @@ export class ApamaDebugConfigurationProvider implements DebugConfigurationProvid
 
 	dispose() {
 		if (this._server) {
-			this._server.close();
+            this._server.close();
 		}
 	}
 }
