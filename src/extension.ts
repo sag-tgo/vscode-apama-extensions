@@ -102,7 +102,7 @@ function runLangServer(apamaEnv: ApamaEnvironment, config : WorkspaceConfigurati
 	  {type: "shell", task: ""},
 	  "Apama Language Server",
 	  "ApamaLanguageServer",
-	  new ShellExecution(apamaEnv.getEplBuddyCmdline(),['-l',config.port.toString()]),
+	  new ShellExecution(apamaEnv.getEplBuddyCmdline(),['-l', '-p' ,config.port.toString()]),
 	  []
 	);
 	correlator.group = 'test';
