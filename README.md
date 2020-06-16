@@ -18,6 +18,10 @@ For mor information on EPL and Apama please visit the [Apama Community Edition w
 
 ![settings](images/settings.png)
 
+## diagnostics
+
+![tasks](images/11-diagnostics.gif)
+
 ## Snippets
 
 ![Snippets](images/1-snippets.gif)
@@ -30,13 +34,33 @@ For mor information on EPL and Apama please visit the [Apama Community Edition w
 
 ![events](images/3-evtfile-send.gif)
 
+## Create Tasks
+
+![tasks](images/5-tasks-create.gif)
+
 ## Create Project
 
 ![project support](images/4-project-create.gif)
 
-## Create Tasks
+## Add bundles
 
-![tasks](images/5-tasks-create.gif)
+![tasks](images/6-project-addbundle.gif)
+
+## Remove bundles
+
+![tasks](images/7-project-rmbundle.gif)
+
+## Deploy project
+
+![tasks](images/8-project-deploy.gif)
+
+## Add breakpoints
+
+![tasks](images/9-set-breakpoints.gif)
+
+## debug
+
+![tasks](images/10-debug.gif)
 
 ## Requirements
 
