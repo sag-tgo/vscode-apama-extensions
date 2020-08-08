@@ -132,7 +132,7 @@ export class ApamaEnvironment {
     this.updateCommands();
     let cmd : string = this.cmd_source + this.cmd_env + ' && ';
     const envType = env.remoteName || "local";
-    if (envType in ['dev-container']) {
+    if (['dev-container'].includes(envType)) {
       cmd = '';
     }
     return cmd;
