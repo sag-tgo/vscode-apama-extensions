@@ -1,4 +1,4 @@
-import { workspace, WorkspaceConfiguration, OutputChannel } from 'vscode';
+import { workspace, WorkspaceConfiguration, OutputChannel, env } from 'vscode';
 import { platform } from 'os';
 import { join } from 'path';
 
@@ -130,12 +130,17 @@ export class ApamaEnvironment {
 
   sourceEnv(): string {
     this.updateCommands();
-    return this.cmd_source + this.cmd_env + ' ';
+    let cmd : string = this.cmd_source + this.cmd_env + ' && ';
+    const envType = env.remoteName || "local";
+    if (envType in ['dev-container']) {
+      cmd = '';
+    }
+    return cmd;
   }
 
   getCorrelatorCmdline(): string {
     this.updateCommands();
-    const r = this.sourceEnv() + ' && ' + this.cmd_correlator + ' '; 
+    const r = this.sourceEnv()  + this.cmd_correlator + ' '; 
     //this.logger.appendLine('startCorrelator ' + r);
     return r;
   }
@@ -150,14 +155,14 @@ export class ApamaEnvironment {
 
   getInjectCmdline(): string {
     this.updateCommands();
-    const r = this.sourceEnv() + ' && ' + this.cmd_inject + ' '; 
+    const r = this.sourceEnv()  + this.cmd_inject + ' '; 
     //this.logger.appendLine('startInject ' + r);
     return r;
   }
 
   getSendCmdLine(): string {
     this.updateCommands();
-    const r = this.sourceEnv() + ' && ' + this.cmd_send + ' '; 
+    const r = this.sourceEnv()  + this.cmd_send + ' '; 
     //this.logger.appendLine('startSend ' + r);
     return r;
 
@@ -165,48 +170,48 @@ export class ApamaEnvironment {
 
   getDeleteCmdLine(): string {
     this.updateCommands();
-    const r = this.sourceEnv() + ' && ' + this.cmd_delete + ' '; 
+    const r = this.sourceEnv()  + this.cmd_delete + ' '; 
     //this.logger.appendLine('startDelete ' + r);
     return r;
   }
 
   getApamaProjectCmdline(): string {
     this.updateCommands();
-    const r = this.sourceEnv() + ' && ' + this.cmd_project + ' '; 
+    const r = this.sourceEnv()  + this.cmd_project + ' '; 
     //this.logger.appendLine('startProject ' + r);
     return r;
   }
 
   getManagerCmdline(): string {
     this.updateCommands();
-    const r = this.sourceEnv() + ' && ' + this.cmd_management + ' '; 
+    const r = this.sourceEnv()  + this.cmd_management + ' '; 
     //this.logger.appendLine('startManager ' + r);
     return r;
   }
 
   getEplBuddyCmdline(): string {
     this.updateCommands();
-    const r = this.sourceEnv() + ' && ' + this.cmd_eplbuddy + ' '; 
+    const r = this.sourceEnv()  + this.cmd_eplbuddy + ' '; 
     //this.logger.appendLine('starteplBuddy ' + r);
     return r;
   }
 
   getEngineWatchCmdline(): string {
     this.updateCommands();
-    const r = this.sourceEnv() + ' && ' + this.cmd_watch + ' '; 
+    const r = this.sourceEnv()  + this.cmd_watch + ' '; 
     //this.logger.appendLine('startWatch ' + r);
     return r;
   }
 
   getEngineReceiveCmdline(): string {
     this.updateCommands();
-    const r = this.sourceEnv() + ' && ' + this.cmd_receive + ' '; 
+    const r = this.sourceEnv()  + this.cmd_receive + ' '; 
     return r;
   }
 
   getEngineInspectCmdline(): string {
     this.updateCommands();
-    const r = this.sourceEnv() + ' && ' + this.cmd_inspect + ' '; 
+    const r = this.sourceEnv()  + this.cmd_inspect + ' '; 
     return r;
   }
 
