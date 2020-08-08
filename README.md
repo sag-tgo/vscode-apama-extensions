@@ -1,5 +1,9 @@
 # epl-syntax-highlighting README
 
+CI takes place on the Azure Platform building on Linux, Windows and Mac platforms.
+
+[![Build Status](https://dev.azure.com/CaribouJohnDevOps/CaribouJohn-github-vscode-extensions/_apis/build/status/CaribouJohn.apama-vscode-extensions?branchName=master)](https://dev.azure.com/CaribouJohnDevOps/CaribouJohn-github-vscode-extensions/_build/latest?definitionId=2&branchName=master)
+
 This is a community developed VSCode extension to support development of Apama Streaming Analytics applications.  Initially it offered syntax highlighting for EPL (Event Programming Language) files. EPL files are used by the Apama Streaming Analytics product to define applications that are executed within a runtime process called the 'correlator'. The language is a domain specific language centered around events and event processing.  As the extension has grown, additional capabilities are being added beyond only syntax highlighting, such as launching the correlator runtime with files from your project.
 
 For more information about Apama and EPL please visit the [Apama Community](http://www.apamacommunity.com/) website.
