@@ -1,4 +1,5 @@
-import { window, commands, Disposable, workspace, OutputChannel, TreeDataProvider, EventEmitter, Event, TreeView, FileSystemWatcher, ExtensionContext, QuickPickItem, TextDocument, Uri, TreeItemCollapsibleState, TreeItem, WorkspaceFolder, RelativePattern } from 'vscode';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { window, commands, Disposable, workspace, OutputChannel, TreeDataProvider, EventEmitter, Event, TreeView, FileSystemWatcher, ExtensionContext, QuickPickItem, TextDocument, TreeItemCollapsibleState, TreeItem, WorkspaceFolder} from 'vscode';
 import { ApamaProject, ApamaProjectWorkspace, ApamaTreeItem, BundleItem } from './apamaProject';
 import { ApamaRunner } from '../apama_util/apamarunner';
 import { ApamaEnvironment } from '../apama_util/apamaenvironment'; 
@@ -12,6 +13,7 @@ export class ApamaProjectView implements TreeDataProvider<string | ApamaTreeItem
 	
 	private projects: ApamaProject[] = [];
 
+	// eslint-disable-next-line @typescript-eslint/ban-types
 	private treeView: TreeView<{}>;
 
 	private fsWatcher: FileSystemWatcher;
@@ -24,7 +26,7 @@ export class ApamaProjectView implements TreeDataProvider<string | ApamaTreeItem
 	// ssh remote etc to work better later on, plus allows some extra organisational
 	// facilities....
 	constructor(private apamaEnv: ApamaEnvironment, private logger: OutputChannel, private workspaces: WorkspaceFolder[], private context: ExtensionContext) {
-		let subscriptions: Disposable[] = [];
+		const subscriptions: Disposable[] = [];
 		
 		this.apama_project = new ApamaRunner('apama_project', apamaEnv.getApamaProjectCmdline(), logger);
 		this.apama_deploy = new ApamaRunner('apama_deploy', apamaEnv.getDeployCmdline(), logger);
@@ -42,13 +44,13 @@ export class ApamaProjectView implements TreeDataProvider<string | ApamaTreeItem
 		//but for deletions of the entire space we need 
 		this.delWatcher = workspace.createFileSystemWatcher("**/*"); //if you delete a directory it will not trigger all contents
 		//handlers 
-		this.fsWatcher.onDidCreate((item) => {
+		this.fsWatcher.onDidCreate((_item) => {
 			this.refresh();
 		});
 		this.delWatcher.onDidDelete(() => { 
 			this.refresh();
 		});
-		this.fsWatcher.onDidChange((item) => {
+		this.fsWatcher.onDidChange((_item) => {
 			this.refresh();
 		});
 
@@ -85,13 +87,13 @@ export class ApamaProjectView implements TreeDataProvider<string | ApamaTreeItem
 				commands.registerCommand('extension.apamaProjects.apamaToolAddBundles', (project: ApamaProject) => {
 					this.apama_project.run(project.fsDir, ['list', 'bundles'])
 						.then((result) => {
-							let lines: string[] = result.stdout.split(/\r?\n/);
-							let displayList: QuickPickItem[] = [];
+							const lines: string[] = result.stdout.split(/\r?\n/);
+							const displayList: QuickPickItem[] = [];
 							lines.forEach((item) => {
 								item = item.trim();
 								//matches number followed by text
 								if (item.search(/^[0-9][0-9]?\s.*$/) === 0) {
-									item = item.replace(/^([0-9][0-9]?\s)(.*)$/g, (cap1, cap2, cap3) => { return cap3; });
+									item = item.replace(/^([0-9][0-9]?\s)(.*)$/g, (_cap1, _cap2, cap3) => { return cap3; });
 									displayList.push({ label: item });
 								}
 							});
@@ -131,7 +133,7 @@ export class ApamaProjectView implements TreeDataProvider<string | ApamaTreeItem
 				//
 				// Placeholder for clicking on a bundle/project - will open files possibly or navigate to the right directory.
 				//
-				commands.registerCommand('extension.apamaProjects.SelectItem', (document: TextDocument) => {
+				commands.registerCommand('extension.apamaProjects.SelectItem', (_document: TextDocument) => {
 					//this.logger.appendLine(document.fileName);
 					return;
 				}),
@@ -172,7 +174,7 @@ export class ApamaProjectView implements TreeDataProvider<string | ApamaTreeItem
 		//if this is a project - we should have set up the bundles now
 		if (item instanceof ApamaProject) {
 			//lets get the bundles 
-			let index = this.workspaceList[item.ws.index].items.findIndex( proj => proj === item );
+			const index = this.workspaceList[item.ws.index].items.findIndex( proj => proj === item );
 			this.workspaceList[item.ws.index].items[index].items = await item.getBundlesFromProject();
 			return this.workspaceList[item.ws.index].items[index].items;
 		}

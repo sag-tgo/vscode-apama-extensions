@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const axios = require('axios').default;
 import * as vscode from 'vscode';
 import { ApamaEnvironment } from '../apama_util/apamaenvironment';
@@ -20,7 +23,7 @@ export class EPLApplication extends vscode.TreeItem {
 		//{"id":"713","name":"Testjbh","state":"inactive","errors":[],"warnings":[],"description":"This is a test"}
 		super(label, vscode.TreeItemCollapsibleState.Collapsed);
 	}
-	contextValue: string = 'EPLApplication';
+	contextValue = 'EPLApplication';
 }
 
 
@@ -28,6 +31,7 @@ export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
 	private _onDidChangeTreeData: vscode.EventEmitter<EPLApplication | undefined> = new vscode.EventEmitter<EPLApplication | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<EPLApplication | undefined> = this._onDidChangeTreeData.event;
 
+	// eslint-disable-next-line @typescript-eslint/ban-types
 	private treeView: vscode.TreeView<{}>;
 	private filelist:EPLApplication[] = [];
 
@@ -36,7 +40,6 @@ export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
 	// ssh remote etc to work better later on, plus allows some extra organisational
 	// facilities....
 	constructor(private apamaEnv: ApamaEnvironment, private logger: vscode.OutputChannel, private context?: vscode.ExtensionContext) {
-		let subscriptions: vscode.Disposable[] = [];
 		
 		//project commands 
 		this.registerCommands();
@@ -64,29 +67,28 @@ export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
 				// inventory using sdk
 				//
 				vscode.commands.registerCommand('extension.c8y.login', async () => {
-					let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('softwareag.c8y');
+					const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('softwareag.c8y');
 
 					if( config ) {
-						let tenant:string = config.get('tenant',"");
-						let user:string = config.get('user',"");
-						let password:string = config.get('password',"");
-						let baseurl:any = config.get('url',"");
+						const tenant:string = config.get('tenant',"");
+						const user:string = config.get('user',"");
+						const password:string = config.get('password',"");
+						const baseurl:any = config.get('url',"");
 						this.logger.appendLine("Logging into c8y");
 
-						let x = new BasicAuth({
+						const x = new BasicAuth({
 							tenant,
 							user,
 							password
 						});
 
-						let client = new Client(x,baseurl);
+						const client = new Client(x,baseurl);
 
 						try {
-							let y = await client.inventory.list();
-							let z = y.data;
+							await client.inventory.list();
 						}
 						catch (err) {
-							debugger;
+							console.log(err);
 						}
 							
 					}
@@ -104,7 +106,7 @@ export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
 							appname = appname.slice(0, -4);
 						}
 
-						let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('softwareag.c8y');
+						const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('softwareag.c8y');
 						let url: string = config.get('url',""); // C8Y host
 						if (!url.endsWith("/")) {
 							url += "/";
@@ -125,7 +127,7 @@ export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
 						};
 						options.body.contents = fs.readFileSync(uri.fsPath).toString();
 						const result = await axios.post(url, options);
-						// console.log(JSON.stringify(result));
+						console.log(JSON.stringify(result));
 						// TODO: show errors/warnings
 					} catch (error) {
 						vscode.window.showErrorMessage("Error uploading " + uri.path +":\n" + error.error.message);
@@ -136,7 +138,7 @@ export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
 				// open EPL App 
 				//
 				vscode.commands.registerCommand('extension.c8y.openEplApp', async (element) => {
-					let setting: vscode.Uri = vscode.Uri.parse("untitled:" + element.label + ".mon" );
+					const setting: vscode.Uri = vscode.Uri.parse("untitled:" + element.label + ".mon" );
 					vscode.workspace.openTextDocument(setting)
 						.then(doc => {
 							vscode.window.showTextDocument(doc)
@@ -165,8 +167,8 @@ export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
 	async refresh(): Promise<void> {
 		this.filelist = [];
 		try {
-			let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('softwareag.c8y');
-			let url: string = config.get('url',"") + "service/cep/eplfiles?contents=true";
+			const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('softwareag.c8y');
+			const url: string = config.get('url',"") + "service/cep/eplfiles?contents=true";
 			const options = {
 				auth: {
 					user: config.get("user", ""),
@@ -176,12 +178,12 @@ export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
 			const result = await axios.get(url, options);
 			const eplfiles = JSON.parse(result);
 			//"{"eplfiles":[{"id":"713","name":"Testjbh","state":"inactive","errors":[],"warnings":[],"description":"This is a test"},{"id":"715","name":"jbh1","state":"active","errors":[],"warnings":[],"description":"jbh desc"},{"id":"719","name":"thisIsATest","state":"active","errors":[],"warnings":[],"description":"This is a test monitor uploaded from VS Code"}]}"
-			for (let element of eplfiles.eplfiles) {
+			for (const element of eplfiles.eplfiles) {
 				this.filelist.push(new EPLApplication(element.id,element.name, (element.state === 'inactive'),element.warnings,element.errors,element.desc,element.contents));
 			}
 
 		} catch (error) {
-			debugger;
+			console.log(error);
 		}
 		this._onDidChangeTreeData.fire(undefined);
 	}
@@ -190,7 +192,8 @@ export class CumulocityView implements vscode.TreeDataProvider<EPLApplication> {
 	// get the children of the current item (group or item)
 	// made this async so we can avoid race conditions on updates
 	//
-	async getChildren(item?: EPLApplication | undefined): Promise<undefined | EPLApplication[] > {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	async getChildren(_item?: EPLApplication | undefined): Promise<undefined | EPLApplication[] > {
 		//await this.refresh();
 		return this.filelist;
 	}

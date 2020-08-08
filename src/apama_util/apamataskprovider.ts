@@ -1,6 +1,5 @@
-import { TaskProvider, CancellationToken, ProviderResult, Task, ProcessExecution, TaskDefinition, ShellExecution, ShellExecutionOptions, OutputChannel, TaskScope, InputBoxOptions } from 'vscode';
+import { TaskProvider, CancellationToken, ProviderResult, Task, TaskDefinition, ShellExecution, OutputChannel } from 'vscode';
 import { ApamaEnvironment } from './apamaenvironment';
-import { window, workspace } from 'vscode';
 
 interface ApamaTaskDefinition extends TaskDefinition {
   task: string;
@@ -16,7 +15,8 @@ export class ApamaTaskProvider implements TaskProvider {
 
   }
 
-  resolveTask(_task: Task, token?: CancellationToken | undefined): ProviderResult<Task> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  resolveTask(_task: Task, _token?: CancellationToken | undefined): ProviderResult<Task> {
     this.logger.appendLine("resolveTask called");
     //
     // The actual task will start on the correct port
@@ -27,7 +27,7 @@ export class ApamaTaskProvider implements TaskProvider {
     const cmdline = _task.definition.cmdline;
     if(port) {
       this.logger.appendLine("Running on port " + port);
-      let finalTask = new Task(
+      const finalTask = new Task(
         _task.definition,
         task +"-"+port,
         "apama",
@@ -52,7 +52,7 @@ export class ApamaTaskProvider implements TaskProvider {
   private runCorrelator(): Task {
 
     //default options for running
-    let correlator = new Task(
+    const correlator = new Task(
       {"type":"apama","task":"correlator","port":"15903","cmdline":this.apamaEnv.getCorrelatorCmdline()},
       "correlator",
       "apama",
@@ -66,7 +66,7 @@ export class ApamaTaskProvider implements TaskProvider {
   private runReceive(): Task {
 
     //default options for running
-    let correlator = new Task(
+    const correlator = new Task(
       {"type":"apama","task":"engine_receive","port":"15903","cmdline":this.apamaEnv.getEngineReceiveCmdline()},
       "engine_receive",
       "apama",
@@ -80,7 +80,7 @@ export class ApamaTaskProvider implements TaskProvider {
    runEngineWatch(): Task {
      //TODO: get user defined options?
      //let options = windows.showInputBox(...etc...);
-    let engine_watch = new Task(
+    const engine_watch = new Task(
       {"type":"apama","task":"engine_watch","port":"15903","cmdline":this.apamaEnv.getEngineWatchCmdline()},
       "engine_watch",
       "apama",

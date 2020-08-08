@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ApamaRunner, ApamaAsyncRunner } from '../apama_util/apamarunner';
 import { OutputChannel,ExtensionContext, workspace, commands, window } from 'vscode';
 import { ApamaEnvironment } from '../apama_util/apamaenvironment';
@@ -22,7 +23,7 @@ export class ApamaCommandProvider {
   registerCommands(): void {
 
     if (this.context !== undefined) {
-      let port: any = workspace.getConfiguration("softwareag.apama").get("debugport");
+      const port: any = workspace.getConfiguration("softwareag.apama").get("debugport");
       this.context.subscriptions.push.apply(this.context.subscriptions,
         [
           //
@@ -108,7 +109,7 @@ export class ApamaCommandProvider {
   }
 
 
-  dispose() {
+  dispose() : void{
     return;
   }
 
@@ -145,7 +146,8 @@ export class ApamaCommandProvider {
 
   onExit(childProcess: ChildProcess): Promise<void> {
     return new Promise((resolve, reject) => {
-      childProcess.once('exit', (code: number, signal: string) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      childProcess.once('exit', (code: number, _signal: string) => {
         if (code === 0) {
           resolve(undefined);
         } else {
